@@ -1,0 +1,180 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
+
+const SettingsScreen: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveApiKey = async () => {
+    if (!geminiApiKey.trim()) {
+      Alert.alert('エラー', 'APIキーを入力してください');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // TODO: Firestore にAPIキーを暗号化して保存する処理を実装
+      Alert.alert('成功', 'APIキーを保存しました（実装準備中）');
+    } catch (error) {
+      console.error('Error saving API key:', error);
+      Alert.alert('エラー', 'APIキーの保存に失敗しました');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'ログアウト',
+      'ログアウトしますか？',
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        {
+          text: 'ログアウト',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+            } catch (error) {
+              Alert.alert('エラー', 'ログアウトに失敗しました');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>アカウント情報</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>表示名</Text>
+          <Text style={styles.value}>{user?.displayName || '未設定'}</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>メールアドレス</Text>
+          <Text style={styles.value}>{user?.email}</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Gemini API設定</Text>
+        <Text style={styles.description}>
+          AI要約機能を使用するには、Google AI Studioで取得したGemini APIキーを入力してください。
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Gemini APIキー"
+          value={geminiApiKey}
+          onChangeText={setGeminiApiKey}
+          secureTextEntry
+          editable={!isSaving}
+        />
+        <TouchableOpacity
+          style={[styles.button, isSaving && styles.buttonDisabled]}
+          onPress={handleSaveApiKey}
+          disabled={isSaving}
+        >
+          <Text style={styles.buttonText}>
+            {isSaving ? '保存中...' : 'APIキーを保存'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>アプリについて</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>バージョン</Text>
+          <Text style={styles.value}>1.0.0</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={[styles.button, styles.logoutButton]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.buttonText}>ログアウト</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F2F2F7',
+  },
+  section: {
+    backgroundColor: '#FFFFFF',
+    marginTop: 20,
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 15,
+  },
+  description: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  infoContainer: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 5,
+  },
+  value: {
+    fontSize: 16,
+    color: '#000000',
+    fontWeight: '500',
+  },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: '#F9F9F9',
+  },
+  button: {
+    height: 50,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#B0B0B0',
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
+
+export default SettingsScreen;
