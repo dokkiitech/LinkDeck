@@ -178,53 +178,33 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-  const handleAddTag = async (tagName: string) => {
+  const handleToggleTag = async (tagName: string) => {
     if (!link) return;
 
+    const isAlreadyAdded = link.tags.includes(tagName);
+
     try {
-      await addTagToLink(linkId, tagName);
+      if (isAlreadyAdded) {
+        // 既に追加されている場合は削除
+        await removeTagFromLink(linkId, tagName);
+      } else {
+        // 追加されていない場合は追加
+        await addTagToLink(linkId, tagName);
+      }
+
       const updatedLink = await getLink(linkId);
       if (updatedLink) {
         setLink(updatedLink);
       }
-      Alert.alert('成功', 'タグを追加しました');
     } catch (error) {
-      Alert.alert('エラー', 'タグの追加に失敗しました');
+      Alert.alert('エラー', isAlreadyAdded ? 'タグの削除に失敗しました' : 'タグの追加に失敗しました');
     }
-  };
-
-  const handleRemoveTag = async (tagName: string) => {
-    if (!link) return;
-
-    Alert.alert(
-      '確認',
-      `タグ「${tagName}」を削除しますか？`,
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeTagFromLink(linkId, tagName);
-              const updatedLink = await getLink(linkId);
-              if (updatedLink) {
-                setLink(updatedLink);
-              }
-              Alert.alert('成功', 'タグを削除しました');
-            } catch (error) {
-              Alert.alert('エラー', 'タグの削除に失敗しました');
-            }
-          },
-        },
-      ]
-    );
   };
 
   const handleAddNewTag = async () => {
     if (!newTagName.trim()) return;
 
-    await handleAddTag(newTagName.trim());
+    await handleToggleTag(newTagName.trim());
     setNewTagName('');
   };
 
@@ -326,19 +306,15 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           <View style={styles.tagsHeader}>
             <Text style={styles.tagsLabel}>タグ:</Text>
             <TouchableOpacity onPress={handleOpenTagModal} style={styles.editTagButton}>
-              <Text style={styles.editTagButtonText}>編集</Text>
+              <Ionicons name="add-circle" size={24} color="#007AFF" />
             </TouchableOpacity>
           </View>
           {link.tags.length > 0 ? (
             <View style={styles.tags}>
               {link.tags.map((tag, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.tag}
-                  onLongPress={() => handleRemoveTag(tag)}
-                >
+                <View key={index} style={styles.tag}>
                   <Text style={styles.tagText}>{tag}</Text>
-                </TouchableOpacity>
+                </View>
               ))}
             </View>
           ) : (
@@ -482,7 +458,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>タグを追加</Text>
+              <Text style={styles.modalTitle}>タグを編集</Text>
               <TouchableOpacity onPress={() => setShowTagModal(false)}>
                 <Text style={styles.modalCloseButton}>×</Text>
               </TouchableOpacity>
@@ -504,7 +480,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.existingTagsLabel}>既存のタグから選択:</Text>
+            <Text style={styles.existingTagsLabel}>タグを選択（タップで追加/削除）:</Text>
             <ScrollView style={styles.tagsList}>
               {availableTags.map((tag) => {
                 const isSelected = link?.tags.includes(tag.name) || false;
@@ -515,8 +491,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                       styles.tagItem,
                       isSelected && styles.tagItemSelected,
                     ]}
-                    onPress={() => handleAddTag(tag.name)}
-                    disabled={isSelected}
+                    onPress={() => handleToggleTag(tag.name)}
                   >
                     <Text
                       style={[
@@ -527,7 +502,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                       {tag.name}
                     </Text>
                     {isSelected && (
-                      <Text style={styles.checkmark}>✓</Text>
+                      <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
                     )}
                   </TouchableOpacity>
                 );
@@ -604,10 +579,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   editTagButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
+    padding: 4,
   },
   editTagButtonText: {
     color: '#FFFFFF',

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserTags, createTag, deleteTag } from '../../services/firestore';
@@ -102,19 +103,26 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const renderTagItem = ({ item }: { item: Tag }) => (
-    <TouchableOpacity
-      style={styles.tagItem}
-      onPress={() => navigation.navigate('TagLinks', { tagName: item.name })}
-      onLongPress={() => handleDeleteTag(item)}
-    >
-      <View style={styles.tagBadge}>
-        <Text style={styles.tagName}>{item.name}</Text>
-      </View>
-      <Text style={styles.tagDate}>
-        作成日: {item.createdAt.toLocaleDateString('ja-JP')}
-      </Text>
-      <Text style={styles.tapHint}>タップして関連リンクを表示</Text>
-    </TouchableOpacity>
+    <View style={styles.tagItemContainer}>
+      <TouchableOpacity
+        style={styles.tagItem}
+        onPress={() => navigation.navigate('TagLinks', { tagName: item.name })}
+      >
+        <View style={styles.tagBadge}>
+          <Text style={styles.tagName}>{item.name}</Text>
+        </View>
+        <Text style={styles.tagDate}>
+          作成日: {item.createdAt.toLocaleDateString('ja-JP')}
+        </Text>
+        <Text style={styles.tapHint}>タップして関連リンクを表示</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDeleteTag(item)}
+      >
+        <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+      </TouchableOpacity>
+    </View>
   );
 
   if (loading) {
@@ -228,16 +236,26 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 10,
   },
-  tagItem: {
+  tagItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+  tagItem: {
+    flex: 1,
+    padding: 15,
+  },
+  deleteButton: {
+    padding: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tagBadge: {
     backgroundColor: '#007AFF',

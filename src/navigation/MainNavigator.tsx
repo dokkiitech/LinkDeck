@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import { MainTabParamList } from '../types';
 import LinksNavigator from './LinksNavigator';
 import TagsNavigator from './TagsNavigator';
@@ -22,6 +23,9 @@ const MainNavigator: React.FC = () => {
         options={{
           headerShown: false,
           title: 'リンク',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="link" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -30,6 +34,9 @@ const MainNavigator: React.FC = () => {
         options={{
           headerShown: false,
           title: 'タグ',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="pricetags" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -37,6 +44,9 @@ const MainNavigator: React.FC = () => {
         component={SettingsScreen}
         options={{
           title: '設定',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>
