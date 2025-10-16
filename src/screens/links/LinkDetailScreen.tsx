@@ -9,11 +9,17 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  TextInput,
+  Modal,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { LinksStackParamList, Link } from '../../types';
-import { getLink, updateLink } from '../../services/firestore';
+import { LinksStackParamList, Link, Tag } from '../../types';
+import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink } from '../../services/firestore';
+import { getGeminiApiKey } from '../../utils/storage';
+import { summarizeURL } from '../../services/gemini';
+import { useAuth } from '../../contexts/AuthContext';
 
 type LinkDetailScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -29,13 +35,35 @@ interface Props {
 
 const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { linkId } = route.params;
+  const { user } = useAuth();
   const [link, setLink] = useState<Link | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [newTagName, setNewTagName] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     loadLink();
   }, [linkId]);
+
+  useEffect(() => {
+    // ヘッダー右側にメニューボタンを追加（iOS標準デザイン）
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => setShowMenu(true)}
+          style={{ marginRight: 15, padding: 8 }}
+        >
+          <Ionicons name="ellipsis-horizontal-circle" size={28} color="#007AFF" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const loadLink = async () => {
     try {
@@ -65,11 +93,62 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleGenerateSummary = async () => {
-    // TODO: Gemini APIとの統合を実装
-    Alert.alert(
-      '機能準備中',
-      'AI要約機能は現在準備中です。設定画面でGemini APIキーを設定してください。'
-    );
+    if (!link) return;
+
+    // 既に要約がある場合は確認
+    if (link.summary) {
+      Alert.alert(
+        '確認',
+        '既に要約が生成されています。新しく生成しますか？',
+        [
+          { text: 'キャンセル', style: 'cancel' },
+          { text: '生成', onPress: () => generateSummaryInternal() },
+        ]
+      );
+      return;
+    }
+
+    await generateSummaryInternal();
+  };
+
+  const generateSummaryInternal = async () => {
+    if (!link) return;
+
+    setGeneratingSummary(true);
+
+    try {
+      // APIキーの取得
+      const apiKey = await getGeminiApiKey();
+
+      if (!apiKey) {
+        Alert.alert(
+          'APIキー未設定',
+          '設定画面でGemini APIキーを設定してください。',
+          [
+            { text: 'キャンセル', style: 'cancel' },
+            { text: '設定画面へ', onPress: () => navigation.navigate('LinksList' as any) },
+          ]
+        );
+        setGeneratingSummary(false);
+        return;
+      }
+
+      // 要約生成
+      const summary = await summarizeURL(apiKey, link.url);
+
+      // Firestoreに保存
+      await updateLink(linkId, { summary });
+
+      // ローカル状態を更新
+      setLink({ ...link, summary });
+
+      Alert.alert('成功', '要約を生成しました');
+    } catch (error: any) {
+      console.error('Error generating summary:', error);
+      Alert.alert('エラー', error.message || '要約の生成に失敗しました');
+    } finally {
+      setGeneratingSummary(false);
+    }
   };
 
   const handleToggleArchive = async () => {
@@ -85,6 +164,129 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     } catch (error) {
       Alert.alert('エラー', '更新に失敗しました');
     }
+  };
+
+  const handleOpenTagModal = async () => {
+    if (!user) return;
+
+    try {
+      const tags = await getUserTags(user.uid);
+      setAvailableTags(tags);
+      setShowTagModal(true);
+    } catch (error) {
+      Alert.alert('エラー', 'タグの読み込みに失敗しました');
+    }
+  };
+
+  const handleAddTag = async (tagName: string) => {
+    if (!link) return;
+
+    try {
+      await addTagToLink(linkId, tagName);
+      const updatedLink = await getLink(linkId);
+      if (updatedLink) {
+        setLink(updatedLink);
+      }
+      Alert.alert('成功', 'タグを追加しました');
+    } catch (error) {
+      Alert.alert('エラー', 'タグの追加に失敗しました');
+    }
+  };
+
+  const handleRemoveTag = async (tagName: string) => {
+    if (!link) return;
+
+    Alert.alert(
+      '確認',
+      `タグ「${tagName}」を削除しますか？`,
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        {
+          text: '削除',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeTagFromLink(linkId, tagName);
+              const updatedLink = await getLink(linkId);
+              if (updatedLink) {
+                setLink(updatedLink);
+              }
+              Alert.alert('成功', 'タグを削除しました');
+            } catch (error) {
+              Alert.alert('エラー', 'タグの削除に失敗しました');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleAddNewTag = async () => {
+    if (!newTagName.trim()) return;
+
+    await handleAddTag(newTagName.trim());
+    setNewTagName('');
+  };
+
+  const handleOpenEditModal = () => {
+    if (!link) return;
+    setEditTitle(link.title);
+    setEditDescription(link.description || '');
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!link || !editTitle.trim()) {
+      Alert.alert('エラー', 'タイトルを入力してください');
+      return;
+    }
+
+    try {
+      const updates: any = {
+        title: editTitle.trim(),
+      };
+
+      if (editDescription.trim()) {
+        updates.description = editDescription.trim();
+      }
+
+      await updateLink(linkId, updates);
+      const updatedLink = await getLink(linkId);
+      if (updatedLink) {
+        setLink(updatedLink);
+      }
+      setShowEditModal(false);
+      Alert.alert('成功', 'リンクを更新しました');
+    } catch (error) {
+      Alert.alert('エラー', 'リンクの更新に失敗しました');
+    }
+  };
+
+  const handleDeleteLink = () => {
+    Alert.alert(
+      '確認',
+      'このリンクを削除しますか？',
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        {
+          text: '削除',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteLink(linkId);
+              Alert.alert('成功', 'リンクを削除しました', [
+                {
+                  text: 'OK',
+                  onPress: () => navigation.goBack(),
+                },
+              ]);
+            } catch (error) {
+              Alert.alert('エラー', 'リンクの削除に失敗しました');
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -120,39 +322,39 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.description}>{link.description}</Text>
         )}
 
-        {link.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
+        <View style={styles.tagsContainer}>
+          <View style={styles.tagsHeader}>
             <Text style={styles.tagsLabel}>タグ:</Text>
+            <TouchableOpacity onPress={handleOpenTagModal} style={styles.editTagButton}>
+              <Text style={styles.editTagButtonText}>編集</Text>
+            </TouchableOpacity>
+          </View>
+          {link.tags.length > 0 ? (
             <View style={styles.tags}>
               {link.tags.map((tag, index) => (
-                <View key={index} style={styles.tag}>
+                <TouchableOpacity
+                  key={index}
+                  style={styles.tag}
+                  onLongPress={() => handleRemoveTag(tag)}
+                >
                   <Text style={styles.tagText}>{tag}</Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
-          </View>
-        )}
-
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleGenerateSummary}
-            disabled={generatingSummary}
-          >
-            <Text style={styles.actionButtonText}>
-              {generatingSummary ? '生成中...' : 'AI要約を生成'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, styles.archiveButton]}
-            onPress={handleToggleArchive}
-          >
-            <Text style={styles.actionButtonText}>
-              {link.isArchived ? 'アーカイブを解除' : 'アーカイブ'}
-            </Text>
-          </TouchableOpacity>
+          ) : (
+            <Text style={styles.noTagsText}>タグが設定されていません</Text>
+          )}
         </View>
+
+        <TouchableOpacity
+          style={styles.generateSummaryButton}
+          onPress={handleGenerateSummary}
+          disabled={generatingSummary}
+        >
+          <Text style={styles.generateSummaryButtonText}>
+            {generatingSummary ? 'AI要約生成中...' : 'AI要約を生成'}
+          </Text>
+        </TouchableOpacity>
 
         {link.summary && (
           <View style={styles.summaryContainer}>
@@ -165,6 +367,175 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           保存日時: {link.createdAt.toLocaleString('ja-JP')}
         </Text>
       </View>
+
+      <Modal
+        visible={showMenu}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                handleOpenEditModal();
+              }}
+            >
+              <Ionicons name="create-outline" size={20} color="#000" style={styles.menuIcon} />
+              <Text style={styles.menuItemText}>編集</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                handleToggleArchive();
+              }}
+            >
+              <Ionicons
+                name={link?.isArchived ? "archive-outline" : "archive"}
+                size={20}
+                color="#000"
+                style={styles.menuIcon}
+              />
+              <Text style={styles.menuItemText}>
+                {link?.isArchived ? 'アーカイブを解除' : 'アーカイブ'}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemDanger]}
+              onPress={() => {
+                setShowMenu(false);
+                handleDeleteLink();
+              }}
+            >
+              <Ionicons name="trash-outline" size={20} color="#FF3B30" style={styles.menuIcon} />
+              <Text style={[styles.menuItemText, styles.menuItemDangerText]}>削除</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>リンクを編集</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Text style={styles.modalCloseButton}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.editFormContainer}>
+              <Text style={styles.inputLabel}>タイトル *</Text>
+              <TextInput
+                style={styles.editInput}
+                placeholder="タイトル"
+                value={editTitle}
+                onChangeText={setEditTitle}
+                multiline
+              />
+
+              <Text style={styles.inputLabel}>説明（任意）</Text>
+              <TextInput
+                style={[styles.editInput, styles.editTextArea]}
+                placeholder="説明"
+                value={editDescription}
+                onChangeText={setEditDescription}
+                multiline
+                numberOfLines={4}
+              />
+
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSaveEdit}
+              >
+                <Text style={styles.saveButtonText}>保存</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showTagModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowTagModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>タグを追加</Text>
+              <TouchableOpacity onPress={() => setShowTagModal(false)}>
+                <Text style={styles.modalCloseButton}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.newTagContainer}>
+              <TextInput
+                style={styles.newTagInput}
+                placeholder="新しいタグ名"
+                value={newTagName}
+                onChangeText={setNewTagName}
+                onSubmitEditing={handleAddNewTag}
+              />
+              <TouchableOpacity
+                style={styles.addNewTagButton}
+                onPress={handleAddNewTag}
+              >
+                <Text style={styles.addNewTagButtonText}>追加</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.existingTagsLabel}>既存のタグから選択:</Text>
+            <ScrollView style={styles.tagsList}>
+              {availableTags.map((tag) => {
+                const isSelected = link?.tags.includes(tag.name) || false;
+                return (
+                  <TouchableOpacity
+                    key={tag.id}
+                    style={[
+                      styles.tagItem,
+                      isSelected && styles.tagItemSelected,
+                    ]}
+                    onPress={() => handleAddTag(tag.name)}
+                    disabled={isSelected}
+                  >
+                    <Text
+                      style={[
+                        styles.tagItemText,
+                        isSelected && styles.tagItemTextSelected,
+                      ]}
+                    >
+                      {tag.name}
+                    </Text>
+                    {isSelected && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -221,11 +592,27 @@ const styles = StyleSheet.create({
   tagsContainer: {
     marginBottom: 20,
   },
+  tagsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   tagsLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: '#000000',
-    marginBottom: 10,
+  },
+  editTagButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+  },
+  editTagButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
   tags: {
     flexDirection: 'row',
@@ -243,23 +630,63 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
   },
-  actions: {
-    marginBottom: 20,
+  noTagsText: {
+    fontSize: 14,
+    color: '#8E8E93',
+    fontStyle: 'italic',
   },
-  actionButton: {
+  generateSummaryButton: {
     backgroundColor: '#007AFF',
     borderRadius: 10,
     padding: 15,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  archiveButton: {
-    backgroundColor: '#8E8E93',
-  },
-  actionButtonText: {
+  generateSummaryButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 50,
+    paddingRight: 10,
+  },
+  menuContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    minWidth: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  menuIcon: {
+    marginRight: 12,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  menuItemDanger: {
+    backgroundColor: '#FFF5F5',
+  },
+  menuItemDangerText: {
+    color: '#FF3B30',
+    fontWeight: '600',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#E5E5EA',
   },
   summaryContainer: {
     backgroundColor: '#FFFFFF',
@@ -282,6 +709,127 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#8E8E93',
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  modalCloseButton: {
+    fontSize: 32,
+    color: '#8E8E93',
+    fontWeight: '300',
+  },
+  newTagContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  newTagInput: {
+    flex: 1,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    marginRight: 10,
+  },
+  addNewTagButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+  },
+  addNewTagButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  existingTagsLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 10,
+  },
+  tagsList: {
+    maxHeight: 300,
+  },
+  tagItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+  },
+  tagItemSelected: {
+    backgroundColor: '#E3F2FD',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  tagItemText: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  tagItemTextSelected: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  checkmark: {
+    fontSize: 18,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  editFormContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+  editInput: {
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 44,
+    maxHeight: 120,
+  },
+  editTextArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  saveButton: {
+    backgroundColor: '#34C759',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

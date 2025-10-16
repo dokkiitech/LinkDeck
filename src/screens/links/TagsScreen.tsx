@@ -9,11 +9,16 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserTags, createTag, deleteTag } from '../../services/firestore';
-import { Tag } from '../../types';
+import { Tag, TagsStackParamList } from '../../types';
 
-const TagsScreen: React.FC = () => {
+interface Props {
+  navigation: NativeStackNavigationProp<TagsStackParamList, 'TagsList'>;
+}
+
+const TagsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +104,7 @@ const TagsScreen: React.FC = () => {
   const renderTagItem = ({ item }: { item: Tag }) => (
     <TouchableOpacity
       style={styles.tagItem}
+      onPress={() => navigation.navigate('TagLinks', { tagName: item.name })}
       onLongPress={() => handleDeleteTag(item)}
     >
       <View style={styles.tagBadge}>
@@ -107,6 +113,7 @@ const TagsScreen: React.FC = () => {
       <Text style={styles.tagDate}>
         作成日: {item.createdAt.toLocaleDateString('ja-JP')}
       </Text>
+      <Text style={styles.tapHint}>タップして関連リンクを表示</Text>
     </TouchableOpacity>
   );
 
@@ -248,6 +255,12 @@ const styles = StyleSheet.create({
   tagDate: {
     fontSize: 12,
     color: '#8E8E93',
+  },
+  tapHint: {
+    fontSize: 11,
+    color: '#007AFF',
+    marginTop: 5,
+    fontStyle: 'italic',
   },
 });
 

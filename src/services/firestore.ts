@@ -36,16 +36,23 @@ export const createLink = async (
   imageUrl?: string,
   tags: string[] = []
 ): Promise<string> => {
-  const linkData: LinkDocument = {
+  // undefinedを含むフィールドを除外
+  const linkData: any = {
     userId,
     url,
     title,
-    description,
-    imageUrl,
     tags,
     isArchived: false,
     createdAt: Timestamp.now(),
   };
+
+  // オプショナルフィールドはundefinedでない場合のみ追加
+  if (description !== undefined && description !== null) {
+    linkData.description = description;
+  }
+  if (imageUrl !== undefined && imageUrl !== null) {
+    linkData.imageUrl = imageUrl;
+  }
 
   const docRef = await addDoc(linksCollection, linkData);
   return docRef.id;
@@ -72,19 +79,32 @@ export const getLink = async (linkId: string): Promise<Link | null> => {
 
 /**
  * ユーザーのリンク一覧を取得
+ *
+ * インデックスが必要:
+ * - userId (ASC), isArchived (ASC), createdAt (DESC)
+ * - userId (ASC), createdAt (DESC)
  */
 export const getUserLinks = async (
   userId: string,
   includeArchived: boolean = false
 ): Promise<Link[]> => {
-  let q = query(
-    linksCollection,
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc')
-  );
+  let q;
 
   if (!includeArchived) {
-    q = query(q, where('isArchived', '==', false));
+    // アーカイブ済みを除外する場合: 複合インデックスが必要
+    q = query(
+      linksCollection,
+      where('userId', '==', userId),
+      where('isArchived', '==', false),
+      orderBy('createdAt', 'desc')
+    );
+  } else {
+    // 全てのリンクを取得する場合
+    q = query(
+      linksCollection,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
   }
 
   const querySnapshot = await getDocs(q);

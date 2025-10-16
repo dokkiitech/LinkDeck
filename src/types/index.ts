@@ -101,5 +101,11 @@ export type MainTabParamList = {
 
 export type LinksStackParamList = {
   LinksList: undefined;
+  AddLink: undefined;
   LinkDetail: { linkId: string };
+};
+
+export type TagsStackParamList = {
+  TagsList: undefined;
+  TagLinks: { tagName: string };
 };

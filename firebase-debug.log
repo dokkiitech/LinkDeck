@@ -1,0 +1,20 @@
+[debug] [2025-10-16T18:14:55.483Z] ----------------------------------------------------------------------
+[debug] [2025-10-16T18:14:55.484Z] Command:       /Users/dokkiitech/.nvm/versions/node/v20.18.3/bin/node /Users/dokkiitech/.nvm/versions/node/v20.18.3/bin/firebase deploy --only firestore:indexes
+[debug] [2025-10-16T18:14:55.485Z] CLI Version:   13.34.0
+[debug] [2025-10-16T18:14:55.485Z] Platform:      darwin
+[debug] [2025-10-16T18:14:55.485Z] Node Version:  v20.18.3
+[debug] [2025-10-16T18:14:55.485Z] Time:          Fri Oct 17 2025 03:14:55 GMT+0900 (Japan Standard Time)
+[debug] [2025-10-16T18:14:55.485Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-16T18:14:55.486Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[error] 
+[error] Error: No currently active project.
+To run this command, you need to specify a project. You have two options:
+- Run this command with --project <alias_or_project_id>.
+- Set an active project by running firebase use --add, then rerun this command.
+To list all the Firebase projects to which you have access, run firebase projects:list.
+To learn about active projects for the CLI, visit https://firebase.google.com/docs/cli#project_aliases
+
+
+[debug] [2025-10-16T18:14:56.005Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-10-16T18:14:56.005Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}

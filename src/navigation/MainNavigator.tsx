@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from '../types';
 import LinksNavigator from './LinksNavigator';
-import TagsScreen from '../screens/links/TagsScreen';
+import TagsNavigator from './TagsNavigator';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -26,8 +26,9 @@ const MainNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="Tags"
-        component={TagsScreen}
+        component={TagsNavigator}
         options={{
+          headerShown: false,
           title: 'タグ',
         }}
       />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,35 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { saveGeminiApiKey, getGeminiApiKey, removeGeminiApiKey } from '../../utils/storage';
+import { validateApiKey } from '../../services/gemini';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    loadApiKey();
+  }, []);
+
+  const loadApiKey = async () => {
+    try {
+      const savedKey = await getGeminiApiKey();
+      if (savedKey) {
+        setHasApiKey(true);
+      }
+    } catch (error) {
+      console.error('Error loading API key:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSaveApiKey = async () => {
     if (!geminiApiKey.trim()) {
@@ -23,14 +45,50 @@ const SettingsScreen: React.FC = () => {
 
     setIsSaving(true);
     try {
-      // TODO: Firestore にAPIキーを暗号化して保存する処理を実装
-      Alert.alert('成功', 'APIキーを保存しました（実装準備中）');
-    } catch (error) {
+      // APIキーの検証
+      const isValid = await validateApiKey(geminiApiKey.trim());
+
+      if (!isValid) {
+        Alert.alert('エラー', 'APIキーが無効です。正しいキーを入力してください。');
+        setIsSaving(false);
+        return;
+      }
+
+      // AsyncStorageに保存
+      await saveGeminiApiKey(geminiApiKey.trim());
+      setHasApiKey(true);
+      setGeminiApiKey('');
+      Alert.alert('成功', 'APIキーを保存しました');
+    } catch (error: any) {
       console.error('Error saving API key:', error);
-      Alert.alert('エラー', 'APIキーの保存に失敗しました');
+      Alert.alert('エラー', error.message || 'APIキーの保存に失敗しました');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleRemoveApiKey = async () => {
+    Alert.alert(
+      '確認',
+      'APIキーを削除しますか？',
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        {
+          text: '削除',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeGeminiApiKey();
+              setHasApiKey(false);
+              setGeminiApiKey('');
+              Alert.alert('成功', 'APIキーを削除しました');
+            } catch (error) {
+              Alert.alert('エラー', 'APIキーの削除に失敗しました');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -73,23 +131,48 @@ const SettingsScreen: React.FC = () => {
         <Text style={styles.description}>
           AI要約機能を使用するには、Google AI Studioで取得したGemini APIキーを入力してください。
         </Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Gemini APIキー"
-          value={geminiApiKey}
-          onChangeText={setGeminiApiKey}
-          secureTextEntry
-          editable={!isSaving}
-        />
-        <TouchableOpacity
-          style={[styles.button, isSaving && styles.buttonDisabled]}
-          onPress={handleSaveApiKey}
-          disabled={isSaving}
-        >
-          <Text style={styles.buttonText}>
-            {isSaving ? '保存中...' : 'APIキーを保存'}
-          </Text>
-        </TouchableOpacity>
+
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#007AFF" />
+        ) : hasApiKey ? (
+          <View>
+            <View style={styles.statusContainer}>
+              <Text style={styles.statusLabel}>状態:</Text>
+              <Text style={styles.statusSuccess}>APIキー設定済み ✓</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.button, styles.removeButton]}
+              onPress={handleRemoveApiKey}
+            >
+              <Text style={styles.buttonText}>APIキーを削除</Text>
+            </TouchableOpacity>
+            <Text style={styles.hint}>
+              ※ 新しいAPIキーを設定するには、まず既存のキーを削除してください
+            </Text>
+          </View>
+        ) : (
+          <View>
+            <TextInput
+              style={styles.input}
+              placeholder="Gemini APIキー"
+              value={geminiApiKey}
+              onChangeText={setGeminiApiKey}
+              secureTextEntry
+              editable={!isSaving}
+            />
+            <TouchableOpacity
+              style={[styles.button, isSaving && styles.buttonDisabled]}
+              onPress={handleSaveApiKey}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>APIキーを保存</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>
@@ -167,6 +250,10 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     backgroundColor: '#B0B0B0',
   },
+  removeButton: {
+    backgroundColor: '#FF9500',
+    marginTop: 10,
+  },
   logoutButton: {
     backgroundColor: '#FF3B30',
   },
@@ -174,6 +261,30 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    padding: 15,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 10,
+  },
+  statusLabel: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginRight: 10,
+  },
+  statusSuccess: {
+    fontSize: 14,
+    color: '#34C759',
+    fontWeight: '600',
+  },
+  hint: {
+    fontSize: 12,
+    color: '#8E8E93',
+    marginTop: 10,
+    fontStyle: 'italic',
   },
 });
 

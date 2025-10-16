@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================
+    // ヘルパー関数
+    // ========================================
+
+    // 認証済みユーザーかチェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // 自分のユーザーIDかチェック
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // リソースの所有者かチェック
+    function isResourceOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    // 新規作成データの所有者かチェック
+    function isIncomingOwner() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+
+    // ========================================
+    // ユーザーコレクション
+    // ========================================
+
+    match /users/{userId} {
+      // 読み取り: 自分のユーザー情報のみ
+      allow read: if isOwner(userId);
+
+      // 作成: 自分のユーザー情報のみ作成可能
+      allow create: if isOwner(userId)
+                    && request.resource.data.keys().hasAll(['email', 'createdAt'])
+                    && request.resource.data.email is string
+                    && request.resource.data.createdAt is timestamp;
+
+      // 更新: 自分のユーザー情報のみ更新可能
+      // userIdとcreatedAtは変更不可
+      allow update: if isOwner(userId)
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.createdAt == resource.data.createdAt;
+
+      // 削除: 自分のユーザー情報のみ削除可能
+      allow delete: if isOwner(userId);
+    }
+
+    // ========================================
+    // リンクコレクション
+    // ========================================
+
+    match /links/{linkId} {
+      // 読み取り: 自分のリンクのみ
+      allow read: if isResourceOwner();
+
+      // 作成: 必須フィールドのバリデーション
+      allow create: if isIncomingOwner()
+                    && request.resource.data.keys().hasAll(['userId', 'url', 'title', 'tags', 'isArchived', 'createdAt'])
+                    && request.resource.data.userId is string
+                    && request.resource.data.url is string
+                    && request.resource.data.url.size() > 0
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0
+                    && request.resource.data.tags is list
+                    && request.resource.data.isArchived is bool
+                    && request.resource.data.createdAt is timestamp
+                    // オプショナルフィールドの型チェック
+                    && (!request.resource.data.keys().hasAny(['description']) || request.resource.data.description is string)
+                    && (!request.resource.data.keys().hasAny(['imageUrl']) || request.resource.data.imageUrl is string)
+                    && (!request.resource.data.keys().hasAny(['summary']) || request.resource.data.summary is string);
+
+      // 更新: 自分のリンクのみ、userId/createdAtは変更不可
+      allow update: if isResourceOwner()
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && request.resource.data.url is string
+                    && request.resource.data.url.size() > 0
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0
+                    && request.resource.data.tags is list
+                    && request.resource.data.isArchived is bool
+                    && (!request.resource.data.keys().hasAny(['description']) || request.resource.data.description is string)
+                    && (!request.resource.data.keys().hasAny(['imageUrl']) || request.resource.data.imageUrl is string)
+                    && (!request.resource.data.keys().hasAny(['summary']) || request.resource.data.summary is string);
+
+      // 削除: 自分のリンクのみ
+      allow delete: if isResourceOwner();
+    }
+
+    // ========================================
+    // タグコレクション
+    // ========================================
+
+    match /tags/{tagId} {
+      // 読み取り: 自分のタグのみ
+      allow read: if isResourceOwner();
+
+      // 作成: 必須フィールドのバリデーション
+      allow create: if isIncomingOwner()
+                    && request.resource.data.keys().hasAll(['userId', 'name', 'createdAt'])
+                    && request.resource.data.userId is string
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 50
+                    && request.resource.data.createdAt is timestamp;
+
+      // 更新: 自分のタグのみ、userId/createdAtは変更不可
+      allow update: if isResourceOwner()
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 50;
+
+      // 削除: 自分のタグのみ
+      allow delete: if isResourceOwner();
+    }
+  }
+}

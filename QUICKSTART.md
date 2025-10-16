@@ -24,11 +24,28 @@
 
 ---
 
-## 📋 Firebase設定の確認事項
+## ⚠️ 重要: Firebase設定（必須）
 
-### ✅ 必須: Firebase Consoleで以下を確認
+アプリを起動する前に、Firebase Consoleで以下の設定を行ってください。
 
-#### 1. **Authentication の設定**
+### 🔥 ステップ1: Firestoreセキュリティルールを設定
+
+**現在、この設定が未完了のため、以下のエラーが発生します：**
+```
+Error loading links: [FirebaseError: Missing or insufficient permissions.]
+```
+
+#### 設定方法
+
+1. [Firebase Console](https://console.firebase.google.com/)を開く
+2. プロジェクト「**linkdeck-7ccde**」を選択
+3. 左メニュー → **Firestore Database** → **ルール**タブ
+4. 以下のルールをコピー＆ペースト
+5. 右上の「**公開**」ボタンをクリック
+
+**詳細な手順**: [FIRESTORE_SETUP.md](FIRESTORE_SETUP.md)を参照
+
+### 🔐 ステップ2: Authentication を有効化
 
 ```bash
 Firebase Console → Authentication → Sign-in method
@@ -36,14 +53,11 @@ Firebase Console → Authentication → Sign-in method
 
 - ✅ メール/パスワード認証を**有効化**してください
 
-#### 2. **Firestore の設定**
+---
 
-```bash
-Firebase Console → Firestore Database
-```
+## 📋 Firestoreセキュリティルール
 
-- ✅ データベースが作成されていることを確認
-- ✅ セキュリティルールを設定（以下をコピー）
+以下をFirebase Consoleにコピー＆ペーストしてください：
 
 ```javascript
 rules_version = '2';
@@ -56,18 +70,28 @@ service cloud.firestore {
 
     // リンクコレクション
     match /links/{linkId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      // 読み取り・更新・削除: 自分のリンクのみ
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // 作成: 認証済みユーザーが自分のuserIdでのみ作成可能
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
     // タグコレクション
     match /tags/{tagId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      // 読み取り・更新・削除: 自分のタグのみ
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // 作成: 認証済みユーザーが自分のuserIdでのみ作成可能
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
   }
 }
 ```
+
+**📝 注意**:
+- このルールをコピーした後、必ず「**公開**」ボタンをクリックしてください
+- 公開しないとルールが適用されません
 
 ---
 

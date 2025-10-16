@@ -34,6 +34,10 @@ yarn-error.*
 .env*.local
 .env
 
+# Firebase
+.firebase/
+.firebaserc
+
 # typescript
 *.tsbuildinfo
 

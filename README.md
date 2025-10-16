@@ -5,12 +5,13 @@
 ## 主な機能
 
 - ✅ **ユーザー認証**: Firebase Authenticationを使用したメールアドレス/パスワードによる認証
-- ✅ **URL保存機能**: iOS共有機能を通じて、あらゆるアプリからURLを保存
+- ✅ **URL追加機能**: アプリ内からURLを追加（テキストからURLを自動抽出）
+- ✅ **URLメタデータ自動取得**: OGP情報（タイトル、説明文、画像）を自動取得
+- ✅ **AI要約機能**: Gemini APIを使用したコンテンツの要約生成
 - ✅ **タグ管理**: カスタムタグを作成してリンクを分類・整理
 - ✅ **リンク一覧表示**: 保存したURLを見やすい形式で一覧表示
-- ✅ **リンク詳細表示**: OGP画像、タイトル、説明文などを表示
-- 🚧 **AI要約機能**: Gemini APIを使用したコンテンツの要約生成（実装準備中）
-- 🚧 **iOS共有拡張機能**: 他のアプリから直接リンクを保存（実装予定）
+- ✅ **リンク詳細表示**: OGP画像、タイトル、説明文、AI要約などを表示
+- 🚧 **iOS共有拡張機能**: 他のアプリから直接リンクを保存（Share Extension実装予定）
 
 ## 技術スタック
 
@@ -88,31 +89,32 @@ EXPO_PUBLIC_FIREBASE_APP_ID=your-app-id
 
 ### 5. Firestore セキュリティルールの設定
 
-Firebase Consoleで以下のセキュリティルールを設定：
+⚠️ **重要**: この設定を行わないと、アプリが正常に動作しません。
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // ユーザーコレクション
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
+#### 方法A: Firebase CLI（推奨）
 
-    // リンクコレクション
-    match /links/{linkId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
+```bash
+# Firebase CLIをインストール
+npm install -g firebase-tools
 
-    // タグコレクション
-    match /tags/{tagId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-  }
-}
+# ログイン
+firebase login
+
+# プロジェクトを選択
+firebase use --add
+# → あなたのプロジェクトIDを選択
+
+# セキュリティルールをデプロイ
+firebase deploy --only firestore:rules
 ```
+
+詳細: [DEPLOY_FIRESTORE_RULES.md](DEPLOY_FIRESTORE_RULES.md)
+
+#### 方法B: Firebase Console（手動）
+
+Firebase Consoleで[`firestore.rules`](firestore.rules)ファイルの内容をコピー＆ペーストして公開
+
+詳細: [FIRESTORE_SETUP.md](FIRESTORE_SETUP.md)
 
 ### 6. アプリケーションの起動
 

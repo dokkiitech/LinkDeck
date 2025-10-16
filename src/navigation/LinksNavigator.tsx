@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LinksStackParamList } from '../types';
 import LinksListScreen from '../screens/links/LinksListScreen';
+import AddLinkScreen from '../screens/links/AddLinkScreen';
 import LinkDetailScreen from '../screens/links/LinkDetailScreen';
 
 const Stack = createNativeStackNavigator<LinksStackParamList>();
@@ -14,6 +15,13 @@ const LinksNavigator: React.FC = () => {
         component={LinksListScreen}
         options={{
           title: 'リンク一覧',
+        }}
+      />
+      <Stack.Screen
+        name="AddLink"
+        component={AddLinkScreen}
+        options={{
+          title: 'リンクを追加',
         }}
       />
       <Stack.Screen
