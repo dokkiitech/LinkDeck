@@ -275,97 +275,76 @@ RCT_EXTERN_METHOD(clearPendingURLs:(RCTPromiseResolveBlock)resolve
 @end
 ```
 
-### ステップ9: TypeScriptでのネイティブモジュール利用
+### ステップ9: TypeScriptでのネイティブモジュール利用 ✅ 実装済み
 
-`src/services/sharedGroup.ts`:
+**実装済みファイル**: `src/services/sharedGroup.ts`
 
-```typescript
-import { NativeModules, Platform } from 'react-native';
+このファイルは既に実装されています。以下の機能を提供します：
 
-interface SharedGroupManager {
-  getPendingURLs(): Promise<string[]>;
-  clearPendingURLs(): Promise<boolean>;
-}
+- `getPendingSharedURLs()`: App Groupから保留中の共有URLを取得
+- `clearPendingSharedURLs()`: 処理済みURLをクリア
+- `isShareExtensionAvailable()`: Share Extension機能が利用可能かチェック
 
-const { SharedGroupManager } = NativeModules as { SharedGroupManager: SharedGroupManager };
+### ステップ10: アプリ起動時の処理 ✅ 実装済み
 
-export const getPendingSharedURLs = async (): Promise<string[]> => {
-  if (Platform.OS !== 'ios' || !SharedGroupManager) {
-    return [];
-  }
+**実装済みファイル**:
+- `src/components/SharedURLHandler.tsx`
+- `src/navigation/AppNavigator.tsx`
 
-  try {
-    return await SharedGroupManager.getPendingURLs();
-  } catch (error) {
-    console.error('Failed to get pending URLs:', error);
-    return [];
-  }
-};
+`SharedURLHandler`コンポーネントが実装されており、以下の機能を提供します：
 
-export const clearPendingSharedURLs = async (): Promise<void> => {
-  if (Platform.OS !== 'ios' || !SharedGroupManager) {
-    return;
-  }
+- アプリ起動時に自動的に共有URLをチェック
+- バックグラウンドからフォアグラウンドに戻った時にチェック
+- URLメタデータの自動取得
+- Firestoreへの自動保存
+- 処理結果の通知
 
-  try {
-    await SharedGroupManager.clearPendingURLs();
-  } catch (error) {
-    console.error('Failed to clear pending URLs:', error);
-  }
-};
-```
+このコンポーネントは`AppNavigator`に統合されており、ユーザーがログイン中のみ動作します。
 
-### ステップ10: アプリ起動時の処理
-
-`App.tsx` に共有URL処理を追加：
+**使用例（既に統合済み）**:
 
 ```typescript
-import { useEffect } from 'react';
-import { getPendingSharedURLs, clearPendingSharedURLs } from './src/services/sharedGroup';
-import { addLink } from './src/services/firestore';
-import { useAuth } from './src/contexts/AuthContext';
+// src/navigation/AppNavigator.tsx
+import SharedURLHandler from '../components/SharedURLHandler';
 
-function App() {
+const AppNavigator: React.FC = () => {
   const { user } = useAuth();
 
-  useEffect(() => {
-    const processSharedURLs = async () => {
-      if (!user) return;
-
-      const pendingURLs = await getPendingSharedURLs();
-
-      if (pendingURLs.length > 0) {
-        // 各URLをFirestoreに追加
-        for (const url of pendingURLs) {
-          try {
-            await addLink({
-              userId: user.uid,
-              url,
-              title: 'Shared Link', // メタデータを後で取得
-              description: '',
-              tags: [],
-              imageUrl: null,
-              aiSummary: null,
-              isArchived: false,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            });
-          } catch (error) {
-            console.error('Failed to add shared URL:', error);
-          }
-        }
-
-        // 処理済みのURLをクリア
-        await clearPendingSharedURLs();
-      }
-    };
-
-    processSharedURLs();
-  }, [user]);
-
-  // ...rest of app
-}
+  return (
+    <NavigationContainer>
+      {user && <SharedURLHandler />}
+      {/* ...rest of navigation */}
+    </NavigationContainer>
+  );
+};
 ```
+
+**処理フロー**:
+1. Share Extensionでユーザーが他アプリからURLを共有
+2. URLがApp Groupの`UserDefaults`に保存される
+3. LinkDeckアプリを開く（またはフォアグラウンドに戻す）
+4. `SharedURLHandler`が自動的にURLを検出
+5. メタデータを取得してFirestoreに保存
+6. 成功通知を表示
+
+## 実装状況まとめ
+
+### ✅ 完了している部分（React Native/TypeScript側）
+
+- **ステップ9**: TypeScriptでのネイティブモジュール利用 → `src/services/sharedGroup.ts`
+- **ステップ10**: アプリ起動時の共有URL処理 → `src/components/SharedURLHandler.tsx`
+
+これらのファイルは既に実装されており、Share Extension（ネイティブ側）が実装されれば自動的に動作します。
+
+### ⚠️ 未実装の部分（ネイティブiOS側）
+
+以下のステップは、Xcodeでのネイティブ開発が必要です：
+
+- **ステップ1〜6**: Share Extension Targetの作成とSwiftコードの実装
+- **ステップ7**: App Groupの設定
+- **ステップ8**: ネイティブモジュール（SharedGroupManager）のSwift実装
+
+これらを実装するには、`npx expo prebuild`を実行してネイティブプロジェクトを生成する必要があります。
 
 ## 簡易実装（Development Build不要）
 
