@@ -3,7 +3,7 @@ import { AppState, AppStateStatus, Alert } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getPendingSharedURLs, clearPendingSharedURLs } from '../services/sharedGroup';
 import { addLink } from '../services/firestore';
-import { extractMetadata } from '../services/metadata';
+import { fetchURLMetadata } from '../utils/urlMetadata';
 
 /**
  * Share Extensionから共有されたURLを処理するコンポーネント
@@ -51,7 +51,7 @@ const SharedURLHandler: React.FC = () => {
       for (const url of pendingURLs) {
         try {
           // メタデータを取得
-          const metadata = await extractMetadata(url);
+          const metadata = await fetchURLMetadata(url);
 
           // Firestoreに保存
           await addLink({
@@ -59,7 +59,7 @@ const SharedURLHandler: React.FC = () => {
             url,
             title: metadata.title || url,
             description: metadata.description || '',
-            imageUrl: metadata.image || null,
+            imageUrl: metadata.imageUrl || null,
             tags: [],
             summary: null,
             isArchived: false,
