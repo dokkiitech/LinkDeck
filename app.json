@@ -22,6 +22,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.linkdeck.app",
+      "buildNumber": "1",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
