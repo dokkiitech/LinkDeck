@@ -4,6 +4,7 @@ import { LinksStackParamList } from '../types';
 import LinksListScreen from '../screens/links/LinksListScreen';
 import AddLinkScreen from '../screens/links/AddLinkScreen';
 import LinkDetailScreen from '../screens/links/LinkDetailScreen';
+import ArchivedLinksScreen from '../screens/links/ArchivedLinksScreen';
 
 const Stack = createNativeStackNavigator<LinksStackParamList>();
 
@@ -29,6 +30,13 @@ const LinksNavigator: React.FC = () => {
         component={LinkDetailScreen}
         options={{
           title: 'リンク詳細',
+        }}
+      />
+      <Stack.Screen
+        name="ArchivedLinks"
+        component={ArchivedLinksScreen}
+        options={{
+          title: 'アーカイブ',
         }}
       />
     </Stack.Navigator>

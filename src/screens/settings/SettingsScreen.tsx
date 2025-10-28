@@ -9,12 +9,15 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { saveGeminiApiKey, getGeminiApiKey, removeGeminiApiKey } from '../../utils/storage';
 import { validateApiKey } from '../../services/gemini';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigation = useNavigation();
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -176,6 +179,20 @@ const SettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>リンク管理</Text>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => (navigation as any).navigate('Links', { screen: 'ArchivedLinks' })}
+        >
+          <View style={styles.menuItemContent}>
+            <Ionicons name="archive-outline" size={24} color="#007AFF" style={styles.menuIcon} />
+            <Text style={styles.menuItemText}>アーカイブしたリンク</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#C7C7CC" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>アプリについて</Text>
         <View style={styles.infoContainer}>
           <Text style={styles.label}>バージョン</Text>
@@ -285,6 +302,23 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     marginTop: 10,
     fontStyle: 'italic',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIcon: {
+    marginRight: 12,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#000000',
   },
 });
 
