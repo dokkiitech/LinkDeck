@@ -70,6 +70,7 @@ export const getLink = async (linkId: string): Promise<Link | null> => {
     return {
       id: docSnap.id,
       ...data,
+      isArchived: Boolean(data.isArchived), // Ensure boolean type
       createdAt: data.createdAt.toDate(),
     };
   }
@@ -113,6 +114,7 @@ export const getUserLinks = async (
     return {
       id: doc.id,
       ...data,
+      isArchived: Boolean(data.isArchived), // Ensure boolean type
       createdAt: data.createdAt.toDate(),
     };
   });
@@ -138,6 +140,7 @@ export const getLinksByTag = async (
     return {
       id: doc.id,
       ...data,
+      isArchived: Boolean(data.isArchived), // Ensure boolean type
       createdAt: data.createdAt.toDate(),
     };
   });
@@ -151,7 +154,14 @@ export const updateLink = async (
   updates: Partial<Omit<LinkDocument, 'userId' | 'createdAt'>>
 ): Promise<void> => {
   const docRef = doc(db, 'links', linkId);
-  await updateDoc(docRef, updates);
+
+  // Ensure isArchived is always a boolean if it's being updated
+  const sanitizedUpdates = { ...updates };
+  if ('isArchived' in sanitizedUpdates && sanitizedUpdates.isArchived !== undefined) {
+    sanitizedUpdates.isArchived = Boolean(sanitizedUpdates.isArchived);
+  }
+
+  await updateDoc(docRef, sanitizedUpdates);
 };
 
 /**

@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeAuth, getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import Constants from 'expo-constants';
 import 'react-native-get-random-values';
@@ -9,6 +9,8 @@ import 'react-native-get-random-values';
  * app.config.jsのextraフィールドから環境変数を取得
  * ビルド時に.envファイルの値が埋め込まれる
  */
+const extra = Constants.expoConfig?.extra || {};
+
 const firebaseConfig = {
   apiKey: Constants.expoConfig?.extra?.firebaseApiKey || process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
   authDomain: Constants.expoConfig?.extra?.firebaseAuthDomain || process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
@@ -35,8 +37,44 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 /**
  * Firebase Authentication インスタンス
+ * React Native用のAsyncStorage永続化を使用
+ *
+ * Note: Firebase v12ではgetReactNativePersistenceが削除されているため、
+ * initializeAuth with AsyncStorageを直接使用します。
  */
-export const auth = getAuth(app);
+function getReactNativePersistence(storage: any) {
+  return {
+    async _get(key: string) {
+      const value = await storage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    },
+    async _set(key: string, value: any) {
+      await storage.setItem(key, JSON.stringify(value));
+    },
+    async _remove(key: string) {
+      await storage.removeItem(key);
+    },
+    _addListener() {},
+    _removeListener() {},
+    type: 'LOCAL' as const,
+  };
+}
+
+export const auth = (() => {
+  const apps = getApps();
+  if (apps.length > 0) {
+    try {
+      return getAuth(app);
+    } catch {
+      // Auth not initialized yet
+    }
+  }
+
+  // Initialize auth with React Native persistence
+  return initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+})();
 
 /**
  * Cloud Firestore インスタンス

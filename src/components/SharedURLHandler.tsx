@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus, Alert } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getPendingSharedURLs, clearPendingSharedURLs } from '../services/sharedGroup';
-import { addLink } from '../services/firestore';
+import { createLink } from '../services/firestore';
 import { fetchURLMetadata } from '../utils/urlMetadata';
 
 /**
@@ -54,18 +54,14 @@ const SharedURLHandler: React.FC = () => {
           const metadata = await fetchURLMetadata(url);
 
           // Firestoreに保存
-          await addLink({
-            userId: user.uid,
+          await createLink(
+            user.uid,
             url,
-            title: metadata.title || url,
-            description: metadata.description || '',
-            imageUrl: metadata.imageUrl || null,
-            tags: [],
-            summary: null,
-            isArchived: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
+            metadata.title || url,
+            metadata.description || '',
+            metadata.imageUrl || undefined,
+            []
+          );
 
           successCount++;
           console.log(`Successfully added shared URL: ${url}`);

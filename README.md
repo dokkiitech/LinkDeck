@@ -190,3 +190,9 @@ npx expo start -c
 ## 作者
 
 LinkDeck開発チーム
+
+## ローカルビルドコマンド
+```
+eas build --platform ios --local
+eas build --local --profile production
+```
