@@ -1,25 +1,33 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { initializeAuth, getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import 'react-native-get-random-values';
 
 /**
  * Firebase設定オブジェクト
- * app.config.js の extra フィールドから環境変数を取得します
- * ローカルビルド時は .env ファイルから、EASクラウドビルド時は eas.json の env から読み込まれます
+ * app.config.jsのextraフィールドから環境変数を取得
+ * ビルド時に.envファイルの値が埋め込まれる
  */
 const extra = Constants.expoConfig?.extra || {};
 
 const firebaseConfig = {
-  apiKey: extra.firebaseApiKey || 'your-api-key',
-  authDomain: extra.firebaseAuthDomain || 'your-auth-domain',
-  projectId: extra.firebaseProjectId || 'your-project-id',
-  storageBucket: extra.firebaseStorageBucket || 'your-storage-bucket',
-  messagingSenderId: extra.firebaseMessagingSenderId || 'your-messaging-sender-id',
-  appId: extra.firebaseAppId || 'your-app-id',
+  apiKey: Constants.expoConfig?.extra?.firebaseApiKey || process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
+  authDomain: Constants.expoConfig?.extra?.firebaseAuthDomain || process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
+  projectId: Constants.expoConfig?.extra?.firebaseProjectId || process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || '',
+  storageBucket: Constants.expoConfig?.extra?.firebaseStorageBucket || process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: Constants.expoConfig?.extra?.firebaseMessagingSenderId || process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: Constants.expoConfig?.extra?.firebaseAppId || process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '',
 };
+
+// デバッグ用: 設定の検証
+if (__DEV__) {
+  console.log('Firebase Config:', {
+    apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 10)}...` : 'NOT SET',
+    authDomain: firebaseConfig.authDomain || 'NOT SET',
+    projectId: firebaseConfig.projectId || 'NOT SET',
+  });
+}
 
 /**
  * Firebaseアプリケーションの初期化
