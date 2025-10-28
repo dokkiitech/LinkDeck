@@ -11,6 +11,7 @@ import {
   linkWithCredential,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import { ERROR_MESSAGES } from '../constants/messages';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -50,8 +51,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await updateProfile(userCredential.user, { displayName });
       }
     } catch (error: any) {
-      console.error('Sign up error:', error);
-      throw new Error(error.message || 'サインアップに失敗しました');
+      if (__DEV__) {
+        console.error('[Auth] Sign up error:', error);
+      }
+      throw new Error(error.message || ERROR_MESSAGES.AUTH.SIGN_UP_FAILED);
     }
   };
 
@@ -59,8 +62,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      throw new Error(error.message || 'ログインに失敗しました');
+      if (__DEV__) {
+        console.error('[Auth] Sign in error:', error);
+      }
+      throw new Error(error.message || ERROR_MESSAGES.AUTH.LOGIN_FAILED);
     }
   };
 
@@ -68,42 +73,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await signInAnonymously(auth);
     } catch (error: any) {
-      console.error('Guest sign in error:', error);
-      throw new Error(error.message || 'ゲストログインに失敗しました');
+      if (__DEV__) {
+        console.error('[Auth] Guest sign in error:', error);
+      }
+      throw new Error(error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
     }
   };
 
   const linkGuestToAccount = async (email: string, password: string, displayName: string) => {
     try {
-      console.log('linkGuestToAccount called');
-      console.log('user:', user);
-      console.log('user.isAnonymous:', user?.isAnonymous);
-
       if (!user || !user.isAnonymous) {
-        console.error('User is not a guest user');
-        throw new Error('ゲストユーザーではありません');
+        throw new Error(ERROR_MESSAGES.AUTH.NOT_GUEST_USER);
       }
 
-      console.log('Creating credential...');
       const credential = EmailAuthProvider.credential(email, password);
-      console.log('Linking credential to user...');
       const userCredential = await linkWithCredential(user, credential);
-      console.log('Credential linked successfully');
 
       // プロフィールの更新
       if (userCredential.user) {
-        console.log('Updating profile...');
         await updateProfile(userCredential.user, { displayName });
-        console.log('Profile updated successfully');
       }
     } catch (error: any) {
-      console.error('Link guest to account error:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      if (error.code === 'auth/email-already-in-use') {
-        throw new Error('このメールアドレスは既に使用されています');
+      if (__DEV__) {
+        console.error('[Auth] Link guest to account error:', error);
       }
-      throw new Error(error.message || 'アカウントの作成に失敗しました');
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error(ERROR_MESSAGES.AUTH.EMAIL_ALREADY_IN_USE);
+      }
+      throw new Error(error.message || ERROR_MESSAGES.AUTH.ACCOUNT_UPGRADE_FAILED);
     }
   };
 
@@ -111,8 +108,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await signOut(auth);
     } catch (error: any) {
-      console.error('Logout error:', error);
-      throw new Error(error.message || 'ログアウトに失敗しました');
+      if (__DEV__) {
+        console.error('[Auth] Logout error:', error);
+      }
+      throw new Error(error.message || ERROR_MESSAGES.AUTH.LOGOUT_FAILED);
     }
   };
 

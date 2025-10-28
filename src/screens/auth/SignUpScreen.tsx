@@ -12,6 +12,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { ERROR_MESSAGES } from '../../constants/messages';
 
 type SignUpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
 
@@ -50,7 +51,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         { text: 'OK', onPress: () => navigation.navigate('Login') },
       ]);
     } catch (error: any) {
-      Alert.alert('サインアップエラー', error.message);
+      Alert.alert('エラー', error.message || ERROR_MESSAGES.AUTH.SIGN_UP_FAILED);
     } finally {
       setLoading(false);
     }
@@ -61,7 +62,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await signInAsGuest();
     } catch (error: any) {
-      Alert.alert('ゲストログインエラー', error.message);
+      Alert.alert('エラー', error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
     } finally {
       setLoading(false);
     }

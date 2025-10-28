@@ -8,10 +8,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { ERROR_MESSAGES } from '../../constants/messages';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -23,6 +25,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { signIn, signInAsGuest } = useAuth();
 
   const handleLogin = async () => {
@@ -36,7 +39,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await signIn(email, password);
     } catch (error: any) {
-      setError('メールアドレスまたはパスワードが違います');
+      setError(error.message || ERROR_MESSAGES.AUTH.LOGIN_FAILED);
     } finally {
       setLoading(false);
     }
@@ -47,7 +50,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await signInAsGuest();
     } catch (error: any) {
-      Alert.alert('ゲストログインエラー', error.message);
+      Alert.alert('エラー', error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
     } finally {
       setLoading(false);
     }
@@ -67,7 +70,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.input}
           placeholder="メールアドレス"
           value={email}
-          onChangeText={handleEmailChange}
+          onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
           editable={!loading}
@@ -77,7 +80,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.input}
           placeholder="パスワード"
           value={password}
-          onChangeText={handlePasswordChange}
+          onChangeText={setPassword}
           secureTextEntry
           editable={!loading}
         />

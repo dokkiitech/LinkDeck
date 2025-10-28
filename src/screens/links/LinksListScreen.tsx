@@ -15,6 +15,7 @@ import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserLinks, deleteLink } from '../../services/firestore';
 import { Link } from '../../types';
+import { ERROR_MESSAGES } from '../../constants/messages';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -39,8 +40,10 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
       const fetchedLinks = await getUserLinks(user.uid, false);
       setLinks(fetchedLinks);
     } catch (error) {
-      console.error('Error loading links:', error);
-      Alert.alert('エラー', 'リンクの読み込みに失敗しました');
+      if (__DEV__) {
+        console.error('[LinksList] Error loading links:', error);
+      }
+      Alert.alert('エラー', ERROR_MESSAGES.LINKS.LOAD_FAILED);
     } finally {
       setLoading(false);
       setRefreshing(false);

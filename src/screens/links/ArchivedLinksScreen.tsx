@@ -13,6 +13,7 @@ import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserLinks, deleteLink } from '../../services/firestore';
 import { Link } from '../../types';
+import { ERROR_MESSAGES } from '../../constants/messages';
 
 type ArchivedLinksScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -38,8 +39,10 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
       const archivedLinks = allLinks.filter((link) => link.isArchived);
       setLinks(archivedLinks);
     } catch (error) {
-      console.error('Error loading archived links:', error);
-      Alert.alert('エラー', 'アーカイブリンクの読み込みに失敗しました');
+      if (__DEV__) {
+        console.error('[ArchivedLinks] Error loading archived links:', error);
+      }
+      Alert.alert('エラー', ERROR_MESSAGES.LINKS.ARCHIVED_LOAD_FAILED);
     } finally {
       setLoading(false);
       setRefreshing(false);

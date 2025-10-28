@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ERROR_MESSAGES } from '../constants/messages';
 
 /**
  * Gemini APIを使用してテキストを要約する
@@ -39,8 +40,10 @@ ${content.slice(0, 10000)} // 最大10,000文字まで
 
     return summary.trim();
   } catch (error: any) {
-    console.error('Error generating summary with Gemini:', error);
-    throw new Error(error.message || '要約の生成中にエラーが発生しました');
+    if (__DEV__) {
+      console.error('[Gemini] Error generating summary:', error);
+    }
+    throw new Error(error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
   }
 };
 
@@ -73,7 +76,9 @@ export const summarizeURL = async (
     // Gemini APIで要約生成
     return await generateSummary(apiKey, textContent);
   } catch (error: any) {
-    console.error('Error summarizing URL:', error);
+    if (__DEV__) {
+      console.error('[Gemini] Error summarizing URL:', error);
+    }
     // 十分なコンテンツがない場合は専用のエラーコードを返す
     if (error.message === 'INSUFFICIENT_CONTENT') {
       throw error;

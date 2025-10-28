@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserTags, createTag, deleteTag } from '../../services/firestore';
 import { Tag, TagsStackParamList } from '../../types';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, CONFIRMATION_MESSAGES } from '../../constants/messages';
 
 interface Props {
   navigation: NativeStackNavigationProp<TagsStackParamList, 'TagsList'>;
@@ -38,9 +39,11 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       const fetchedTags = await getUserTags(user.uid);
       setTags(fetchedTags);
     } catch (error) {
-      console.error('Error loading tags:', error);
-      Alert.alert('エラー', 'タグの読み込みに失敗しました');
-    } finally {
+      if (__DEV__) {
+        console.error('[Tags] Error loading tags:', error);
+      }
+      Alert.alert('エラー', ERROR_MESSAGES.TAGS.LOAD_FAILED);
+    } finally{
       setLoading(false);
       setRefreshing(false);
     }
@@ -74,10 +77,12 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       };
       setTags([newTag, ...tags]);
       setNewTagName('');
-      Alert.alert('成功', 'タグを作成しました');
+      Alert.alert('成功', SUCCESS_MESSAGES.TAGS.CREATED);
     } catch (error) {
-      console.error('Error creating tag:', error);
-      Alert.alert('エラー', 'タグの作成に失敗しました');
+      if (__DEV__) {
+        console.error('[Tags] Error creating tag:', error);
+      }
+      Alert.alert('エラー', ERROR_MESSAGES.TAGS.CREATE_FAILED);
     } finally {
       setIsCreating(false);
     }
@@ -98,10 +103,12 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
             try {
               await deleteTag(user.uid, tag.id);
               setTags(tags.filter((t) => t.id !== tag.id));
-              Alert.alert('成功', 'タグを削除しました');
+              Alert.alert('成功', SUCCESS_MESSAGES.TAGS.DELETED);
             } catch (error) {
-              console.error('Error deleting tag:', error);
-              Alert.alert('エラー', 'タグの削除に失敗しました');
+              if (__DEV__) {
+                console.error('[Tags] Error deleting tag:', error);
+              }
+              Alert.alert('エラー', ERROR_MESSAGES.TAGS.DELETE_FAILED);
             }
           },
         },

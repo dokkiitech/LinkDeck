@@ -14,6 +14,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { ERROR_MESSAGES } from '../../constants/messages';
 
 type UpgradeAccountScreenNavigationProp = NativeStackNavigationProp<SettingsStackParamList, 'UpgradeAccount'>;
 
@@ -30,12 +31,6 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
   const { linkGuestToAccount } = useAuth();
 
   const handleUpgrade = async () => {
-    console.log('handleUpgrade called');
-    console.log('displayName:', displayName);
-    console.log('email:', email);
-    console.log('password length:', password.length);
-    console.log('confirmPassword length:', confirmPassword.length);
-
     if (!displayName || !email || !password || !confirmPassword) {
       Alert.alert('エラー', 'すべてのフィールドを入力してください');
       return;
@@ -51,12 +46,9 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    console.log('Starting account upgrade...');
     setLoading(true);
     try {
-      console.log('Calling linkGuestToAccount...');
       await linkGuestToAccount(email, password, displayName);
-      console.log('Account upgrade successful');
 
       // Web環境でも確実に動作するように、Alertの後すぐに戻る
       if (Platform.OS === 'web') {
@@ -70,7 +62,9 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
         );
       }
     } catch (error: any) {
-      console.error('Account upgrade error:', error);
+      if (__DEV__) {
+        console.error('[UpgradeAccount] Account upgrade error:', error);
+      }
       if (Platform.OS === 'web') {
         alert('エラー: ' + error.message);
       } else {
