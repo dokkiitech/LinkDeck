@@ -29,9 +29,6 @@ export interface Link {
   userId: string;
   url: string;
   title: string;
-  description?: string;
-  imageUrl?: string;
-  summary?: string; // AI生成の要約文
   tags: string[];
   isArchived: boolean;
   createdAt: Date;
@@ -44,9 +41,6 @@ export interface LinkDocument {
   userId: string;
   url: string;
   title: string;
-  description?: string;
-  imageUrl?: string;
-  summary?: string;
   tags: string[];
   isArchived: boolean;
   createdAt: Timestamp;
@@ -69,15 +63,6 @@ export interface TagDocument {
   userId: string;
   name: string;
   createdAt: Timestamp;
-}
-
-/**
- * URLメタデータの型定義
- */
-export interface URLMetadata {
-  title: string;
-  description?: string;
-  imageUrl?: string;
 }
 
 /**

@@ -14,8 +14,8 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinksStackParamList, Tag } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-import { createLink, getUserTags } from '../../services/firestore';
-import { fetchURLMetadata, extractURLFromText } from '../../utils/urlMetadata';
+import { createLink, getUserTags, createTag } from '../../services/firestore';
+import { extractURLFromText } from '../../utils/urlMetadata';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -36,12 +36,20 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     loadExistingTags();
-  }, [user]);
+
+    // 画面にフォーカスが当たったときにも既存タグをリロード
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadExistingTags();
+    });
+
+    return unsubscribe;
+  }, [user, navigation]);
 
   const loadExistingTags = async () => {
     if (!user) return;
     try {
       const fetchedTags = await getUserTags(user.uid);
+      console.log('Loaded existing tags:', fetchedTags.length, fetchedTags);
       setExistingTags(fetchedTags);
     } catch (error) {
       console.error('Error loading tags:', error);
@@ -71,18 +79,20 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
-      // URLメタデータを取得
-      const metadata = await fetchURLMetadata(extractedUrl);
-
-      // Firestoreに保存
+      // Firestoreに保存（タイトルはURLを使用）
       await createLink(
         user.uid,
         extractedUrl,
-        metadata.title,
-        metadata.description,
-        metadata.imageUrl,
+        extractedUrl,
         tags
       );
+
+      // 入力フィールドをクリア
+      setInputText('');
+      setTags([]);
+
+      // 新しく作成したタグがある場合、既存タグリストを更新
+      await loadExistingTags();
 
       Alert.alert('成功', 'リンクを保存しました', [
         {
@@ -98,18 +108,48 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
+    if (!user) {
+      Alert.alert('エラー', 'ログインしてください');
+      return;
+    }
+
     if (!newTag.trim()) {
       return;
     }
 
-    if (tags.includes(newTag.trim())) {
+    const tagName = newTag.trim();
+
+    // 選択中のタグに既に含まれているかチェック
+    if (tags.includes(tagName)) {
       Alert.alert('エラー', 'このタグは既に追加されています');
       return;
     }
 
-    setTags([...tags, newTag.trim()]);
-    setNewTag('');
+    // 既存のタグにも含まれていないかチェック（まだFirestoreに保存されていない新規タグの場合のみ作成）
+    const existingTag = existingTags.find((tag) => tag.name === tagName);
+
+    try {
+      if (!existingTag) {
+        // Firestoreに新しいタグを保存
+        const tagId = await createTag(user.uid, tagName);
+        const newTagObj: Tag = {
+          id: tagId,
+          userId: user.uid,
+          name: tagName,
+          createdAt: new Date(),
+        };
+        // 既存タグリストに追加
+        setExistingTags([newTagObj, ...existingTags]);
+      }
+
+      // 選択中のタグに追加
+      setTags([...tags, tagName]);
+      setNewTag('');
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      Alert.alert('エラー', 'タグの作成に失敗しました');
+    }
   };
 
   const handleSelectExistingTag = (tagName: string) => {

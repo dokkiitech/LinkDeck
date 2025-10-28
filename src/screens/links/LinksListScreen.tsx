@@ -5,7 +5,6 @@ import {
   SectionList,
   TouchableOpacity,
   StyleSheet,
-  Image,
   ActivityIndicator,
   Alert,
   TextInput,
@@ -97,7 +96,6 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
     return (
       link.title.toLowerCase().includes(query) ||
       link.url.toLowerCase().includes(query) ||
-      (link.description && link.description.toLowerCase().includes(query)) ||
       link.tags.some((tag) => tag.toLowerCase().includes(query))
     );
   });
@@ -148,13 +146,6 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
       onPress={() => navigation.navigate('LinkDetail', { linkId: item.id })}
       onLongPress={() => handleDeleteLink(item.id)}
     >
-      {item.imageUrl ? (
-        <Image source={{ uri: item.imageUrl }} style={styles.linkImage} />
-      ) : (
-        <View style={[styles.linkImage, styles.placeholderImage]}>
-          <Text style={styles.placeholderText}>No Image</Text>
-        </View>
-      )}
       <View style={styles.linkContent}>
         <Text style={styles.linkTitle} numberOfLines={2}>
           {item.title}
@@ -332,20 +323,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  linkImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-  },
-  placeholderImage: {
-    backgroundColor: '#E5E5EA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    color: '#8E8E93',
-    fontSize: 16,
   },
   linkContent: {
     padding: 15,

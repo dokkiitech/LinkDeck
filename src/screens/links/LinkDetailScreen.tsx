@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Image,
   ActivityIndicator,
   Alert,
   Linking,
@@ -16,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
-import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink } from '../../services/firestore';
+import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag } from '../../services/firestore';
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
@@ -44,7 +43,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [newTagName, setNewTagName] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
   const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
@@ -202,16 +200,39 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleAddNewTag = async () => {
-    if (!newTagName.trim()) return;
+    if (!user || !newTagName.trim()) return;
 
-    await handleToggleTag(newTagName.trim());
-    setNewTagName('');
+    const tagName = newTagName.trim();
+
+    try {
+      // 既存のタグにも含まれていないかチェック（まだFirestoreに保存されていない新規タグの場合のみ作成）
+      const existingTag = availableTags.find((tag) => tag.name === tagName);
+
+      if (!existingTag) {
+        // Firestoreに新しいタグを保存
+        const tagId = await createTag(user.uid, tagName);
+        const newTagObj: Tag = {
+          id: tagId,
+          userId: user.uid,
+          name: tagName,
+          createdAt: new Date(),
+        };
+        // 既存タグリストに追加
+        setAvailableTags([newTagObj, ...availableTags]);
+      }
+
+      // リンクにタグを追加
+      await handleToggleTag(tagName);
+      setNewTagName('');
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      Alert.alert('エラー', 'タグの作成に失敗しました');
+    }
   };
 
   const handleOpenEditModal = () => {
     if (!link) return;
     setEditTitle(link.title);
-    setEditDescription(link.description || '');
     setShowEditModal(true);
   };
 
@@ -222,15 +243,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     }
 
     try {
-      const updates: any = {
-        title: editTitle.trim(),
-      };
-
-      if (editDescription.trim()) {
-        updates.description = editDescription.trim();
-      }
-
-      await updateLink(linkId, updates);
+      await updateLink(linkId, { title: editTitle.trim() });
       const updatedLink = await getLink(linkId);
       if (updatedLink) {
         setLink(updatedLink);
@@ -287,20 +300,12 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      {link.imageUrl && (
-        <Image source={{ uri: link.imageUrl }} style={styles.image} />
-      )}
-
       <View style={styles.content}>
         <Text style={styles.title}>{link.title}</Text>
 
         <TouchableOpacity onPress={handleOpenLink} style={styles.urlContainer}>
           <Text style={styles.url}>{link.url}</Text>
         </TouchableOpacity>
-
-        {link.description && (
-          <Text style={styles.description}>{link.description}</Text>
-        )}
 
         <View style={styles.tagsContainer}>
           <View style={styles.tagsHeader}>
@@ -428,16 +433,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                 multiline
               />
 
-              <Text style={styles.inputLabel}>説明（任意）</Text>
-              <TextInput
-                style={[styles.editInput, styles.editTextArea]}
-                placeholder="説明"
-                value={editDescription}
-                onChangeText={setEditDescription}
-                multiline
-                numberOfLines={4}
-              />
-
               <TouchableOpacity
                 style={styles.saveButton}
                 onPress={handleSaveEdit}
@@ -536,11 +531,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#8E8E93',
   },
-  image: {
-    width: '100%',
-    height: 250,
-    resizeMode: 'cover',
-  },
   content: {
     padding: 20,
   },
@@ -557,12 +547,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#007AFF',
     textDecorationLine: 'underline',
-  },
-  description: {
-    fontSize: 14,
-    color: '#000000',
-    marginBottom: 20,
-    lineHeight: 20,
   },
   tagsContainer: {
     marginBottom: 20,
@@ -786,10 +770,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 44,
     maxHeight: 120,
-  },
-  editTextArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
   },
   saveButton: {
     backgroundColor: '#34C759',

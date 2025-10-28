@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  SectionList,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Image,
   Alert,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -51,6 +50,32 @@ const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // 日付をフォーマット (YYYY年MM月DD日)
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}年${month}月${day}日`;
+  };
+
+  // リンクを日付でグループ化
+  const groupLinksByDate = (): { date: string; data: Link[] }[] => {
+    const grouped: { [key: string]: Link[] } = {};
+
+    links.forEach((link) => {
+      const dateKey = formatDate(link.createdAt);
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(link);
+    });
+
+    return Object.keys(grouped).map((date) => ({
+      date,
+      data: grouped[date],
+    }));
+  };
+
   const renderLinkItem = ({ item }: { item: Link }) => (
     <TouchableOpacity
       style={styles.linkItem}
@@ -62,22 +87,10 @@ const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
         });
       }}
     >
-      {item.imageUrl ? (
-        <Image source={{ uri: item.imageUrl }} style={styles.linkImage} />
-      ) : (
-        <View style={styles.placeholderImage}>
-          <Text style={styles.placeholderText}>画像なし</Text>
-        </View>
-      )}
       <View style={styles.linkContent}>
         <Text style={styles.linkTitle} numberOfLines={2}>
           {item.title}
         </Text>
-        {item.description && (
-          <Text style={styles.linkDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
         <Text style={styles.linkUrl} numberOfLines={1}>
           {item.url}
         </Text>
@@ -112,11 +125,17 @@ const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={links}
+        <SectionList
+          sections={groupLinksByDate()}
           renderItem={renderLinkItem}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>{section.date}</Text>
+            </View>
+          )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          stickySectionHeadersEnabled={false}
         />
       )}
     </View>
@@ -171,6 +190,17 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 10,
   },
+  sectionHeader: {
+    backgroundColor: '#F2F2F7',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginTop: 10,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
   linkItem: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -182,22 +212,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  linkImage: {
-    width: '100%',
-    height: 180,
-    resizeMode: 'cover',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: 180,
-    backgroundColor: '#E5E5EA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    color: '#8E8E93',
-    fontSize: 14,
-  },
   linkContent: {
     padding: 15,
   },
@@ -206,12 +220,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000000',
     marginBottom: 5,
-  },
-  linkDescription: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 5,
-    lineHeight: 20,
   },
   linkUrl: {
     fontSize: 12,

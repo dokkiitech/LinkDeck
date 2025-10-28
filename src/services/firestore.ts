@@ -32,12 +32,9 @@ export const createLink = async (
   userId: string,
   url: string,
   title: string,
-  description?: string,
-  imageUrl?: string,
   tags: string[] = []
 ): Promise<string> => {
-  // undefinedを含むフィールドを除外
-  const linkData: any = {
+  const linkData = {
     userId,
     url,
     title,
@@ -45,14 +42,6 @@ export const createLink = async (
     isArchived: false,
     createdAt: Timestamp.now(),
   };
-
-  // オプショナルフィールドはundefinedでない場合のみ追加
-  if (description !== undefined && description !== null) {
-    linkData.description = description;
-  }
-  if (imageUrl !== undefined && imageUrl !== null) {
-    linkData.imageUrl = imageUrl;
-  }
 
   const docRef = await addDoc(linksCollection, linkData);
   return docRef.id;

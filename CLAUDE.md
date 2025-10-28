@@ -4,7 +4,7 @@
 
 LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読みたい記事のURLを簡単に保存・整理し、AIによる要約機能で効率的に内容を把握することを目的としたモバイルアプリケーションです。
 
-## 実装状況（2025年10月16日時点）
+## 実装状況（2025年10月29日時点）
 
 ### ✅ 実装済み機能
 
@@ -25,12 +25,13 @@ LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読
    - リンク詳細表示画面（LinkDetailScreen）
    - リンクの削除機能
    - アーカイブ機能（トグル）
-   - OGP画像、タイトル、説明文の表示
+   - タイトルとURLのシンプルな表示
 
 4. **タグ管理機能**
-   - タグ作成・削除機能
+   - タグ作成・削除機能（Firestoreへの自動保存対応）
    - タグ一覧表示画面（TagsScreen）
-   - タグとリンクの紐付け（データモデル上）
+   - タグとリンクの紐付け
+   - AddLinkScreen内での新規タグ作成時のFirestore保存機能
 
 5. **Firestoreサービス層**
    - リンクのCRUD操作
@@ -54,21 +55,25 @@ LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読
    - 他のアプリからURLを直接保存する機能
    - URLの自動抽出（正規表現による）
 
-2. **URLメタデータ自動取得**
-   - OGP情報（タイトル、説明文、画像）の自動スクレイピング
-   - Cloud Functions for Firebaseでの実装を推奨
-
-3. **AI要約機能（Gemini API統合）**
+2. **AI要約機能（Gemini API統合）**
    - ユーザーのGemini APIキーの暗号化保存
    - URLコンテンツのスクレイピング
    - Gemini APIへのリクエストと要約生成
    - 生成された要約のキャッシュ
 
-4. **UI/UX改善**
+3. **UI/UX改善**
    - ダークモード対応
    - タイムライン表示機能
-   - リンクの検索機能
+   - リンクの検索機能（実装済み）
    - 無限スクロールの実装
+
+### ❌ 削除された機能
+
+1. **OGP（Open Graph Protocol）関連機能**
+   - URLメタデータの自動取得機能は削除されました（2025年10月29日）
+   - Link型からdescription、imageUrlフィールドを削除
+   - リンク作成時にはURLをそのままタイトルとして使用
+   - よりシンプルなリンク管理に焦点を当てた設計に変更
 
 ## プロジェクト構造
 
@@ -129,9 +134,6 @@ LinkDeck/
   userId: string;           // 作成したユーザーのuid
   url: string;
   title: string;
-  description?: string;
-  imageUrl?: string;        // OGP画像
-  summary?: string;         // AI生成の要約
   tags: string[];           // タグ名の配列
   isArchived: boolean;
   createdAt: Timestamp;
