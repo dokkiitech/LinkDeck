@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -94,25 +95,33 @@ const SettingsScreen: React.FC = () => {
     );
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'ログアウト',
-      'ログアウトしますか？',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: 'ログアウト',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert('エラー', 'ログアウトに失敗しました');
-            }
+  const handleLogout = async () => {
+    const performLogout = async () => {
+      try {
+        await logout();
+      } catch (error) {
+        Alert.alert('エラー', 'ログアウトに失敗しました');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('ログアウトしますか？')) {
+        performLogout();
+      }
+    } else {
+      Alert.alert(
+        'ログアウト',
+        'ログアウトしますか？',
+        [
+          { text: 'キャンセル', style: 'cancel' },
+          {
+            text: 'ログアウト',
+            style: 'destructive',
+            onPress: performLogout,
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   return (

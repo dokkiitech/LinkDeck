@@ -7,7 +7,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
@@ -27,15 +27,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('エラー', 'メールアドレスとパスワードを入力してください');
+      setError('メールアドレスとパスワードを入力してください');
       return;
     }
 
     setLoading(true);
+    setError('');
     try {
       await signIn(email, password);
     } catch (error: any) {
-      Alert.alert('ログインエラー', error.message);
+      setError('メールアドレスまたはパスワードが違います');
     } finally {
       setLoading(false);
     }
@@ -66,7 +67,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.input}
           placeholder="メールアドレス"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={handleEmailChange}
           autoCapitalize="none"
           keyboardType="email-address"
           editable={!loading}
@@ -76,19 +77,23 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.input}
           placeholder="パスワード"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
           secureTextEntry
           editable={!loading}
         />
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleLogin}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>
-            {loading ? 'ログイン中...' : 'ログイン'}
-          </Text>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>ログイン</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -151,6 +156,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
     backgroundColor: '#F9F9F9',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   button: {
     width: '100%',
