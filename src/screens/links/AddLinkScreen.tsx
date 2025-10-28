@@ -17,6 +17,7 @@ import { createLink, createTag } from '../../services/firestore';
 import { extractURLFromText } from '../../utils/urlMetadata';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import { URLInput } from '../../components/links/URLInput';
+import { TitleInput } from '../../components/links/TitleInput';
 import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
 
@@ -32,6 +33,7 @@ interface Props {
 const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const [inputText, setInputText] = useState('');
+  const [titleText, setTitleText] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagName, setNewTagName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,11 +64,13 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
-      // Firestoreに保存（タイトルはURLを使用）
-      await createLink(user.uid, extractedUrl, extractedUrl, selectedTags);
+      // Firestoreに保存（タイトルが空の場合はURLを使用）
+      const finalTitle = titleText.trim() || extractedUrl;
+      await createLink(user.uid, extractedUrl, finalTitle, selectedTags);
 
       // 入力フィールドをクリア
       setInputText('');
+      setTitleText('');
       setSelectedTags([]);
 
       Alert.alert('成功', SUCCESS_MESSAGES.LINKS.SAVED, [
@@ -141,10 +145,20 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <URLInput
           value={inputText}
           onChangeText={setInputText}
+          editable={!loading}
+        />
+
+        <TitleInput
+          value={titleText}
+          onChangeText={setTitleText}
           editable={!loading}
         />
 

@@ -11,6 +11,7 @@ import {
   TextInput,
   Modal,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,6 +45,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [newTagName, setNewTagName] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTitle, setEditTitle] = useState('');
+  const [editUrl, setEditUrl] = useState('');
   const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
@@ -284,12 +286,16 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const handleOpenEditModal = () => {
     if (!link) return;
     setEditTitle(link.title);
+    setEditUrl(link.url);
     setShowEditModal(true);
   };
 
   const handleSaveEdit = async () => {
-    if (!link || !editTitle.trim()) {
-      const message = 'タイトルを入力してください';
+    if (!link) return;
+
+    // URLは必須
+    if (!editUrl.trim()) {
+      const message = 'URLは必須です';
       if (Platform.OS === 'web') {
         alert(`エラー: ${message}`);
       } else {
@@ -299,7 +305,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     }
 
     try {
-      await updateLink(linkId, { title: editTitle.trim() });
+      // タイトルが空の場合はURLを使用
+      const finalTitle = editTitle.trim() || editUrl.trim();
+
+      await updateLink(linkId, {
+        title: finalTitle,
+        url: editUrl.trim(),
+      });
+
       const updatedLink = await getLink(linkId);
       if (updatedLink) {
         setLink(updatedLink);
@@ -480,34 +493,64 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         transparent={true}
         onRequestClose={() => setShowEditModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>リンクを編集</Text>
-              <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                <Text style={styles.modalCloseButton}>×</Text>
-              </TouchableOpacity>
-            </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowEditModal(false)}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+              style={styles.modalContent}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>リンクを編集</Text>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <Text style={styles.modalCloseButton}>×</Text>
+                </TouchableOpacity>
+              </View>
 
-            <View style={styles.editFormContainer}>
-              <Text style={styles.inputLabel}>タイトル *</Text>
-              <TextInput
-                style={styles.editInput}
-                placeholder="タイトル"
-                value={editTitle}
-                onChangeText={setEditTitle}
-                multiline
-              />
-
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveEdit}
+              <ScrollView
+                style={styles.editFormContainer}
+                keyboardShouldPersistTaps="handled"
               >
-                <Text style={styles.saveButtonText}>保存</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+                <Text style={styles.inputLabel}>URL（必須）</Text>
+                <TextInput
+                  style={styles.editInput}
+                  placeholder="https://example.com"
+                  value={editUrl}
+                  onChangeText={setEditUrl}
+                  autoCapitalize="none"
+                  keyboardType="url"
+                  multiline
+                />
+
+                <Text style={styles.inputLabel}>タイトル（任意）</Text>
+                <TextInput
+                  style={styles.editInput}
+                  placeholder="タイトル（未入力の場合はURLを使用）"
+                  value={editTitle}
+                  onChangeText={setEditTitle}
+                  multiline
+                />
+                <Text style={styles.inputHint}>
+                  ※ 空欄の場合、URLがタイトルとして使用されます
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSaveEdit}
+                >
+                  <Text style={styles.saveButtonText}>保存</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal
@@ -829,6 +872,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 44,
     maxHeight: 120,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: '#8E8E93',
+    marginTop: 5,
+    marginBottom: 10,
   },
   saveButton: {
     backgroundColor: '#34C759',
