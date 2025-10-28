@@ -25,7 +25,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signInAsGuest } = useAuth();
 
   const handleSignUp = async () => {
     if (!displayName || !email || !password || !confirmPassword) {
@@ -51,6 +51,17 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       ]);
     } catch (error: any) {
       Alert.alert('サインアップエラー', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setLoading(true);
+    try {
+      await signInAsGuest();
+    } catch (error: any) {
+      Alert.alert('ゲストログインエラー', error.message);
     } finally {
       setLoading(false);
     }
@@ -113,6 +124,16 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.button, styles.guestButton, loading && styles.buttonDisabled]}
+          onPress={handleGuestLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'ログイン中...' : 'ゲストとして利用'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.linkButton}
           onPress={() => navigation.navigate('Login')}
           disabled={loading}
@@ -141,6 +162,11 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     marginBottom: 10,
   },
+  catchphrase: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 30,
+  },
   subtitle: {
     fontSize: 24,
     fontWeight: '600',
@@ -166,6 +192,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
+  },
+  guestButton: {
+    backgroundColor: '#8E8E93',
   },
   buttonDisabled: {
     backgroundColor: '#B0B0B0',

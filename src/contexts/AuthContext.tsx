@@ -3,9 +3,12 @@ import {
   User as FirebaseUser,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   onAuthStateChanged,
   updateProfile,
+  EmailAuthProvider,
+  linkWithCredential,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
@@ -14,6 +17,8 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInAsGuest: () => Promise<void>;
+  linkGuestToAccount: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -59,6 +64,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const signInAsGuest = async () => {
+    try {
+      await signInAnonymously(auth);
+    } catch (error: any) {
+      console.error('Guest sign in error:', error);
+      throw new Error(error.message || 'ゲストログインに失敗しました');
+    }
+  };
+
+  const linkGuestToAccount = async (email: string, password: string, displayName: string) => {
+    try {
+      if (!user || !user.isAnonymous) {
+        throw new Error('ゲストユーザーではありません');
+      }
+
+      const credential = EmailAuthProvider.credential(email, password);
+      const userCredential = await linkWithCredential(user, credential);
+
+      // プロフィールの更新
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, { displayName });
+      }
+    } catch (error: any) {
+      console.error('Link guest to account error:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('このメールアドレスは既に使用されています');
+      }
+      throw new Error(error.message || 'アカウントの作成に失敗しました');
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -69,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, logout }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInAsGuest, linkGuestToAccount, logout }}>
       {children}
     </AuthContext.Provider>
   );

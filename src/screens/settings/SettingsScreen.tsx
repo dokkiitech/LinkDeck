@@ -119,14 +119,34 @@ const SettingsScreen: React.FC = () => {
     <ScrollView style={styles.container}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>アカウント情報</Text>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>表示名</Text>
-          <Text style={styles.value}>{user?.displayName || '未設定'}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>メールアドレス</Text>
-          <Text style={styles.value}>{user?.email}</Text>
-        </View>
+        {user?.isAnonymous ? (
+          <View>
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>アカウントタイプ</Text>
+              <Text style={styles.value}>ゲストユーザー</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.button, styles.upgradeButton]}
+              onPress={() => (navigation as any).navigate('Settings', { screen: 'UpgradeAccount' })}
+            >
+              <Text style={styles.buttonText}>アカウントを作成</Text>
+            </TouchableOpacity>
+            <Text style={styles.hint}>
+              ※ アカウントを作成すると、データを永続的に保存し、複数のデバイスからアクセスできます
+            </Text>
+          </View>
+        ) : (
+          <View>
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>表示名</Text>
+              <Text style={styles.value}>{user?.displayName || '未設定'}</Text>
+            </View>
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>メールアドレス</Text>
+              <Text style={styles.value}>{user?.email}</Text>
+            </View>
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>
@@ -270,6 +290,11 @@ const styles = StyleSheet.create({
   removeButton: {
     backgroundColor: '#FF9500',
     marginTop: 10,
+  },
+  upgradeButton: {
+    backgroundColor: '#34C759',
+    marginTop: 15,
+    marginBottom: 10,
   },
   logoutButton: {
     backgroundColor: '#FF3B30',
