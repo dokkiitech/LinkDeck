@@ -63,6 +63,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     >
       <View style={styles.content}>
         <Text style={styles.title}>LinkDeck</Text>
+        <Text style={styles.catchphrase}>URLを見返さない生活もうやめましょう</Text>
         <Text style={styles.subtitle}>新規登録</Text>
 
         <TextInput

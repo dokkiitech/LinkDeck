@@ -48,6 +48,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     >
       <View style={styles.content}>
         <Text style={styles.title}>LinkDeck</Text>
+        <Text style={styles.catchphrase}>URLを見返さない生活もうやめましょう</Text>
         <Text style={styles.subtitle}>ログイン</Text>
 
         <TextInput
@@ -107,6 +108,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#007AFF',
     marginBottom: 10,
+  },
+  catchphrase: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 30,
   },
   subtitle: {
     fontSize: 24,
