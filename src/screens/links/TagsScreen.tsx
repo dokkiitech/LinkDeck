@@ -23,6 +23,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -41,7 +42,13 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert('エラー', 'タグの読み込みに失敗しました');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadTags();
   };
 
   const handleCreateTag = async () => {
@@ -167,6 +174,8 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
           renderItem={renderTagItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       )}
     </View>
