@@ -50,14 +50,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   }, [linkId]);
 
   useEffect(() => {
-    // ヘッダー右側にメニューボタンを追加（iOS標準デザイン）
+    // ヘッダー右側にメニューボタンを追加
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
           onPress={() => setShowMenu(true)}
           style={{ marginRight: 15, padding: 8 }}
         >
-          <Ionicons name="ellipsis-horizontal-circle" size={28} color="#007AFF" />
+          <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
         </TouchableOpacity>
       ),
     });
@@ -374,7 +374,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                 handleOpenEditModal();
               }}
             >
-              <Ionicons name="create-outline" size={20} color="#000" style={styles.menuIcon} />
               <Text style={styles.menuItemText}>編集</Text>
             </TouchableOpacity>
 
@@ -387,12 +386,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                 handleToggleArchive();
               }}
             >
-              <Ionicons
-                name={link?.isArchived ? "archive-outline" : "archive"}
-                size={20}
-                color="#000"
-                style={styles.menuIcon}
-              />
               <Text style={styles.menuItemText}>
                 {link?.isArchived ? 'アーカイブを解除' : 'アーカイブ'}
               </Text>
@@ -401,14 +394,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             <View style={styles.menuDivider} />
 
             <TouchableOpacity
-              style={[styles.menuItem, styles.menuItemDanger]}
+              style={styles.menuItem}
               onPress={() => {
                 setShowMenu(false);
                 handleDeleteLink();
               }}
             >
-              <Ionicons name="trash-outline" size={20} color="#FF3B30" style={styles.menuIcon} />
-              <Text style={[styles.menuItemText, styles.menuItemDangerText]}>削除</Text>
+              <Text style={styles.menuItemDangerText}>削除</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -628,23 +620,16 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 16,
-  },
-  menuIcon: {
-    marginRight: 12,
+    alignItems: 'center',
   },
   menuItemText: {
     fontSize: 16,
     color: '#000000',
   },
-  menuItemDanger: {
-    backgroundColor: '#FFF5F5',
-  },
   menuItemDangerText: {
+    fontSize: 16,
     color: '#FF3B30',
-    fontWeight: '600',
   },
   menuDivider: {
     height: 1,
