@@ -95,3 +95,8 @@ export type TagsStackParamList = {
   TagsList: undefined;
   TagLinks: { tagName: string };
 };
+
+export type SettingsStackParamList = {
+  SettingsMain: undefined;
+  UpgradeAccount: undefined;
+};

@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from '../../types';
@@ -29,6 +30,12 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
   const { linkGuestToAccount } = useAuth();
 
   const handleUpgrade = async () => {
+    console.log('handleUpgrade called');
+    console.log('displayName:', displayName);
+    console.log('email:', email);
+    console.log('password length:', password.length);
+    console.log('confirmPassword length:', confirmPassword.length);
+
     if (!displayName || !email || !password || !confirmPassword) {
       Alert.alert('エラー', 'すべてのフィールドを入力してください');
       return;
@@ -44,16 +51,31 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
+    console.log('Starting account upgrade...');
     setLoading(true);
     try {
+      console.log('Calling linkGuestToAccount...');
       await linkGuestToAccount(email, password, displayName);
-      Alert.alert(
-        '成功',
-        'アカウントが作成されました。これで、データを永続的に保存し、複数のデバイスからアクセスできます。',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+      console.log('Account upgrade successful');
+
+      // Web環境でも確実に動作するように、Alertの後すぐに戻る
+      if (Platform.OS === 'web') {
+        alert('アカウントが作成されました。これで、データを永続的に保存し、複数のデバイスからアクセスできます。');
+        navigation.goBack();
+      } else {
+        Alert.alert(
+          '成功',
+          'アカウントが作成されました。これで、データを永続的に保存し、複数のデバイスからアクセスできます。',
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
+      }
     } catch (error: any) {
-      Alert.alert('エラー', error.message);
+      console.error('Account upgrade error:', error);
+      if (Platform.OS === 'web') {
+        alert('エラー: ' + error.message);
+      } else {
+        Alert.alert('エラー', error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -113,10 +135,16 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
             onPress={handleUpgrade}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
-              {loading ? 'アカウント作成中...' : 'アカウントを作成'}
-            </Text>
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>アカウントを作成</Text>
+            )}
           </TouchableOpacity>
+
+          {loading && (
+            <Text style={styles.loadingText}>アカウント作成中...</Text>
+          )}
 
           <View style={styles.infoBox}>
             <Text style={styles.infoTitle}>アカウント作成のメリット</Text>
@@ -182,6 +210,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginTop: 10,
   },
   infoBox: {
     marginTop: 30,

@@ -127,7 +127,7 @@ const SettingsScreen: React.FC = () => {
             </View>
             <TouchableOpacity
               style={[styles.button, styles.upgradeButton]}
-              onPress={() => (navigation as any).navigate('Settings', { screen: 'UpgradeAccount' })}
+              onPress={() => (navigation as any).navigate('UpgradeAccount')}
             >
               <Text style={styles.buttonText}>アカウントを作成</Text>
             </TouchableOpacity>
