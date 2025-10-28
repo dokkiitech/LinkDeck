@@ -23,8 +23,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, signInAsGuest } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -43,14 +42,15 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleEmailChange = (text: string) => {
-    setEmail(text);
-    if (error) setError('');
-  };
-
-  const handlePasswordChange = (text: string) => {
-    setPassword(text);
-    if (error) setError('');
+  const handleGuestLogin = async () => {
+    setLoading(true);
+    try {
+      await signInAsGuest();
+    } catch (error: any) {
+      Alert.alert('ゲストログインエラー', error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,6 +94,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           ) : (
             <Text style={styles.buttonText}>ログイン</Text>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.guestButton, loading && styles.buttonDisabled]}
+          onPress={handleGuestLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'ログイン中...' : 'ゲストとして利用'}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -161,6 +171,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
+  },
+  guestButton: {
+    backgroundColor: '#8E8E93',
   },
   buttonDisabled: {
     backgroundColor: '#B0B0B0',

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { MainTabParamList } from '../types';
 import LinksNavigator from './LinksNavigator';
 import TagsNavigator from './TagsNavigator';
-import SettingsScreen from '../screens/settings/SettingsScreen';
+import SettingsNavigator from './SettingsNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -41,8 +41,9 @@ const MainNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsNavigator}
         options={{
+          headerShown: false,
           title: '設定',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
