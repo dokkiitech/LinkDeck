@@ -20,7 +20,7 @@ module.exports = {
     newArchEnabled: true,
     scheme: "linkdeck",
     splash: {
-      image: "./assets/splash-icon.png",
+      image: "./assets/Now-loading.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
