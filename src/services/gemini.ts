@@ -67,13 +67,17 @@ export const summarizeURL = async (
     const textContent = extractTextFromHTML(html);
 
     if (!textContent || textContent.trim().length < 100) {
-      throw new Error('十分なテキストコンテンツが取得できませんでした');
+      throw new Error('INSUFFICIENT_CONTENT');
     }
 
     // Gemini APIで要約生成
     return await generateSummary(apiKey, textContent);
   } catch (error: any) {
     console.error('Error summarizing URL:', error);
+    // 十分なコンテンツがない場合は専用のエラーコードを返す
+    if (error.message === 'INSUFFICIENT_CONTENT') {
+      throw error;
+    }
     throw new Error(error.message || 'URL要約中にエラーが発生しました');
   }
 };

@@ -143,7 +143,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert('成功', '要約を生成しました');
     } catch (error: any) {
       console.error('Error generating summary:', error);
-      Alert.alert('エラー', error.message || '要約の生成に失敗しました');
+
+      // 十分なコンテンツがない場合の特別な処理
+      if (error.message === 'INSUFFICIENT_CONTENT') {
+        Alert.alert('要約不可', 'このリンクは要約できません。\n十分なテキストコンテンツが取得できませんでした。');
+      } else {
+        Alert.alert('エラー', error.message || '要約の生成に失敗しました');
+      }
     } finally {
       setGeneratingSummary(false);
     }
