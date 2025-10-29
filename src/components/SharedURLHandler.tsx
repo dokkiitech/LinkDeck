@@ -1,90 +1,102 @@
-import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus, Alert } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
-import { getPendingSharedURLs, clearPendingSharedURLs } from '../services/sharedGroup';
 import { createLink } from '../services/firestore';
 import { fetchURLMetadata } from '../utils/urlMetadata';
 
 /**
- * Share Extensionから共有されたURLを処理するコンポーネント
- * アプリがフォアグラウンドになった時に自動的に処理する
+ * URLスキーム経由で共有されたURLを処理するコンポーネント
+ * linkdeck://share?url=...&title=... の形式で受け取る
  */
 const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
-  const appState = useRef(AppState.currentState);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    // 初回マウント時にチェック
-    processSharedURLs();
+    // アプリ起動時の初期URLを処理
+    handleInitialURL();
 
-    // AppStateの変更を監視
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    // アプリがフォアグラウンドにある時のURL受信を監視
+    const subscription = Linking.addEventListener('url', handleDeepLink);
 
     return () => {
       subscription.remove();
     };
   }, [user]);
 
-  const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    // バックグラウンドからアクティブに戻った時
-    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-      processSharedURLs();
+  const handleInitialURL = async () => {
+    const url = await Linking.getInitialURL();
+    if (url) {
+      await processURL(url);
     }
-
-    appState.current = nextAppState;
   };
 
-  const processSharedURLs = async () => {
-    if (!user) return;
+  const handleDeepLink = (event: { url: string }) => {
+    processURL(event.url);
+  };
+
+  const processURL = async (url: string) => {
+    if (!user || isProcessing) return;
 
     try {
-      const pendingURLs = await getPendingSharedURLs();
+      // URLをパース
+      const parsed = Linking.parse(url);
 
-      if (pendingURLs.length === 0) return;
+      // linkdeck://share?url=...&title=... の形式をチェック
+      if (parsed.hostname !== 'share') {
+        return;
+      }
 
-      console.log(`Processing ${pendingURLs.length} shared URL(s)...`);
+      const queryParams = parsed.queryParams as { url?: string; title?: string };
+      const sharedURL = queryParams.url;
 
-      let successCount = 0;
-      let failCount = 0;
+      if (!sharedURL || typeof sharedURL !== 'string') {
+        console.warn('Invalid shared URL:', url);
+        return;
+      }
 
-      // 各URLを処理
-      for (const url of pendingURLs) {
+      setIsProcessing(true);
+
+      console.log(`Processing shared URL: ${sharedURL}`);
+
+      // タイトルが指定されていればそれを使用、なければメタデータを取得
+      let title = queryParams.title && typeof queryParams.title === 'string'
+        ? queryParams.title
+        : undefined;
+
+      if (!title) {
         try {
-          // メタデータを取得
-          const metadata = await fetchURLMetadata(url);
-
-          // Firestoreに保存
-          await createLink(
-            user.uid,
-            url,
-            metadata.title || url,
-            metadata.description || '',
-            metadata.imageUrl || undefined,
-            []
-          );
-
-          successCount++;
-          console.log(`Successfully added shared URL: ${url}`);
+          const metadata = await fetchURLMetadata(sharedURL);
+          title = metadata.title || sharedURL;
         } catch (error) {
-          failCount++;
-          console.error(`Failed to add shared URL: ${url}`, error);
+          console.warn('Failed to fetch metadata, using URL as title:', error);
+          title = sharedURL;
         }
       }
 
-      // 処理済みのURLをクリア
-      await clearPendingSharedURLs();
+      // Firestoreに保存
+      await createLink(
+        user.uid,
+        sharedURL,
+        title,
+        [] // tags
+      );
 
-      // 結果を通知
-      if (successCount > 0) {
-        Alert.alert(
-          '共有URLを追加しました',
-          `${successCount}件のリンクを追加しました${failCount > 0 ? `\n（${failCount}件は失敗しました）` : ''}`
-        );
-      } else if (failCount > 0) {
-        Alert.alert('エラー', `共有URLの追加に失敗しました（${failCount}件）`);
-      }
+      console.log(`Successfully added shared URL: ${sharedURL}`);
+
+      Alert.alert(
+        '共有URLを追加しました',
+        `リンク「${title}」を保存しました`
+      );
     } catch (error) {
-      console.error('Error processing shared URLs:', error);
+      console.error('Error processing shared URL:', error);
+      Alert.alert(
+        'エラー',
+        '共有URLの追加に失敗しました'
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
