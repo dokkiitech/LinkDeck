@@ -1,9 +1,9 @@
 {
-  "id" : "ADBkzW9lMhL2o57VchuD1v8",
-  "timestamp" : "2025-10-30T00:31:00.051Z[UTC]",
+  "id" : "AB_NGjb7Mphyq_H5VR5P-3E",
+  "timestamp" : "2025-10-30T01:30:43.074Z[UTC]",
   "appAppleId" : 6754117887,
   "cfBundleShortVersion" : "1.0.0",
-  "cfBundleVersion" : "16",
+  "cfBundleVersion" : "18",
   "deviceModel" : "iPhone17,2",
   "osVersion" : "26.1",
   "locale" : "ja-JP",
@@ -13,12 +13,12 @@
   "connectionStatus" : "WI_FI",
   "pairedAppleWatch" : "",
   "appUptimeMillis" : null,
-  "availableDiskBytes" : 9821306880,
+  "availableDiskBytes" : 9710559232,
   "totalDiskBytes" : 255413800960,
   "networkType" : null,
-  "batteryPercentage" : 75,
+  "batteryPercentage" : 65,
   "screenWidth" : 440,
   "screenHeight" : 956,
   "emailAddress" : "sukeryo27@gmail.com",
-  "comment" : "クラッシュするぞー"
+  "comment" : "18エラー"
 }

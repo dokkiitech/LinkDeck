@@ -1,10 +1,10 @@
-Incident Identifier: 72DE2288-DD1D-4F94-BD61-BE586F44291A
+Incident Identifier: 0D096ADB-66D6-4588-8B3A-15C4F42AF3BE
 Distributor ID:      com.apple.TestFlight
 Hardware Model:      iPhone17,2
-Process:             LinkDeck [51589]
-Path:                /private/var/containers/Bundle/Application/DF848C63-A147-49E1-B8AC-BFA08E05F751/LinkDeck.app/LinkDeck
+Process:             LinkDeck [52168]
+Path:                /private/var/containers/Bundle/Application/6F4204D1-8316-4D53-8417-64222829135F/LinkDeck.app/LinkDeck
 Identifier:          com.linkdeck.app
-Version:             1.0.0 (16)
+Version:             1.0.0 (18)
 AppStoreTools:       17B54
 AppVariant:          1:iPhone17,2:26
 Beta:                YES
@@ -13,8 +13,8 @@ Role:                Foreground
 Parent Process:      launchd [1]
 Coalition:           com.linkdeck.app [10384]
 
-Date/Time:           2025-10-30 09:30:44.6548 +0900
-Launch Time:         2025-10-30 09:30:43.7182 +0900
+Date/Time:           2025-10-30 10:30:28.9781 +0900
+Launch Time:         2025-10-30 10:30:27.1501 +0900
 OS Version:          iPhone OS 26.1 (23B5044l)
 Release Type:        Beta
 Baseband Version:    2.10.00
@@ -23,7 +23,7 @@ Report Version:      104
 Exception Type:  EXC_CRASH (SIGABRT)
 Exception Codes: 0x0000000000000000, 0x0000000000000000
 Termination Reason: SIGNAL 6 Abort trap: 6
-Terminating Process: LinkDeck [51589]
+Terminating Process: LinkDeck [52168]
 
 Triggered by Thread:  9
 
@@ -31,10 +31,10 @@ Last Exception Backtrace:
 0   CoreFoundation                	0x19bc27988 __exceptionPreprocess + 164 (NSException.m:249)
 1   libobjc.A.dylib               	0x198b717c4 objc_exception_throw + 88 (objc-exception.mm:356)
 2   CoreFoundation                	0x19bc278e4 -[NSException raise] + 16 (NSException.m:129)
-3   LinkDeck                      	0x1007b631c 0x10076c000 + 303900
-4   LinkDeck                      	0x1007b5114 0x10076c000 + 299284
-5   LinkDeck                      	0x1007b4ed4 0x10076c000 + 298708
-6   LinkDeck                      	0x100783530 0x10076c000 + 95536
+3   LinkDeck                      	0x1043da31c 0x104390000 + 303900
+4   LinkDeck                      	0x1043d9114 0x104390000 + 299284
+5   LinkDeck                      	0x1043d8ed4 0x104390000 + 298708
+6   LinkDeck                      	0x1043a7530 0x104390000 + 95536
 7   libdispatch.dylib             	0x1d47e8adc _dispatch_call_block_and_release + 32 (init.c:1575)
 8   libdispatch.dylib             	0x1d48027ec _dispatch_client_callout + 16 (client_callout.mm:85)
 9   libdispatch.dylib             	0x1d47f1468 _dispatch_lane_serial_drain + 740 (queue.c:3991)
@@ -42,10 +42,17 @@ Last Exception Backtrace:
 11  libdispatch.dylib             	0x1d47fc3ec _dispatch_root_queue_drain_deferred_wlh + 292 (queue.c:7265)
 12  libdispatch.dylib             	0x1d47fbce4 _dispatch_workloop_worker_thread + 692 (queue.c:6859)
 13  libsystem_pthread.dylib       	0x1f7e093b8 _pthread_wqthread + 292 (pthread.c:2696)
-14  libsystem_pthread.dylib       	0x1f7e088c0 start_wqthread + 8 (:-1)
+14  libsystem_pthread.dylib       	0x1f7e088c0 start_wqthread + 8
+
+Kernel Triage:
+VM - (Error reason: UPL Abort Range (Absent Page)) Setting error bit in vm_page
+VM - (Error reason: UPL Abort Range (Absent Page)) Setting error bit in vm_page
+VM - (Error reason: UPL Abort Range (Absent Page)) Setting error bit in vm_page
+VM - (Error reason: UPL Abort Range (Absent Page)) Setting error bit in vm_page
+
 
 Thread 0:
-0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8 (:-1)
+0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8
 1   libsystem_kernel.dylib        	0x00000002451f62f8 mach_msg2_internal + 76 (mach_msg.c:201)
 2   libsystem_kernel.dylib        	0x00000002451f6214 mach_msg_overwrite + 428 (mach_msg.c:0)
 3   libsystem_kernel.dylib        	0x00000002451f605c mach_msg + 24 (mach_msg.c:323)
@@ -55,7 +62,7 @@ Thread 0:
 7   GraphicsServices              	0x000000023c2bf498 GSEventRunModal + 120 (GSEvent.c:2049)
 8   UIKitCore                     	0x00000001a151917c -[UIApplication _run] + 792 (UIApplication.m:3905)
 9   UIKitCore                     	0x00000001a14bdc2c UIApplicationMain + 336 (UIApplication.m:5580)
-10  LinkDeck                      	0x0000000100771620 0x10076c000 + 22048
+10  LinkDeck                      	0x0000000104395620 0x104390000 + 22048
 11  dyld                          	0x0000000198bc6e28 start + 7116 (dyldMain.cpp:1477)
 
 Thread 1:
@@ -70,9 +77,11 @@ Thread 5:
 
 Thread 6:
 
-Thread 7 name:
 Thread 7:
-0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8 (:-1)
+
+Thread 8 name:
+Thread 8:
+0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8
 1   libsystem_kernel.dylib        	0x00000002451f62f8 mach_msg2_internal + 76 (mach_msg.c:201)
 2   libsystem_kernel.dylib        	0x00000002451f6214 mach_msg_overwrite + 428 (mach_msg.c:0)
 3   libsystem_kernel.dylib        	0x00000002451f605c mach_msg + 24 (mach_msg.c:323)
@@ -84,12 +93,10 @@ Thread 7:
 9   UIKitCore                     	0x00000001a14ea618 -[UIEventFetcher threadMain] + 408 (UIEventFetcher.m:1333)
 10  Foundation                    	0x0000000199266dbc __NSThread__start__ + 732 (NSThread.m:997)
 11  libsystem_pthread.dylib       	0x00000001f7e0c44c _pthread_start + 136 (pthread.c:931)
-12  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8 (:-1)
-
-Thread 8:
+12  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8
 
 Thread 9 Crashed:
-0   libsystem_kernel.dylib        	0x00000002451fd0cc __pthread_kill + 8 (:-1)
+0   libsystem_kernel.dylib        	0x00000002451fd0cc __pthread_kill + 8
 1   libsystem_pthread.dylib       	0x00000001f7e0f810 pthread_kill + 268 (pthread.c:1721)
 2   libsystem_c.dylib             	0x00000001a72f2f10 abort + 124 (abort.c:122)
 3   libc++abi.dylib               	0x0000000198c73808 __abort_message + 132 (abort_message.cpp:66)
@@ -100,10 +107,10 @@ Thread 9 Crashed:
 8   libc++abi.dylib               	0x0000000198c762bc __cxa_throw + 92 (cxa_exception.cpp:299)
 9   libobjc.A.dylib               	0x0000000198b7192c objc_exception_throw + 448 (objc-exception.mm:385)
 10  CoreFoundation                	0x000000019bc278e4 -[NSException raise] + 16 (NSException.m:129)
-11  LinkDeck                      	0x00000001007b631c 0x10076c000 + 303900
-12  LinkDeck                      	0x00000001007b5114 0x10076c000 + 299284
-13  LinkDeck                      	0x00000001007b4ed4 0x10076c000 + 298708
-14  LinkDeck                      	0x0000000100783530 0x10076c000 + 95536
+11  LinkDeck                      	0x00000001043da31c 0x104390000 + 303900
+12  LinkDeck                      	0x00000001043d9114 0x104390000 + 299284
+13  LinkDeck                      	0x00000001043d8ed4 0x104390000 + 298708
+14  LinkDeck                      	0x00000001043a7530 0x104390000 + 95536
 15  libdispatch.dylib             	0x00000001d47e8adc _dispatch_call_block_and_release + 32 (init.c:1575)
 16  libdispatch.dylib             	0x00000001d48027ec _dispatch_client_callout + 16 (client_callout.mm:85)
 17  libdispatch.dylib             	0x00000001d47f1468 _dispatch_lane_serial_drain + 740 (queue.c:3991)
@@ -111,37 +118,41 @@ Thread 9 Crashed:
 19  libdispatch.dylib             	0x00000001d47fc3ec _dispatch_root_queue_drain_deferred_wlh + 292 (queue.c:7265)
 20  libdispatch.dylib             	0x00000001d47fbce4 _dispatch_workloop_worker_thread + 692 (queue.c:6859)
 21  libsystem_pthread.dylib       	0x00000001f7e093b8 _pthread_wqthread + 292 (pthread.c:2696)
-22  libsystem_pthread.dylib       	0x00000001f7e088c0 start_wqthread + 8 (:-1)
+22  libsystem_pthread.dylib       	0x00000001f7e088c0 start_wqthread + 8
 
 Thread 10:
 
 Thread 11 name:
 Thread 11:
-0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8 (:-1)
+0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8
 1   libsystem_kernel.dylib        	0x00000002451f62f8 mach_msg2_internal + 76 (mach_msg.c:201)
 2   libsystem_kernel.dylib        	0x00000002451f6214 mach_msg_overwrite + 428 (mach_msg.c:0)
 3   libsystem_kernel.dylib        	0x00000002451f605c mach_msg + 24 (mach_msg.c:323)
 4   CoreFoundation                	0x000000019bba8868 __CFRunLoopServiceMachPort + 160 (CFRunLoop.c:2650)
 5   CoreFoundation                	0x000000019bb7f848 __CFRunLoopRun + 1188 (CFRunLoop.c:3035)
 6   CoreFoundation                	0x000000019bb7ea6c _CFRunLoopRunSpecificWithOptions + 532 (CFRunLoop.c:3462)
-7   React                         	0x00000001010f4ea0 +[RCTJSThreadManager runRunLoop] + 252 (:-1)
+7   React                         	0x0000000105904ea0 +[RCTJSThreadManager runRunLoop] + 252
 8   Foundation                    	0x0000000199266dbc __NSThread__start__ + 732 (NSThread.m:997)
 9   libsystem_pthread.dylib       	0x00000001f7e0c44c _pthread_start + 136 (pthread.c:931)
-10  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8
 
 Thread 12 name:
 Thread 12:
-0   libsystem_kernel.dylib        	0x00000002451f85d4 __psynch_cvwait + 8 (:-1)
+0   libsystem_kernel.dylib        	0x00000002451f85d4 __psynch_cvwait + 8
 1   libsystem_pthread.dylib       	0x00000001f7e0ab58 _pthread_cond_wait + 984 (pthread_cond.c:862)
 2   libc++.1.dylib                	0x00000001aadc46fc std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&) + 32 (condition_variable.cpp:30)
-3   hermes                        	0x0000000101a339c4 hermes::vm::HadesGC::Executor::worker() + 116 (:-1)
-4   hermes                        	0x0000000101a3392c void* std::__1::__thread_proxy[abi:nn180100]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, hermes::vm::HadesGC::Executor::Exe... + 44 (:-1)
-5   libsystem_pthread.dylib       	0x00000001f7e0c44c _pthread_start + 136 (pthread.c:931)
-6   libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8 (:-1)
+3   hermes                        	0x000000010521f9c4 void std::__1::condition_variable::wait<hermes::vm::HadesGC::Executor::worker()::'lambda'()>(std::__1::unique_lock<std::__1::mutex>&, hermes::vm::HadesGC::Executor::worker()::'lambda'()) + 28 (condition_variable.h:146)
+4   hermes                        	0x000000010521f9c4 hermes::vm::HadesGC::Executor::worker() + 116 (HadesGC.cpp:1062)
+5   hermes                        	0x000000010521f92c hermes::vm::HadesGC::Executor::Executor()::'lambda'()::operator()() const + 4 (HadesGC.cpp:1033)
+6   hermes                        	0x000000010521f92c decltype(std::declval<hermes::vm::HadesGC::Executor::Executor()::'lambda'()>()()) std::__1::__invoke[abi:nn180100]<hermes::vm::HadesGC::Executor::Executor()::'lambda'()>(hermes::vm::HadesGC::Execut... + 4 (invoke.h:344)
+7   hermes                        	0x000000010521f92c void std::__1::__thread_execute[abi:nn180100]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, hermes::vm::HadesGC::Executor::Executor()::'lambd... + 4 (thread.h:199)
+8   hermes                        	0x000000010521f92c void* std::__1::__thread_proxy[abi:nn180100]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, hermes::vm::HadesGC::Executor::Exe... + 44 (thread.h:208)
+9   libsystem_pthread.dylib       	0x00000001f7e0c44c _pthread_start + 136 (pthread.c:931)
+10  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8
 
 Thread 13 name:
 Thread 13:
-0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8 (:-1)
+0   libsystem_kernel.dylib        	0x00000002451f2cd4 mach_msg2_trap + 8
 1   libsystem_kernel.dylib        	0x00000002451f62f8 mach_msg2_internal + 76 (mach_msg.c:201)
 2   libsystem_kernel.dylib        	0x00000002451f6214 mach_msg_overwrite + 428 (mach_msg.c:0)
 3   libsystem_kernel.dylib        	0x00000002451f605c mach_msg + 24 (mach_msg.c:323)
@@ -151,29 +162,29 @@ Thread 13:
 7   CFNetwork                     	0x00000001b1052920 +[__CFN_CoreSchedulingSetRunnable _run:] + 416 (CoreSchedulingSet.mm:1473)
 8   Foundation                    	0x0000000199266dbc __NSThread__start__ + 732 (NSThread.m:997)
 9   libsystem_pthread.dylib       	0x00000001f7e0c44c _pthread_start + 136 (pthread.c:931)
-10  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8 (:-1)
+10  libsystem_pthread.dylib       	0x00000001f7e088cc thread_start + 8
 
 
 Thread 9 crashed with ARM Thread State (64-bit):
     x0: 0x0000000000000000   x1: 0x0000000000000000   x2: 0x0000000000000000   x3: 0x0000000000000000
-    x4: 0x0000000198c77f43   x5: 0x000000016fb79560   x6: 0x000000000000006e   x7: 0xfffff0003ffff800
-    x8: 0x31d0a3a00b56f62a   x9: 0x31d0a3a164e1462a  x10: 0x0000000000000002  x11: 0x0000010000000000
+    x4: 0x0000000198c77f43   x5: 0x000000016bf55560   x6: 0x000000000000006e   x7: 0xfffff0003ffff800
+    x8: 0x6a604ed59f2d4abe   x9: 0x6a604ed4f4d83abe  x10: 0x0000000000000002  x11: 0x0000010000000000
    x12: 0x00000000fffffffd  x13: 0x0000000000000000  x14: 0x0000000000000000  x15: 0x0000000000000000
-   x16: 0x0000000000000148  x17: 0x000000016fb7b000  x18: 0x0000000000000000  x19: 0x0000000000000006
-   x20: 0x0000000000004c03  x21: 0x000000016fb7b0e0  x22: 0x000000020330c000  x23: 0x0000000102ba6820
-   x24: 0xd000000000000018  x25: 0x0000000105564000  x26: 0x0000000000000038  x27: 0x00000000000001f5
-   x28: 0x00000002079d3bc0   fp: 0x000000016fb794d0   lr: 0x00000001f7e0f810
-    sp: 0x000000016fb794b0   pc: 0x00000002451fd0cc cpsr: 0x40000000
+   x16: 0x0000000000000148  x17: 0x000000016bf57000  x18: 0x0000000000000000  x19: 0x0000000000000006
+   x20: 0x0000000000004a03  x21: 0x000000016bf570e0  x22: 0x000000020330c000  x23: 0x00000001117dd5c0
+   x24: 0xd000000000000018  x25: 0x0000000110610000  x26: 0x0000000000000038  x27: 0x00000000000001f5
+   x28: 0x00000002079d3bc0   fp: 0x000000016bf554d0   lr: 0x00000001f7e0f810
+    sp: 0x000000016bf554b0   pc: 0x00000002451fd0cc cpsr: 0x40000000
    esr: 0x56000080 (Syscall)
 
 
 Binary Images:
-        0x10076c000 -         0x100a0bfff LinkDeck arm64  <f017f0713f3734ee8fee2302c9b28dc5> /var/containers/Bundle/Application/DF848C63-A147-49E1-B8AC-BFA08E05F751/LinkDeck.app/LinkDeck
-        0x100b4c000 -         0x100bd3fff ReactNativeDependencies arm64  <b35f1182b82e33728a74a4fe502c0906> /private/var/containers/Bundle/Application/DF848C63-A147-49E1-B8AC-BFA08E05F751/LinkDeck.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies
-        0x100e54000 -         0x10128ffff React arm64  <d636736195903fe5bbab2a3ad49a83e8> /private/var/containers/Bundle/Application/DF848C63-A147-49E1-B8AC-BFA08E05F751/LinkDeck.app/Frameworks/React.framework/React
-        0x101964000 -         0x101b67fff hermes arm64  <ba3c949a77073472b346d3e0690c88d0> /private/var/containers/Bundle/Application/DF848C63-A147-49E1-B8AC-BFA08E05F751/LinkDeck.app/Frameworks/hermes.framework/hermes
-        0x101f38000 -         0x101f43fff libobjc-trampolines.dylib arm64e  <d6c51f40a5413970be5c27cf06124753> /private/preboot/Cryptexes/OS/usr/lib/libobjc-trampolines.dylib
-        0x10271c000 -         0x10272ffff GAXClient arm64e  <4978ebfab5803a34b126db8b59be2b70> /System/Library/AccessibilityBundles/GAXClient.bundle/GAXClient
+        0x104390000 -         0x10462ffff LinkDeck arm64  <a38c3146cb9337798663feb2f1afef63> /var/containers/Bundle/Application/6F4204D1-8316-4D53-8417-64222829135F/LinkDeck.app/LinkDeck
+        0x104760000 -         0x10476bfff libobjc-trampolines.dylib arm64e  <d6c51f40a5413970be5c27cf06124753> /private/preboot/Cryptexes/OS/usr/lib/libobjc-trampolines.dylib
+        0x1047c4000 -         0x1047d7fff GAXClient arm64e  <4978ebfab5803a34b126db8b59be2b70> /System/Library/AccessibilityBundles/GAXClient.bundle/GAXClient
+        0x104b58000 -         0x104bdffff ReactNativeDependencies arm64  <b35f1182b82e33728a74a4fe502c0906> /private/var/containers/Bundle/Application/6F4204D1-8316-4D53-8417-64222829135F/LinkDeck.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies
+        0x105150000 -         0x105353fff hermes arm64  <ba3c949a77073472b346d3e0690c88d0> /private/var/containers/Bundle/Application/6F4204D1-8316-4D53-8417-64222829135F/LinkDeck.app/Frameworks/hermes.framework/hermes
+        0x105664000 -         0x105a9ffff React arm64  <d636736195903fe5bbab2a3ad49a83e8> /private/var/containers/Bundle/Application/6F4204D1-8316-4D53-8417-64222829135F/LinkDeck.app/Frameworks/React.framework/React
         0x198b40000 -         0x198b91adf libobjc.A.dylib arm64e  <23e64df5dc0c3cef9e03c3b8b95c54d6> /usr/lib/libobjc.A.dylib
         0x198bc2000 -         0x198c60ad7 dyld arm64e  <fe4142ce36b33428862a87e25ef9766c> /usr/lib/dyld
         0x198c61000 -         0x198c7b6c7 libc++abi.dylib arm64e  <4f1749cafb403955b91b3097db2d7ab6> /usr/lib/libc++abi.dylib
