@@ -13,7 +13,6 @@ const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedURLsRef = useRef<Set<string>>(new Set());
-  const hasInitialized = useRef(false);
 
   useEffect(() => {
     // ユーザーがログインしていない場合は何もしない
@@ -21,30 +20,14 @@ const SharedURLHandler: React.FC = () => {
       return;
     }
 
-    // 初回のみ実行
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      handleInitialURL();
-    }
-
     // アプリがフォアグラウンドにある時のURL受信を監視
+    // 起動時の自動処理（handleInitialURL）は削除
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
     return () => {
       subscription.remove();
     };
-  }, [user]); // userを依存配列に戻す
-
-  const handleInitialURL = async () => {
-    try {
-      const url = await Linking.getInitialURL();
-      if (url) {
-        await processURL(url);
-      }
-    } catch (error) {
-      console.error('Error handling initial URL:', error);
-    }
-  };
+  }, [user]);
 
   const handleDeepLink = (event: { url: string }) => {
     processURL(event.url).catch(error => {
