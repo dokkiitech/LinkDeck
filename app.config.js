@@ -37,7 +37,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.linkdeck.app",
-      buildNumber: "1",
+      buildNumber: "17",
       infoPlist: {
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true

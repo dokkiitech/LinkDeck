@@ -13,10 +13,19 @@ const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedURLsRef = useRef<Set<string>>(new Set());
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    // 初期URLの処理（アプリ起動時のみ）
-    handleInitialURL();
+    // ユーザーがログインしていない場合は何もしない
+    if (!user) {
+      return;
+    }
+
+    // 初回のみ実行
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      handleInitialURL();
+    }
 
     // アプリがフォアグラウンドにある時のURL受信を監視
     const subscription = Linking.addEventListener('url', handleDeepLink);
@@ -24,21 +33,37 @@ const SharedURLHandler: React.FC = () => {
     return () => {
       subscription.remove();
     };
-  }, []); // 空の依存配列で一度だけ実行
+  }, [user]); // userを依存配列に戻す
 
   const handleInitialURL = async () => {
-    const url = await Linking.getInitialURL();
-    if (url) {
-      await processURL(url);
+    try {
+      const url = await Linking.getInitialURL();
+      if (url) {
+        await processURL(url);
+      }
+    } catch (error) {
+      console.error('Error handling initial URL:', error);
     }
   };
 
   const handleDeepLink = (event: { url: string }) => {
-    processURL(event.url);
+    processURL(event.url).catch(error => {
+      console.error('Error handling deep link:', error);
+    });
   };
 
   const processURL = async (url: string) => {
-    if (!user || isProcessing) return;
+    // ユーザーがログインしていない場合は処理しない
+    if (!user) {
+      console.log('User not logged in, skipping URL processing');
+      return;
+    }
+
+    // 既に処理中の場合はスキップ
+    if (isProcessing) {
+      console.log('Already processing a URL, skipping');
+      return;
+    }
 
     try {
       // URLをパース
@@ -114,9 +139,16 @@ const SharedURLHandler: React.FC = () => {
       );
     } catch (error) {
       console.error('Error processing shared URL:', error);
+      
+      // エラーの詳細をログに出力
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
       Alert.alert(
         'エラー',
-        '共有URLの追加に失敗しました'
+        '共有URLの追加に失敗しました。もう一度お試しください。'
       );
     } finally {
       setIsProcessing(false);
