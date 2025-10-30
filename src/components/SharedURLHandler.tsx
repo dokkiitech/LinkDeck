@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Alert } from 'react-native';
 import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,9 +12,10 @@ import { fetchURLMetadata } from '../utils/urlMetadata';
 const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const processedURLsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // アプリ起動時の初期URLを処理
+    // 初期URLの処理（アプリ起動時のみ）
     handleInitialURL();
 
     // アプリがフォアグラウンドにある時のURL受信を監視
@@ -23,7 +24,7 @@ const SharedURLHandler: React.FC = () => {
     return () => {
       subscription.remove();
     };
-  }, [user]);
+  }, []); // 空の依存配列で一度だけ実行
 
   const handleInitialURL = async () => {
     const url = await Linking.getInitialURL();
@@ -55,6 +56,28 @@ const SharedURLHandler: React.FC = () => {
         console.warn('Invalid shared URL:', url);
         return;
       }
+
+      // 重複チェック：同じURLを短時間に処理しない
+      const urlKey = `${sharedURL}-${Date.now()}`;
+      const recentKey = Array.from(processedURLsRef.current).find(key => 
+        key.startsWith(sharedURL) && Date.now() - parseInt(key.split('-').pop() || '0') < 5000
+      );
+      
+      if (recentKey) {
+        console.log('URL already processed recently, skipping:', sharedURL);
+        return;
+      }
+
+      processedURLsRef.current.add(urlKey);
+      
+      // 古いエントリをクリーンアップ（10秒以上前のものを削除）
+      const now = Date.now();
+      processedURLsRef.current.forEach(key => {
+        const timestamp = parseInt(key.split('-').pop() || '0');
+        if (now - timestamp > 10000) {
+          processedURLsRef.current.delete(key);
+        }
+      });
 
       setIsProcessing(true);
 
