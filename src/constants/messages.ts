@@ -21,8 +21,8 @@ export const ERROR_MESSAGES = {
     LOAD_FAILED: 'リンクの読み込みに失敗しました',
     SAVE_FAILED: 'リンクの保存に失敗しました',
     DELETE_FAILED: 'リンクの削除に失敗しました',
-    URL_REQUIRED: 'URLまたはテキストを入力してください',
-    NO_VALID_URL: '有効なURLが見つかりませんでした',
+    URL_REQUIRED: 'URLを入力してください',
+    NO_VALID_URL: '有効なURLを入力してください（http://またはhttps://で始まるURL）',
     ARCHIVED_LOAD_FAILED: 'アーカイブリンクの読み込みに失敗しました',
   },
 

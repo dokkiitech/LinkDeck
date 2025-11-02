@@ -78,27 +78,5 @@ const extractTitle = (html: string): string | undefined => {
   return match ? match[1].trim() : undefined;
 };
 
-/**
- * テキストからURLを抽出する
- * @param text URLを含むテキスト
- * @returns 抽出されたURL（見つからない場合はnull）
- */
-export const extractURLFromText = (text: string): string | null => {
-  // URLパターンの正規表現
-  const urlRegex = /(https?:\/\/[^\s]+)/gi;
-  const match = text.match(urlRegex);
-
-  if (match && match.length > 0) {
-    return match[0];
-  }
-
-  // http(s)がない場合も考慮
-  const domainRegex = /([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?/gi;
-  const domainMatch = text.match(domainRegex);
-
-  if (domainMatch && domainMatch.length > 0) {
-    return `https://${domainMatch[0]}`;
-  }
-
-  return null;
-};
+// extractURLFromText は urlValidation.ts に移動しました
+// import { extractURLFromText } from '../utils/urlValidation'; を使用してください

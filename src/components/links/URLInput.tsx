@@ -18,19 +18,17 @@ export const URLInput: React.FC<URLInputProps> = ({
 }) => {
   return (
     <View style={styles.section}>
-      <Text style={styles.label}>URLまたはテキスト</Text>
+      <Text style={styles.label}>URL</Text>
       <TextInput
         style={styles.input}
-        placeholder="URLを入力、またはURLを含むテキストを貼り付け"
+        placeholder="URLを入力"
         value={value}
         onChangeText={onChangeText}
-        multiline
-        numberOfLines={4}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="url"
         editable={editable}
       />
-      <Text style={styles.hint}>
-        ※ テキストに含まれるURLを自動で抽出します
-      </Text>
     </View>
   );
 };
@@ -52,12 +50,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#E5E5EA',
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginTop: 5,
   },
 });

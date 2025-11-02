@@ -4,6 +4,7 @@ import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
 import { createLink } from '../services/firestore';
 import { fetchURLMetadata } from '../utils/urlMetadata';
+import { isValidURL } from '../utils/urlValidation';
 
 /**
  * URLスキーム経由で共有されたURLを処理するコンポーネント
@@ -62,6 +63,16 @@ const SharedURLHandler: React.FC = () => {
 
       if (!sharedURL || typeof sharedURL !== 'string') {
         console.warn('Invalid shared URL:', url);
+        return;
+      }
+
+      // URLの厳格なバリデーション
+      if (!isValidURL(sharedURL)) {
+        console.warn('Shared URL is not a valid URL:', sharedURL);
+        Alert.alert(
+          'エラー',
+          '共有されたURLが無効です。有効なURL（http://またはhttps://で始まる）を共有してください。'
+        );
         return;
       }
 

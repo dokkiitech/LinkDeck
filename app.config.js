@@ -42,7 +42,8 @@ module.exports = {
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true
         },
-        ITSAppUsesNonExemptEncryption: false
+        ITSAppUsesNonExemptEncryption: false,
+        NSCameraUsageDescription: "QRコードを読み取るためにカメラへのアクセスが必要です"
       }
     },
     android: {
@@ -53,6 +54,7 @@ module.exports = {
       package: "com.linkdeck.app",
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
+      permissions: ["CAMERA"],
       intentFilters: [
         {
           action: "VIEW",
@@ -88,7 +90,13 @@ module.exports = {
     },
     plugins: [
       "expo-font",
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
+        }
+      ]
     ]
   }
 };
