@@ -49,11 +49,18 @@ LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読
    - Firestore Document型の定義
    - Navigation型の定義
 
+8. **URL共有機能（URLスキーム経由）**
+   - expo-linkingを使用したURLスキーム（`linkdeck://share?url=...`）
+   - SharedURLHandlerコンポーネントによる自動URL保存
+   - iOSショートカット経由での他アプリからのURL共有対応
+   - URLメタデータの自動取得とタイトル設定
+
 ### 🚧 実装準備中の機能
 
-1. **iOS共有拡張機能（Share Extension）**
-   - 他のアプリからURLを直接保存する機能
-   - URLの自動抽出（正規表現による）
+1. **iOS Share Extension（完全なネイティブ共有機能）**
+   - 標準の共有メニューからLinkDeckを直接選択可能に
+   - App Groupsを使用したメインアプリとの連携
+   - ネイティブコード（Swift）とExpo Config Pluginの実装が必要
 
 2. **AI要約機能（Gemini API統合）**
    - ユーザーのGemini APIキーの暗号化保存
@@ -100,17 +107,23 @@ LinkDeck/
 │   │   └── settings/
 │   │       └── SettingsScreen.tsx
 │   ├── services/            # サービス層
-│   │   └── firestore.ts     # Firestore操作
+│   │   ├── firestore.ts     # Firestore操作
+│   │   ├── sharedGroup.ts   # 共有グループ機能（準備中）
+│   │   └── gemini.ts        # Gemini API統合（準備中）
 │   ├── types/               # TypeScript型定義
 │   │   └── index.ts
-│   ├── components/          # 再利用可能なコンポーネント（未使用）
+│   ├── components/          # 再利用可能なコンポーネント
+│   │   └── SharedURLHandler.tsx  # URL共有ハンドラー
 │   ├── hooks/               # カスタムフック（未使用）
-│   └── utils/               # ユーティリティ関数（未使用）
+│   └── utils/               # ユーティリティ関数
+│       ├── storage.ts       # ローカルストレージ操作
+│       └── urlMetadata.ts   # URLメタデータ取得
 ├── assets/                  # 画像・アイコン
 ├── App.tsx                  # エントリーポイント
 ├── .env.example             # 環境変数のテンプレート
 ├── README.md                # プロジェクト説明
 ├── SETUP_GUIDE.md           # セットアップガイド
+├── SHARE_SETUP_GUIDE.md     # URL共有機能セットアップガイド
 └── package.json             # 依存関係
 ```
 

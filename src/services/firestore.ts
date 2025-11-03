@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Link, LinkDocument, Tag, TagDocument } from '../types';
+import { isValidURL } from '../utils/urlValidation';
 
 /**
  * リンクコレクションの参照
@@ -34,6 +35,11 @@ export const createLink = async (
   title: string,
   tags: string[] = []
 ): Promise<string> => {
+  // URLの厳格なバリデーション
+  if (!isValidURL(url)) {
+    throw new Error('Invalid URL: 有効なURLを入力してください');
+  }
+
   const linkData = {
     userId,
     url,

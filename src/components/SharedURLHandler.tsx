@@ -1,90 +1,151 @@
-import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus, Alert } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { Alert } from 'react-native';
+import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
-import { getPendingSharedURLs, clearPendingSharedURLs } from '../services/sharedGroup';
 import { createLink } from '../services/firestore';
 import { fetchURLMetadata } from '../utils/urlMetadata';
+import { isValidURL } from '../utils/urlValidation';
 
 /**
- * Share Extensionから共有されたURLを処理するコンポーネント
- * アプリがフォアグラウンドになった時に自動的に処理する
+ * URLスキーム経由で共有されたURLを処理するコンポーネント
+ * linkdeck://share?url=...&title=... の形式で受け取る
  */
 const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
-  const appState = useRef(AppState.currentState);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const processedURLsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // 初回マウント時にチェック
-    processSharedURLs();
+    // ユーザーがログインしていない場合は何もしない
+    if (!user) {
+      return;
+    }
 
-    // AppStateの変更を監視
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    // アプリがフォアグラウンドにある時のURL受信を監視
+    // 起動時の自動処理（handleInitialURL）は削除
+    const subscription = Linking.addEventListener('url', handleDeepLink);
 
     return () => {
       subscription.remove();
     };
   }, [user]);
 
-  const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    // バックグラウンドからアクティブに戻った時
-    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-      processSharedURLs();
-    }
-
-    appState.current = nextAppState;
+  const handleDeepLink = (event: { url: string }) => {
+    processURL(event.url).catch(error => {
+      console.error('Error handling deep link:', error);
+    });
   };
 
-  const processSharedURLs = async () => {
-    if (!user) return;
+  const processURL = async (url: string) => {
+    // ユーザーがログインしていない場合は処理しない
+    if (!user) {
+      console.log('User not logged in, skipping URL processing');
+      return;
+    }
+
+    // 既に処理中の場合はスキップ
+    if (isProcessing) {
+      console.log('Already processing a URL, skipping');
+      return;
+    }
 
     try {
-      const pendingURLs = await getPendingSharedURLs();
+      // URLをパース
+      const parsed = Linking.parse(url);
 
-      if (pendingURLs.length === 0) return;
+      // linkdeck://share?url=...&title=... の形式をチェック
+      if (parsed.hostname !== 'share') {
+        return;
+      }
 
-      console.log(`Processing ${pendingURLs.length} shared URL(s)...`);
+      const queryParams = parsed.queryParams as { url?: string; title?: string };
+      const sharedURL = queryParams.url;
 
-      let successCount = 0;
-      let failCount = 0;
+      if (!sharedURL || typeof sharedURL !== 'string') {
+        console.warn('Invalid shared URL:', url);
+        return;
+      }
 
-      // 各URLを処理
-      for (const url of pendingURLs) {
+      // URLの厳格なバリデーション
+      if (!isValidURL(sharedURL)) {
+        console.warn('Shared URL is not a valid URL:', sharedURL);
+        Alert.alert(
+          'エラー',
+          '共有されたURLが無効です。有効なURL（http://またはhttps://で始まる）を共有してください。'
+        );
+        return;
+      }
+
+      // 重複チェック：同じURLを短時間に処理しない
+      const urlKey = `${sharedURL}-${Date.now()}`;
+      const recentKey = Array.from(processedURLsRef.current).find(key => 
+        key.startsWith(sharedURL) && Date.now() - parseInt(key.split('-').pop() || '0') < 5000
+      );
+      
+      if (recentKey) {
+        console.log('URL already processed recently, skipping:', sharedURL);
+        return;
+      }
+
+      processedURLsRef.current.add(urlKey);
+      
+      // 古いエントリをクリーンアップ（10秒以上前のものを削除）
+      const now = Date.now();
+      processedURLsRef.current.forEach(key => {
+        const timestamp = parseInt(key.split('-').pop() || '0');
+        if (now - timestamp > 10000) {
+          processedURLsRef.current.delete(key);
+        }
+      });
+
+      setIsProcessing(true);
+
+      console.log(`Processing shared URL: ${sharedURL}`);
+
+      // タイトルが指定されていればそれを使用、なければメタデータを取得
+      let title = queryParams.title && typeof queryParams.title === 'string'
+        ? queryParams.title
+        : undefined;
+
+      if (!title) {
         try {
-          // メタデータを取得
-          const metadata = await fetchURLMetadata(url);
-
-          // Firestoreに保存
-          await createLink(
-            user.uid,
-            url,
-            metadata.title || url,
-            metadata.description || '',
-            metadata.imageUrl || undefined,
-            []
-          );
-
-          successCount++;
-          console.log(`Successfully added shared URL: ${url}`);
+          const metadata = await fetchURLMetadata(sharedURL);
+          title = metadata.title || sharedURL;
         } catch (error) {
-          failCount++;
-          console.error(`Failed to add shared URL: ${url}`, error);
+          console.warn('Failed to fetch metadata, using URL as title:', error);
+          title = sharedURL;
         }
       }
 
-      // 処理済みのURLをクリア
-      await clearPendingSharedURLs();
+      // Firestoreに保存
+      await createLink(
+        user.uid,
+        sharedURL,
+        title,
+        [] // tags
+      );
 
-      // 結果を通知
-      if (successCount > 0) {
-        Alert.alert(
-          '共有URLを追加しました',
-          `${successCount}件のリンクを追加しました${failCount > 0 ? `\n（${failCount}件は失敗しました）` : ''}`
-        );
-      } else if (failCount > 0) {
-        Alert.alert('エラー', `共有URLの追加に失敗しました（${failCount}件）`);
-      }
+      console.log(`Successfully added shared URL: ${sharedURL}`);
+
+      Alert.alert(
+        '共有URLを追加しました',
+        `リンク「${title}」を保存しました`
+      );
     } catch (error) {
-      console.error('Error processing shared URLs:', error);
+      console.error('Error processing shared URL:', error);
+      
+      // エラーの詳細をログに出力
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
+      Alert.alert(
+        'エラー',
+        '共有URLの追加に失敗しました。もう一度お試しください。'
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 

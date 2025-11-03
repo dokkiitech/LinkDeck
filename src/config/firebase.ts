@@ -40,20 +40,39 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 /**
  * Firebase Authentication インスタンス
  * React Native用のAsyncStorage永続化を使用
+ *
+ * 重要: initializeAuthは一度だけ呼び出す必要がある
+ * 既に初期化されている場合はgetAuthを使用
  */
 let auth;
 try {
-  // 既存のauthインスタンスがあるか確認
-  auth = getAuth(app);
-} catch (error) {
-  // 初回のみinitializeAuthを使用
   const persistence = Platform.OS === 'web'
     ? browserLocalPersistence
     : getReactNativePersistence(ReactNativeAsyncStorage);
 
-  auth = initializeAuth(app, {
-    persistence,
-  });
+  // まずgetAuthを試す（既に初期化されている場合はこれで取得可能）
+  auth = getAuth(app);
+
+  if (__DEV__) {
+    console.log('Firebase Auth: Using existing instance');
+  }
+} catch (error) {
+  // 初期化されていない場合のみinitializeAuthを呼び出す
+  try {
+    const persistence = Platform.OS === 'web'
+      ? browserLocalPersistence
+      : getReactNativePersistence(ReactNativeAsyncStorage);
+
+    auth = initializeAuth(app, { persistence });
+
+    if (__DEV__) {
+      console.log('Firebase Auth: Initialized new instance');
+    }
+  } catch (initError) {
+    console.error('Firebase Auth initialization error:', initError);
+    // フォールバック: persistenceなしで初期化を試みる
+    auth = getAuth(app);
+  }
 }
 
 export { auth };

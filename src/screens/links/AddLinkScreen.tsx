@@ -14,12 +14,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { createLink, createTag } from '../../services/firestore';
-import { extractURLFromText } from '../../utils/urlMetadata';
+import { extractURLFromText } from '../../utils/urlValidation';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import { URLInput } from '../../components/links/URLInput';
 import { TitleInput } from '../../components/links/TitleInput';
 import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
+import QRCodeScanner from '../../components/links/QRCodeScanner';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -37,6 +38,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagName, setNewTagName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   // カスタムフックを使用してタグ管理
   const { tags: existingTags, createTag: createNewTag } = useTags({ userId: user?.uid });
@@ -140,6 +142,10 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
     setSelectedTags(selectedTags.filter((tag) => tag !== tagToRemove));
   };
 
+  const handleQRCodeScanned = (url: string) => {
+    setInputText(url);
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -150,11 +156,23 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <URLInput
-          value={inputText}
-          onChangeText={setInputText}
-          editable={!loading}
-        />
+        <View style={styles.urlSection}>
+          <View style={styles.urlInputWrapper}>
+            <URLInput
+              value={inputText}
+              onChangeText={setInputText}
+              editable={!loading}
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.qrButton}
+            onPress={() => setShowQRScanner(true)}
+            disabled={loading}
+          >
+            <Text style={styles.qrButtonText}>📷</Text>
+            <Text style={styles.qrButtonLabel}>QR</Text>
+          </TouchableOpacity>
+        </View>
 
         <TitleInput
           value={titleText}
@@ -185,6 +203,12 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      <QRCodeScanner
+        visible={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScan={handleQRCodeScanned}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -199,6 +223,33 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+  },
+  urlSection: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 25,
+    gap: 10,
+  },
+  urlInputWrapper: {
+    flex: 1,
+  },
+  qrButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 32,
+  },
+  qrButtonText: {
+    fontSize: 24,
+  },
+  qrButtonLabel: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
   },
   saveButton: {
     backgroundColor: '#007AFF',
