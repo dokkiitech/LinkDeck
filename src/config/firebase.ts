@@ -41,13 +41,22 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
  * Firebase Authentication インスタンス
  * React Native用のAsyncStorage永続化を使用
  */
-const persistence = Platform.OS === 'web'
-  ? browserLocalPersistence
-  : getReactNativePersistence(ReactNativeAsyncStorage);
+let auth;
+try {
+  // 既存のauthインスタンスがあるか確認
+  auth = getAuth(app);
+} catch (error) {
+  // 初回のみinitializeAuthを使用
+  const persistence = Platform.OS === 'web'
+    ? browserLocalPersistence
+    : getReactNativePersistence(ReactNativeAsyncStorage);
 
-export const auth = initializeAuth(app, {
-  persistence,
-});
+  auth = initializeAuth(app, {
+    persistence,
+  });
+}
+
+export { auth };
 
 /**
  * Cloud Firestore インスタンス
