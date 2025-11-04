@@ -1,15 +1,9 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeAuth, getAuth, browserLocalPersistence } from 'firebase/auth';
+import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import Constants from 'expo-constants';
 import 'react-native-get-random-values';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
-
-// React Native向けの永続化設定をインポート
-// 注: TypeScriptエラーが表示される場合がありますが、ランタイムでは正常に動作します
-// @ts-ignore - Firebase SDKのReact Nativeビルドから動的にロード
-import { getReactNativePersistence } from 'firebase/auth/react-native';
 
 /**
  * Firebase設定オブジェクト
@@ -57,19 +51,13 @@ try {
 } catch (error) {
   // 初期化されていない場合のみinitializeAuthを呼び出す
   try {
-    const persistence = Platform.OS === 'web'
-      ? browserLocalPersistence
-      : getReactNativePersistence(ReactNativeAsyncStorage);
-
+    // React Nativeの場合のみAsyncStorageを使用
     auth = initializeAuth(app, {
-      persistence: [persistence],
+      persistence: getReactNativePersistence(ReactNativeAsyncStorage),
     });
 
     if (__DEV__) {
-      console.log('Firebase Auth: Initialized with persistence', {
-        platform: Platform.OS,
-        persistenceType: Platform.OS === 'web' ? 'browserLocalPersistence' : 'AsyncStorage'
-      });
+      console.log('Firebase Auth: Initialized with AsyncStorage persistence');
     }
   } catch (initError) {
     console.error('Firebase Auth initialization error:', initError);
