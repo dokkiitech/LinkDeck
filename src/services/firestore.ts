@@ -246,3 +246,21 @@ export const deleteTag = async (userId: string, tagId: string): Promise<void> =>
     await deleteDoc(docRef);
   }
 };
+
+/**
+ * ユーザーが特定のURLを既に保存しているかチェック
+ */
+export const checkLinkExists = async (
+  userId: string,
+  url: string
+): Promise<boolean> => {
+  const q = query(
+    linksCollection,
+    where('userId', '==', userId),
+    where('url', '==', url),
+    limit(1)
+  );
+
+  const querySnapshot = await getDocs(q);
+  return !querySnapshot.empty;
+};

@@ -3,8 +3,8 @@ import { Alert } from 'react-native';
 import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
 import { createLink } from '../services/firestore';
-import { fetchURLMetadata } from '../utils/urlMetadata';
-import { isValidURL } from '../utils/urlValidation';
+import { fetchUrlTitle } from '../utils/urlMetadata';
+import { extractURLFromText } from '../utils/urlValidation';
 
 /**
  * URLスキーム経由で共有されたURLを処理するコンポーネント
@@ -12,8 +12,9 @@ import { isValidURL } from '../utils/urlValidation';
  */
 const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const isProcessingRef = useRef(false);
   const processedURLsRef = useRef<Set<string>>(new Set());
+  const hasHandledInitialURL = useRef(false);
 
   useEffect(() => {
     // ユーザーがログインしていない場合は何もしない
@@ -21,8 +22,28 @@ const SharedURLHandler: React.FC = () => {
       return;
     }
 
+    // 初回起動時のURLを処理（1回だけ）
+    const handleInitialURL = async () => {
+      if (hasHandledInitialURL.current) {
+        console.log('[SharedURLHandler] Initial URL already handled, skipping');
+        return;
+      }
+
+      try {
+        const initialUrl = await Linking.getInitialURL();
+        if (initialUrl) {
+          console.log('[SharedURLHandler] Processing initial URL:', initialUrl);
+          hasHandledInitialURL.current = true;
+          await processURL(initialUrl);
+        }
+      } catch (error) {
+        console.error('[SharedURLHandler] Error handling initial URL:', error);
+      }
+    };
+
+    handleInitialURL();
+
     // アプリがフォアグラウンドにある時のURL受信を監視
-    // 起動時の自動処理（handleInitialURL）は削除
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
     return () => {
@@ -31,121 +52,131 @@ const SharedURLHandler: React.FC = () => {
   }, [user]);
 
   const handleDeepLink = (event: { url: string }) => {
-    processURL(event.url).catch(error => {
-      console.error('Error handling deep link:', error);
-    });
+    console.log('[SharedURLHandler] Deep link event received:', event.url);
+    processURL(event.url);
   };
 
   const processURL = async (url: string) => {
     // ユーザーがログインしていない場合は処理しない
     if (!user) {
-      console.log('User not logged in, skipping URL processing');
+      console.log('[SharedURLHandler] User not logged in, skipping');
       return;
     }
 
-    // 既に処理中の場合はスキップ
-    if (isProcessing) {
-      console.log('Already processing a URL, skipping');
+    // linkdeck:// スキームでない場合はスキップ
+    if (!url.startsWith('linkdeck://')) {
+      console.log('[SharedURLHandler] Not a linkdeck:// URL, skipping');
       return;
     }
+
+    // URLをパース
+    let parsed;
+    try {
+      parsed = Linking.parse(url);
+    } catch (error) {
+      console.error('[SharedURLHandler] Failed to parse URL:', error);
+      return;
+    }
+
+    // linkdeck://share?url=...&title=... の形式をチェック
+    if (parsed.hostname !== 'share') {
+      console.log('[SharedURLHandler] Not a share URL, skipping');
+      return;
+    }
+
+    const queryParams = parsed.queryParams as { url?: string; title?: string };
+    const sharedText = queryParams.url;
+
+    if (!sharedText || typeof sharedText !== 'string') {
+      console.warn('[SharedURLHandler] Invalid shared URL');
+      return;
+    }
+
+    // テキストからURLを抽出
+    const extractedURL = extractURLFromText(sharedText);
+
+    if (!extractedURL) {
+      console.warn('[SharedURLHandler] No valid URL found');
+      Alert.alert(
+        'エラー',
+        '共有されたテキストから有効なURLが見つかりませんでした。'
+      );
+      return;
+    }
+
+    console.log('[SharedURLHandler] Extracted URL:', extractedURL);
+
+    // === シンプルな重複防止ロジック ===
+    // 同じURLが処理中または直近5秒以内に処理済みならスキップ
+    const now = Date.now();
+
+    // 古いエントリをクリーンアップ（5秒以上前のものを削除）
+    processedURLsRef.current.forEach(key => {
+      const timestamp = parseInt(key.split('-').pop() || '0');
+      if (now - timestamp > 5000) {
+        processedURLsRef.current.delete(key);
+      }
+    });
+
+    // 既に処理中または処理済みかチェック
+    const isDuplicate = Array.from(processedURLsRef.current).some(key =>
+      key.startsWith(`${extractedURL}-`)
+    );
+
+    if (isDuplicate) {
+      console.log('[SharedURLHandler] Duplicate URL detected, skipping');
+      return;
+    }
+
+    // URLを処理リストに追加
+    const urlKey = `${extractedURL}-${now}`;
+    processedURLsRef.current.add(urlKey);
+    console.log('[SharedURLHandler] Processing:', extractedURL);
 
     try {
-      // URLをパース
-      const parsed = Linking.parse(url);
-
-      // linkdeck://share?url=...&title=... の形式をチェック
-      if (parsed.hostname !== 'share') {
-        return;
-      }
-
-      const queryParams = parsed.queryParams as { url?: string; title?: string };
-      const sharedURL = queryParams.url;
-
-      if (!sharedURL || typeof sharedURL !== 'string') {
-        console.warn('Invalid shared URL:', url);
-        return;
-      }
-
-      // URLの厳格なバリデーション
-      if (!isValidURL(sharedURL)) {
-        console.warn('Shared URL is not a valid URL:', sharedURL);
-        Alert.alert(
-          'エラー',
-          '共有されたURLが無効です。有効なURL（http://またはhttps://で始まる）を共有してください。'
-        );
-        return;
-      }
-
-      // 重複チェック：同じURLを短時間に処理しない
-      const urlKey = `${sharedURL}-${Date.now()}`;
-      const recentKey = Array.from(processedURLsRef.current).find(key => 
-        key.startsWith(sharedURL) && Date.now() - parseInt(key.split('-').pop() || '0') < 5000
-      );
-      
-      if (recentKey) {
-        console.log('URL already processed recently, skipping:', sharedURL);
-        return;
-      }
-
-      processedURLsRef.current.add(urlKey);
-      
-      // 古いエントリをクリーンアップ（10秒以上前のものを削除）
-      const now = Date.now();
-      processedURLsRef.current.forEach(key => {
-        const timestamp = parseInt(key.split('-').pop() || '0');
-        if (now - timestamp > 10000) {
-          processedURLsRef.current.delete(key);
-        }
-      });
-
-      setIsProcessing(true);
-
-      console.log(`Processing shared URL: ${sharedURL}`);
-
-      // タイトルが指定されていればそれを使用、なければメタデータを取得
+      // タイトル取得
       let title = queryParams.title && typeof queryParams.title === 'string'
         ? queryParams.title
         : undefined;
 
       if (!title) {
         try {
-          const metadata = await fetchURLMetadata(sharedURL);
-          title = metadata.title || sharedURL;
+          const fetchedTitle = await fetchUrlTitle(extractedURL);
+          title = fetchedTitle || extractedURL;
         } catch (error) {
-          console.warn('Failed to fetch metadata, using URL as title:', error);
-          title = sharedURL;
+          console.warn('[SharedURLHandler] Failed to fetch title, using URL');
+          title = extractedURL;
         }
       }
 
       // Firestoreに保存
       await createLink(
         user.uid,
-        sharedURL,
+        extractedURL,
         title,
         [] // tags
       );
 
-      console.log(`Successfully added shared URL: ${sharedURL}`);
+      console.log('[SharedURLHandler] Successfully saved:', extractedURL);
 
       Alert.alert(
         '共有URLを追加しました',
         `リンク「${title}」を保存しました`
       );
     } catch (error) {
-      console.error('Error processing shared URL:', error);
-      
-      // エラーの詳細をログに出力
+      console.error('[SharedURLHandler] Error saving URL:', error);
+
       if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
+        console.error('[SharedURLHandler] Error:', error.message);
       }
-      
+
+      // エラー時は処理リストから削除（再試行可能に）
+      processedURLsRef.current.delete(urlKey);
+
       Alert.alert(
         'エラー',
         '共有URLの追加に失敗しました。もう一度お試しください。'
       );
-    } finally {
-      setIsProcessing(false);
     }
   };
 

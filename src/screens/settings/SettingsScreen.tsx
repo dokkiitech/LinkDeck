@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Platform,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -93,6 +94,20 @@ const SettingsScreen: React.FC = () => {
         },
       ]
     );
+  };
+
+  const handleOpenShortcut = async () => {
+    const shortcutUrl = 'https://www.icloud.com/shortcuts/0dbc5884f700449485ef9f2bd6dfaa79';
+    try {
+      const supported = await Linking.canOpenURL(shortcutUrl);
+      if (supported) {
+        await Linking.openURL(shortcutUrl);
+      } else {
+        Alert.alert('エラー', 'ショートカットを開けませんでした');
+      }
+    } catch (error) {
+      Alert.alert('エラー', 'ショートカットを開けませんでした');
+    }
   };
 
   const handleLogout = async () => {
@@ -205,6 +220,40 @@ const SettingsScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>iOSショートカット</Text>
+        <Text style={styles.description}>
+          他のアプリからLinkDeckへURLを簡単に共有できるiOSショートカットをインストールできます。
+        </Text>
+
+        <View style={styles.featureList}>
+          <View style={styles.featureItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+            <Text style={styles.featureText}>Safari、Chrome、その他のアプリから共有可能</Text>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+            <Text style={styles.featureText}>URLとページタイトルを自動取得</Text>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+            <Text style={styles.featureText}>ワンタップでLinkDeckに保存</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.button, styles.shortcutButton]}
+          onPress={handleOpenShortcut}
+        >
+          <Ionicons name="download-outline" size={20} color="#FFFFFF" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>ショートカットをインストール</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.hint}>
+          ※ iOSの「ショートカット」アプリが必要です。タップするとショートカットのダウンロードページが開きます。
+        </Text>
       </View>
 
       <View style={styles.section}>
@@ -336,6 +385,30 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     marginTop: 10,
     fontStyle: 'italic',
+  },
+  shortcutButton: {
+    backgroundColor: '#5856D6',
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  featureList: {
+    marginBottom: 20,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  featureIcon: {
+    marginRight: 10,
+  },
+  featureText: {
+    fontSize: 14,
+    color: '#000000',
+    flex: 1,
   },
   menuItem: {
     flexDirection: 'row',
