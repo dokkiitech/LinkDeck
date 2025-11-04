@@ -17,6 +17,7 @@ import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { createLink, createTag } from '../../services/firestore';
 import { extractURLFromText } from '../../utils/urlValidation';
+import { fetchUrlTitle } from '../../utils/urlMetadata';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import { URLInput } from '../../components/links/URLInput';
 import { TitleInput } from '../../components/links/TitleInput';
@@ -45,16 +46,43 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
   const [newTagName, setNewTagName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [fetchingTitle, setFetchingTitle] = useState(false);
 
   // カスタムフックを使用してタグ管理
   const { tags: existingTags, createTag: createNewTag } = useTags({ userId: user?.uid });
 
-  // initialUrlが変更されたら入力テキストを更新
+  // initialUrlが変更されたら入力テキストを更新し、タイトルを取得
   useEffect(() => {
     if (route.params?.initialUrl) {
       setInputText(route.params.initialUrl);
+      // タイトルが未入力の場合のみ自動取得
+      if (!titleText) {
+        fetchAndSetTitle(route.params.initialUrl);
+      }
     }
   }, [route.params?.initialUrl]);
+
+  // URLからタイトルを取得する関数
+  const fetchAndSetTitle = async (url: string) => {
+    // URLが有効かチェック
+    const extractedUrl = extractURLFromText(url);
+    if (!extractedUrl) {
+      return;
+    }
+
+    setFetchingTitle(true);
+    try {
+      const title = await fetchUrlTitle(extractedUrl);
+      if (title && !titleText) {
+        // ユーザーがまだタイトルを入力していない場合のみ設定
+        setTitleText(title);
+      }
+    } catch (error) {
+      console.warn('[AddLink] Error fetching title:', error);
+    } finally {
+      setFetchingTitle(false);
+    }
+  };
 
   const handleAddLink = async () => {
     if (!user) {
@@ -190,6 +218,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
           value={titleText}
           onChangeText={setTitleText}
           editable={!loading}
+          loading={fetchingTitle}
         />
 
         <TagSelector
