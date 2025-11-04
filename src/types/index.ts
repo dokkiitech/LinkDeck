@@ -86,7 +86,7 @@ export type MainTabParamList = {
 
 export type LinksStackParamList = {
   LinksList: undefined;
-  AddLink: undefined;
+  AddLink: { initialUrl?: string } | undefined;
   LinkDetail: { linkId: string };
   ArchivedLinks: undefined;
 };

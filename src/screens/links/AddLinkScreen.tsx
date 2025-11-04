@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -11,6 +11,7 @@ import {
   Text,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { createLink, createTag } from '../../services/firestore';
@@ -27,13 +28,17 @@ type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   'AddLink'
 >;
 
+type AddLinkScreenRouteProp = RouteProp<LinksStackParamList, 'AddLink'>;
+
 interface Props {
   navigation: AddLinkScreenNavigationProp;
+  route: AddLinkScreenRouteProp;
 }
 
-const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
+const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
   const { user } = useAuth();
-  const [inputText, setInputText] = useState('');
+  const initialUrl = route.params?.initialUrl || '';
+  const [inputText, setInputText] = useState(initialUrl);
   const [titleText, setTitleText] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagName, setNewTagName] = useState('');
@@ -42,6 +47,13 @@ const AddLinkScreen: React.FC<Props> = ({ navigation }) => {
 
   // カスタムフックを使用してタグ管理
   const { tags: existingTags, createTag: createNewTag } = useTags({ userId: user?.uid });
+
+  // initialUrlが変更されたら入力テキストを更新
+  useEffect(() => {
+    if (route.params?.initialUrl) {
+      setInputText(route.params.initialUrl);
+    }
+  }, [route.params?.initialUrl]);
 
   const handleAddLink = async () => {
     if (!user) {

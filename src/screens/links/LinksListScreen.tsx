@@ -8,14 +8,17 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  Animated,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-import { getUserLinks, deleteLink } from '../../services/firestore';
+import { getUserLinks, deleteLink, createLink } from '../../services/firestore';
 import { Link } from '../../types';
-import { ERROR_MESSAGES } from '../../constants/messages';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
+import QRCodeScanner from '../../components/links/QRCodeScanner';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -32,6 +35,9 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFabMenu, setShowFabMenu] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [fabAnimation] = useState(new Animated.Value(0));
 
   const loadLinks = async () => {
     if (!user) return;
@@ -64,6 +70,42 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const handleRefresh = () => {
     setRefreshing(true);
     loadLinks();
+  };
+
+  const toggleFabMenu = () => {
+    const toValue = showFabMenu ? 0 : 1;
+    Animated.spring(fabAnimation, {
+      toValue,
+      useNativeDriver: true,
+      friction: 6,
+    }).start();
+    setShowFabMenu(!showFabMenu);
+  };
+
+  const handleManualAdd = () => {
+    setShowFabMenu(false);
+    Animated.timing(fabAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+    navigation.navigate('AddLink');
+  };
+
+  const handleQRScan = () => {
+    setShowFabMenu(false);
+    Animated.timing(fabAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+    setShowQRScanner(true);
+  };
+
+  const handleQRCodeScanned = (url: string) => {
+    setShowQRScanner(false);
+    // QRコードから読み取ったURLを持ってAddLink画面に遷移
+    navigation.navigate('AddLink', { initialUrl: url } as any);
   };
 
   // 日付をフォーマット (YYYY年MM月DD日)
@@ -215,13 +257,112 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
+      {/* FAB Menu Overlay */}
+      {showFabMenu && (
+        <TouchableOpacity
+          style={styles.fabMenuOverlay}
+          activeOpacity={1}
+          onPress={toggleFabMenu}
+        />
+      )}
+
+      {/* FAB Menu Items */}
+      {showFabMenu && (
+        <View style={styles.fabMenuContainer}>
+          <Animated.View
+            style={[
+              styles.fabMenuItem,
+              {
+                transform: [
+                  {
+                    translateY: fabAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -80],
+                    }),
+                  },
+                  {
+                    scale: fabAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    }),
+                  },
+                ],
+                opacity: fabAnimation,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.fabMenuButton}
+              onPress={handleQRScan}
+            >
+              <Text style={styles.fabMenuIcon}>📷</Text>
+            </TouchableOpacity>
+            <Text style={styles.fabMenuLabel}>QRコード</Text>
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.fabMenuItem,
+              {
+                transform: [
+                  {
+                    translateY: fabAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -150],
+                    }),
+                  },
+                  {
+                    scale: fabAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    }),
+                  },
+                ],
+                opacity: fabAnimation,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.fabMenuButton}
+              onPress={handleManualAdd}
+            >
+              <Text style={styles.fabMenuIcon}>✏️</Text>
+            </TouchableOpacity>
+            <Text style={styles.fabMenuLabel}>手動入力</Text>
+          </Animated.View>
+        </View>
+      )}
+
       {/* Floating Action Button */}
       <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('AddLink')}
+        style={[styles.fab, showFabMenu && styles.fabRotated]}
+        onPress={toggleFabMenu}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Animated.Text
+          style={[
+            styles.fabText,
+            {
+              transform: [
+                {
+                  rotate: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '45deg'],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          +
+        </Animated.Text>
       </TouchableOpacity>
+
+      {/* QR Code Scanner */}
+      <QRCodeScanner
+        visible={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScan={handleQRCodeScanned}
+      />
     </View>
   );
 };
@@ -356,12 +497,62 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
+    zIndex: 10,
+  },
+  fabRotated: {
+    backgroundColor: '#FF3B30',
   },
   fabText: {
     color: '#FFFFFF',
     fontSize: 32,
     fontWeight: '300',
     marginTop: -2,
+  },
+  fabMenuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    zIndex: 8,
+  },
+  fabMenuContainer: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    alignItems: 'center',
+    zIndex: 9,
+  },
+  fabMenuItem: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  fabMenuButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  fabMenuIcon: {
+    fontSize: 24,
+  },
+  fabMenuLabel: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 5,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
 });
 

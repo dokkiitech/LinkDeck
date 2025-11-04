@@ -59,8 +59,25 @@ export const normalizeURL = (url: string): string => {
 };
 
 /**
- * テキストからURLを抽出（厳格版）
- * - http/https で始まるURLのみを抽出
+ * URLにプロトコルを自動追加
+ * プロトコルがない場合はhttps://を追加
+ */
+export const addProtocolIfNeeded = (url: string): string => {
+  const trimmedUrl = url.trim();
+
+  // 既にプロトコルがある場合はそのまま返す
+  if (/^https?:\/\//i.test(trimmedUrl)) {
+    return trimmedUrl;
+  }
+
+  // プロトコルがない場合はhttps://を追加
+  return `https://${trimmedUrl}`;
+};
+
+/**
+ * テキストからURLを抽出（自動補完版）
+ * - http/https で始まるURLを抽出
+ * - プロトコルがない場合は自動的にhttps://を追加して検証
  * - 最初に見つかった有効なURLを返す
  * - 有効なURLが見つからない場合はnullを返す
  */
@@ -74,6 +91,12 @@ export const extractURLFromText = (text: string): string | null => {
   // まず、入力テキスト全体が有効なURLかチェック
   if (isValidURL(trimmedText)) {
     return normalizeURL(trimmedText);
+  }
+
+  // プロトコルがない場合は追加して再チェック
+  const urlWithProtocol = addProtocolIfNeeded(trimmedText);
+  if (isValidURL(urlWithProtocol)) {
+    return normalizeURL(urlWithProtocol);
   }
 
   // URLパターンで抽出を試みる（http/https で始まるもののみ）
