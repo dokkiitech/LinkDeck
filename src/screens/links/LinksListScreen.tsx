@@ -266,71 +266,80 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {/* FAB Menu Items */}
+      {/* FAB Menu Items - QRコード（左上） */}
       {showFabMenu && (
-        <View style={styles.fabMenuContainer}>
-          <Animated.View
-            style={[
-              styles.fabMenuItem,
-              {
-                transform: [
-                  {
-                    translateY: fabAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, -80],
-                    }),
-                  },
-                  {
-                    scale: fabAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 1],
-                    }),
-                  },
-                ],
-                opacity: fabAnimation,
-              },
-            ]}
+        <Animated.View
+          style={[
+            styles.fabMenuItem,
+            styles.fabMenuItemTopLeft,
+            {
+              transform: [
+                {
+                  translateX: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -80],
+                  }),
+                },
+                {
+                  translateY: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -80],
+                  }),
+                },
+                {
+                  scale: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ],
+              opacity: fabAnimation,
+            },
+          ]}
+        >
+          <Text style={styles.fabMenuLabel}>QRコード</Text>
+          <TouchableOpacity
+            style={styles.fabMenuButton}
+            onPress={handleQRScan}
           >
-            <TouchableOpacity
-              style={styles.fabMenuButton}
-              onPress={handleQRScan}
-            >
-              <Text style={styles.fabMenuIcon}>📷</Text>
-            </TouchableOpacity>
-            <Text style={styles.fabMenuLabel}>QRコード</Text>
-          </Animated.View>
+            <Text style={styles.fabMenuIcon}>📷</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
-          <Animated.View
-            style={[
-              styles.fabMenuItem,
-              {
-                transform: [
-                  {
-                    translateY: fabAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, -150],
-                    }),
-                  },
-                  {
-                    scale: fabAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 1],
-                    }),
-                  },
-                ],
-                opacity: fabAnimation,
-              },
-            ]}
+      {/* FAB Menu Items - 手動入力（真上） */}
+      {showFabMenu && (
+        <Animated.View
+          style={[
+            styles.fabMenuItem,
+            styles.fabMenuItemTop,
+            {
+              transform: [
+                {
+                  translateY: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -100],
+                  }),
+                },
+                {
+                  scale: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ],
+              opacity: fabAnimation,
+            },
+          ]}
+        >
+          <Text style={styles.fabMenuLabel}>手動入力</Text>
+          <TouchableOpacity
+            style={styles.fabMenuButton}
+            onPress={handleManualAdd}
           >
-            <TouchableOpacity
-              style={styles.fabMenuButton}
-              onPress={handleManualAdd}
-            >
-              <Text style={styles.fabMenuIcon}>✏️</Text>
-            </TouchableOpacity>
-            <Text style={styles.fabMenuLabel}>手動入力</Text>
-          </Animated.View>
-        </View>
+            <Text style={styles.fabMenuIcon}>✏️</Text>
+          </TouchableOpacity>
+        </Animated.View>
       )}
 
       {/* Floating Action Button */}
@@ -517,16 +526,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     zIndex: 8,
   },
-  fabMenuContainer: {
+  fabMenuItem: {
     position: 'absolute',
     right: 20,
     bottom: 20,
     alignItems: 'center',
     zIndex: 9,
   },
-  fabMenuItem: {
+  fabMenuItemTop: {
     alignItems: 'center',
-    marginBottom: 15,
+  },
+  fabMenuItemTopLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   fabMenuButton: {
     width: 50,
@@ -548,7 +560,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
-    marginTop: 5,
+    marginBottom: 5,
+    marginRight: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,
