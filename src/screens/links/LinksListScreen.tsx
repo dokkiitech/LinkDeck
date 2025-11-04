@@ -266,7 +266,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {/* FAB Menu Items - QRコード（左上） */}
+      {/* FAB Menu Items - 手動入力（左上） */}
       {showFabMenu && (
         <Animated.View
           style={[
@@ -297,17 +297,17 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
-          <Text style={styles.fabMenuLabel}>QRコード</Text>
+          <Text style={styles.fabMenuLabel}>手動入力</Text>
           <TouchableOpacity
             style={styles.fabMenuButton}
-            onPress={handleQRScan}
+            onPress={handleManualAdd}
           >
-            <Text style={styles.fabMenuIcon}>📷</Text>
+            <Ionicons name="create-outline" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </Animated.View>
       )}
 
-      {/* FAB Menu Items - 手動入力（真上） */}
+      {/* FAB Menu Items - QRコード（真上） */}
       {showFabMenu && (
         <Animated.View
           style={[
@@ -332,12 +332,12 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
-          <Text style={styles.fabMenuLabel}>手動入力</Text>
+          <Text style={styles.fabMenuLabel}>QRコード</Text>
           <TouchableOpacity
             style={styles.fabMenuButton}
-            onPress={handleManualAdd}
+            onPress={handleQRScan}
           >
-            <Text style={styles.fabMenuIcon}>✏️</Text>
+            <Ionicons name="qr-code" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -552,9 +552,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-  },
-  fabMenuIcon: {
-    fontSize: 24,
   },
   fabMenuLabel: {
     color: '#FFFFFF',

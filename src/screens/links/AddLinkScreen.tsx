@@ -10,6 +10,7 @@ import {
   Platform,
   Text,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList } from '../../types';
@@ -181,8 +182,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
             onPress={() => setShowQRScanner(true)}
             disabled={loading}
           >
-            <Text style={styles.qrButtonText}>📷</Text>
-            <Text style={styles.qrButtonLabel}>QR</Text>
+            <Ionicons name="qr-code" size={28} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
@@ -253,15 +253,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 32,
-  },
-  qrButtonText: {
-    fontSize: 24,
-  },
-  qrButtonLabel: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '600',
-    marginTop: 2,
   },
   saveButton: {
     backgroundColor: '#007AFF',
