@@ -43,25 +43,25 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
  */
 let auth;
 try {
-  // 既に初期化済みかチェック
-  auth = getAuth(app);
-  if (__DEV__) {
-    console.log('Firebase Auth: Using existing instance');
-  }
-} catch (error) {
-  // 初期化されていない場合のみinitializeAuthを呼び出す
-  try {
-    // React Nativeの場合のみAsyncStorageを使用
-    auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-    });
+  // まず永続化設定付きで初期化を試みる
+  // 既に初期化されている場合、このコードは例外をスローする
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+  });
 
+  if (__DEV__) {
+    console.log('Firebase Auth: Initialized with AsyncStorage persistence');
+  }
+} catch (error: any) {
+  // 既に初期化済みの場合（error.code === 'auth/already-initialized'）
+  if (error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
     if (__DEV__) {
-      console.log('Firebase Auth: Initialized with AsyncStorage persistence');
+      console.log('Firebase Auth: Using existing instance (already initialized with persistence)');
     }
-  } catch (initError) {
-    console.error('Firebase Auth initialization error:', initError);
-    // フォールバック: persistenceなしで初期化を試みる
+  } else {
+    // その他のエラーの場合はフォールバック
+    console.error('Firebase Auth initialization error:', error);
     auth = getAuth(app);
     console.warn('Firebase Auth: Initialized WITHOUT persistence due to error');
   }
