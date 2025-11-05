@@ -12,10 +12,10 @@ if (result.error) {
 module.exports = {
   expo: {
     name: "LinksDeck",
-    slug: "LinksDeck",
+    slug: "LinkDeck",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/LinksDeck-icon.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
     scheme: "linksdeck",
