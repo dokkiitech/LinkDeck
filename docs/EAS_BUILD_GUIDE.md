@@ -1,6 +1,6 @@
 # EAS Build ガイド
 
-LinkDeckアプリをEAS（Expo Application Services）でビルドする手順を説明します。
+LinksDeckアプリをEAS（Expo Application Services）でビルドする手順を説明します。
 
 ## 前提条件
 

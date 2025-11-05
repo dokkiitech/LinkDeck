@@ -225,7 +225,7 @@ const SettingsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>iOSショートカット</Text>
         <Text style={styles.description}>
-          他のアプリからLinkDeckへURLを簡単に共有できるiOSショートカットをインストールできます。
+          他のアプリからLinksDeckへURLを簡単に共有できるiOSショートカットをインストールできます。
         </Text>
 
         <View style={styles.featureList}>
@@ -239,7 +239,7 @@ const SettingsScreen: React.FC = () => {
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
-            <Text style={styles.featureText}>ワンタップでLinkDeckに保存</Text>
+            <Text style={styles.featureText}>ワンタップでLinksDeckに保存</Text>
           </View>
         </View>
 

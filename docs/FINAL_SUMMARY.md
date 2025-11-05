@@ -1,4 +1,4 @@
-# 🎉 LinkDeck - 実装完了サマリー
+# 🎉 LinksDeck - 実装完了サマリー
 
 ## ✅ すべての実装が完了しました！
 
@@ -95,7 +95,7 @@
 ## 📂 プロジェクト構造
 
 ```
-LinkDeck/
+LinksDeck/
 ├── src/
 │   ├── config/
 │   │   └── firebase.ts              # Firebase設定
@@ -316,7 +316,7 @@ service cloud.firestore {
 
 ---
 
-**🎊 LinkDeckの開発が完了しました！**
+**🎊 LinksDeckの開発が完了しました！**
 
 すべての機能が実装され、開発サーバーも正常に起動しています。
 iOSシミュレータまたはAndroidエミュレータでアプリを起動して、新機能をお試しください！

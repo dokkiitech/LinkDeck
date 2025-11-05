@@ -2,7 +2,7 @@
 
 ## 概要
 
-iOS Share Extensionを使用すると、Safari やその他のアプリからURLを直接LinkDeckに共有できるようになります。
+iOS Share Extensionを使用すると、Safari やその他のアプリからURLを直接LinksDeckに共有できるようになります。
 
 ## 前提条件
 
@@ -26,16 +26,16 @@ eas build --profile development --platform ios
 ### ステップ2: Xcodeでプロジェクトを開く
 
 ```bash
-open ios/LinkDeck.xcworkspace
+open ios/LinksDeck.xcworkspace
 ```
 
 ### ステップ3: Share Extension Targetの追加
 
-1. Xcodeのプロジェクトナビゲータで、プロジェクトファイル（LinkDeck）を選択
+1. Xcodeのプロジェクトナビゲータで、プロジェクトファイル（LinksDeck）を選択
 2. 下部の「+」ボタンをクリックして新しいTargetを追加
 3. 「Share Extension」を検索して選択
 4. 以下の情報を入力：
-   - **Product Name**: LinkDeckShareExtension
+   - **Product Name**: LinksDeckShareExtension
    - **Organization Identifier**: あなたのBundle ID（例：com.yourcompany.linkdeck）
    - **Bundle Identifier**: com.yourcompany.linkdeck.ShareExtension
    - **Language**: Swift
@@ -43,7 +43,7 @@ open ios/LinkDeck.xcworkspace
 
 ### ステップ4: Share Extension Info.plist の設定
 
-`ios/LinkDeckShareExtension/Info.plist` を編集して、URL共有のみを許可するように設定：
+`ios/LinksDeckShareExtension/Info.plist` を編集して、URL共有のみを許可するように設定：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -53,7 +53,7 @@ open ios/LinkDeck.xcworkspace
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>LinkDeckに追加</string>
+    <string>LinksDeckに追加</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -89,7 +89,7 @@ open ios/LinkDeck.xcworkspace
 
 ### ステップ5: ShareViewController.swift の実装
 
-`ios/LinkDeckShareExtension/ShareViewController.swift` を以下の内容に置き換え：
+`ios/LinksDeckShareExtension/ShareViewController.swift` を以下の内容に置き換え：
 
 ```swift
 import UIKit
@@ -152,7 +152,7 @@ class ShareViewController: UIViewController {
     private func showSuccessAlert() {
         let alert = UIAlertController(
             title: "保存しました",
-            message: "URLをLinkDeckに追加しました",
+            message: "URLをLinksDeckに追加しました",
             preferredStyle: .alert
         )
 
@@ -218,7 +218,7 @@ const usePendingURLs = () => {
 
 App Groupのデータにアクセスするためのネイティブモジュールを作成：
 
-`ios/LinkDeck/SharedGroupManager.swift`:
+`ios/LinksDeck/SharedGroupManager.swift`:
 
 ```swift
 import Foundation
@@ -259,7 +259,7 @@ class SharedGroupManager: NSObject {
 }
 ```
 
-`ios/LinkDeck/SharedGroupManager.m`:
+`ios/LinksDeck/SharedGroupManager.m`:
 
 ```objc
 #import <React/RCTBridgeModule.h>
@@ -322,7 +322,7 @@ const AppNavigator: React.FC = () => {
 **処理フロー**:
 1. Share Extensionでユーザーが他アプリからURLを共有
 2. URLがApp Groupの`UserDefaults`に保存される
-3. LinkDeckアプリを開く（またはフォアグラウンドに戻す）
+3. LinksDeckアプリを開く（またはフォアグラウンドに戻す）
 4. `SharedURLHandler`が自動的にURLを検出
 5. メタデータを取得してFirestoreに保存
 6. 成功通知を表示

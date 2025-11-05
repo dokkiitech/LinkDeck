@@ -1,6 +1,6 @@
-# LinkDeck
+# LinksDeck
 
-**LinkDeck（リンクデッキ）** は、Webブラウジング中に見つけた有益な情報や後で読みたい記事のURLを簡単に保存・整理し、AIによる要約機能で効率的に内容を把握することを目的としたモバイルアプリケーションです。
+**LinksDeck（リンクデッキ）** は、Webブラウジング中に見つけた有益な情報や後で読みたい記事のURLを簡単に保存・整理し、AIによる要約機能で効率的に内容を把握することを目的としたモバイルアプリケーションです。
 
 ## 主な機能
 
@@ -26,7 +26,7 @@
 ## プロジェクト構造
 
 ```
-LinkDeck/
+LinksDeck/
 ├── src/
 │   ├── config/          # Firebase設定
 │   ├── contexts/        # React Context (認証など)
@@ -55,7 +55,7 @@ LinkDeck/
 ### 2. リポジトリのクローンと依存関係のインストール
 
 ```bash
-cd LinkDeck
+cd LinksDeck
 npm install
 ```
 
@@ -189,7 +189,7 @@ npx expo start -c
 
 ## 作者
 
-LinkDeck開発チーム
+LinksDeck開発チーム
 
 ## ローカルビルドコマンド
 ```

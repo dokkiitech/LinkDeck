@@ -4,7 +4,7 @@ EAS Buildで`.env`ファイルの環境変数を使用する方法を説明し�
 
 ## 概要
 
-LinkDeckアプリは、ビルド時にFirebaseの設定情報を環境変数から読み取ります。
+LinksDeckアプリは、ビルド時にFirebaseの設定情報を環境変数から読み取ります。
 EAS Buildでは、以下の2つの方法で環境変数を設定できます。
 
 ## 方法1: Expo Dashboardで設定（推奨）
@@ -12,7 +12,7 @@ EAS Buildでは、以下の2つの方法で環境変数を設定できます。
 ### ステップ1: Expo Dashboardにアクセス
 
 1. https://expo.dev にアクセスしてログイン
-2. LinkDeckプロジェクトを選択
+2. LinksDeckプロジェクトを選択
 3. 左サイドバーから「Secrets」を選択
 
 ### ステップ2: 環境変数を追加

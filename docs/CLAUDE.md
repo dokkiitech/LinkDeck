@@ -1,8 +1,8 @@
-# LinkDeck - プロジェクトドキュメント
+# LinksDeck - プロジェクトドキュメント
 
 ## プロジェクト概要
 
-LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読みたい記事のURLを簡単に保存・整理し、AIによる要約機能で効率的に内容を把握することを目的としたモバイルアプリケーションです。
+LinksDeckは、Webブラウジング中に見つけた有益な情報や後で読みたい記事のURLを簡単に保存・整理し、AIによる要約機能で効率的に内容を把握することを目的としたモバイルアプリケーションです。
 
 ## 実装状況（2025年10月29日時点）
 
@@ -50,7 +50,7 @@ LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読
    - Navigation型の定義
 
 8. **URL共有機能（URLスキーム経由）**
-   - expo-linkingを使用したURLスキーム（`linkdeck://share?url=...`）
+   - expo-linkingを使用したURLスキーム（`linksdeck://share?url=...`）
    - SharedURLHandlerコンポーネントによる自動URL保存
    - iOSショートカット経由での他アプリからのURL共有対応
    - URLメタデータの自動取得とタイトル設定
@@ -58,7 +58,7 @@ LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読
 ### 🚧 実装準備中の機能
 
 1. **iOS Share Extension（完全なネイティブ共有機能）**
-   - 標準の共有メニューからLinkDeckを直接選択可能に
+   - 標準の共有メニューからLinksDeckを直接選択可能に
    - App Groupsを使用したメインアプリとの連携
    - ネイティブコード（Swift）とExpo Config Pluginの実装が必要
 
@@ -85,7 +85,7 @@ LinkDeckは、Webブラウジング中に見つけた有益な情報や後で読
 ## プロジェクト構造
 
 ```
-LinkDeck/
+LinksDeck/
 ├── src/
 │   ├── config/              # Firebase設定
 │   │   └── firebase.ts      # Firebaseの初期化

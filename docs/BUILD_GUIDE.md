@@ -1,4 +1,4 @@
-# LinkDeck ビルドガイド
+# LinksDeck ビルドガイド
 
 ## 環境変数の設定
 

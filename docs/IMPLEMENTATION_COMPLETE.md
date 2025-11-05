@@ -1,4 +1,4 @@
-# LinkDeck - 実装完了レポート
+# LinksDeck - 実装完了レポート
 
 ## 🎉 実装完了した機能
 
@@ -126,9 +126,9 @@ const summary = await summarizeURL('your-api-key', 'https://example.com/article'
 **実装ファイル**: [`app.json`](app.json)
 
 **設定内容**:
-- URLスキーム: `linkdeck://`
-- iOS Bundle Identifier: `com.linkdeck.app`
-- Android Package: `com.linkdeck.app`
+- URLスキーム: `linksdeck://`
+- iOS Bundle Identifier: `com.linksdeck.app`
+- Android Package: `com.linksdeck.app`
 - NSAppTransportSecurityの設定（HTTP通信許可）
 - Android Intent Filters（URLスキーム対応）
 - expo-sharingプラグインの設定

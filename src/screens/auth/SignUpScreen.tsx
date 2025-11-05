@@ -74,7 +74,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>LinkDeck</Text>
+        <Text style={styles.title}>LinksDeck</Text>
         <Text style={styles.catchphrase}>URLを見返さない生活もうやめましょう</Text>
         <Text style={styles.subtitle}>新規登録</Text>
 
