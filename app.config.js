@@ -18,7 +18,7 @@ module.exports = {
     icon: "./assets/LinksDeck-icon.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
-    scheme: "linksdeck",
+    scheme: "linkdeck",
     splash: {
       image: "./assets/Now-loading.png",
       resizeMode: "contain",
@@ -36,7 +36,7 @@ module.exports = {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.linksdeck.app",
+      bundleIdentifier: "com.linkdeck.app",
       buildNumber: "19",
       infoPlist: {
         NSAppTransportSecurity: {
@@ -51,7 +51,7 @@ module.exports = {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      package: "com.linksdeck.app",
+      package: "com.linkdeck.app",
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       permissions: ["CAMERA"],
