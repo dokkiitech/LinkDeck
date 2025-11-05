@@ -108,13 +108,13 @@ firebase use --add
 firebase deploy --only firestore:rules
 ```
 
-詳細: [DEPLOY_FIRESTORE_RULES.md](DEPLOY_FIRESTORE_RULES.md)
+詳細: [DEPLOY_FIRESTORE_RULES.md](docs/DEPLOY_FIRESTORE_RULES.md)
 
 #### 方法B: Firebase Console（手動）
 
 Firebase Consoleで[`firestore.rules`](firestore.rules)ファイルの内容をコピー＆ペーストして公開
 
-詳細: [FIRESTORE_SETUP.md](FIRESTORE_SETUP.md)
+詳細: [FIRESTORE_SETUP.md](docs/FIRESTORE_SETUP.md)
 
 ### 6. アプリケーションの起動
 
@@ -196,3 +196,34 @@ LinkDeck開発チーム
 eas build --platform ios --local
 eas build --local --profile production
 ```
+
+## ドキュメント
+
+プロジェクトの詳細なドキュメントは `/docs` ディレクトリにあります。
+
+### セットアップガイド
+- [SETUP_GUIDE.md](docs/SETUP_GUIDE.md) - 詳細なセットアップ手順
+- [QUICKSTART.md](docs/QUICKSTART.md) - クイックスタートガイド
+- [ENV_SETUP_FOR_EAS.md](docs/ENV_SETUP_FOR_EAS.md) - EAS環境変数設定
+- [FIRESTORE_SETUP.md](docs/FIRESTORE_SETUP.md) - Firestoreセットアップ
+- [FIRESTORE_INDEX_GUI_SETUP.md](docs/FIRESTORE_INDEX_GUI_SETUP.md) - Firestoreインデックス設定（GUI）
+
+### ビルドとデプロイ
+- [BUILD_GUIDE.md](docs/BUILD_GUIDE.md) - ビルドガイド
+- [EAS_BUILD_GUIDE.md](docs/EAS_BUILD_GUIDE.md) - EASビルドガイド
+- [QUICK_DEPLOY.md](docs/QUICK_DEPLOY.md) - クイックデプロイ手順
+- [DEPLOY_FIRESTORE_RULES.md](docs/DEPLOY_FIRESTORE_RULES.md) - Firestoreルールのデプロイ
+- [DEPLOY_INDEXES.md](docs/DEPLOY_INDEXES.md) - インデックスのデプロイ
+
+### 機能ガイド
+- [SHARE_SETUP_GUIDE.md](docs/SHARE_SETUP_GUIDE.md) - URL共有機能セットアップ
+- [SHARE_EXTENSION_GUIDE.md](docs/SHARE_EXTENSION_GUIDE.md) - iOS共有拡張機能ガイド
+
+### プロジェクト情報
+- [CLAUDE.md](docs/CLAUDE.md) - プロジェクトドキュメント（開発状況、技術仕様）
+- [IMPLEMENTATION_COMPLETE.md](docs/IMPLEMENTATION_COMPLETE.md) - 実装完了記録
+- [FINAL_SUMMARY.md](docs/FINAL_SUMMARY.md) - プロジェクト最終サマリー
+- [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - トラブルシューティング
+
+### テンプレート
+- [pull_request_template.md](docs/pull_request_template.md) - プルリクエストテンプレート
