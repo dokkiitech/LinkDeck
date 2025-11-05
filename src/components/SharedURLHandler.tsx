@@ -53,7 +53,28 @@ const SharedURLHandler: React.FC = () => {
 
   const handleDeepLink = (event: { url: string }) => {
     console.log('[SharedURLHandler] Deep link event received:', event.url);
-    processURL(event.url);
+
+    // === ロック機構による排他制御 ===
+    // 既に処理中なら即座にブロック（ショートカットが2回イベントを発火する対策）
+    if (isProcessingRef.current) {
+      console.log('[SharedURLHandler] Already processing, blocking duplicate event');
+      return;
+    }
+
+    // ロック取得
+    isProcessingRef.current = true;
+    console.log('[SharedURLHandler] Lock acquired');
+
+    // 処理実行
+    processURL(event.url)
+      .catch(error => {
+        console.error('[SharedURLHandler] Error in processURL:', error);
+      })
+      .finally(() => {
+        // ロック解放（必ず実行）
+        isProcessingRef.current = false;
+        console.log('[SharedURLHandler] Lock released');
+      });
   };
 
   const processURL = async (url: string) => {
