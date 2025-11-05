@@ -222,39 +222,41 @@ const SettingsScreen: React.FC = () => {
         )}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>iOSショートカット</Text>
-        <Text style={styles.description}>
-          他のアプリからLinksDeckへURLを簡単に共有できるiOSショートカットをインストールできます。
-        </Text>
+      {Platform.OS === 'ios' && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>iOSショートカット</Text>
+          <Text style={styles.description}>
+            他のアプリからLinksDeckへURLを簡単に共有できるiOSショートカットをインストールできます。
+          </Text>
 
-        <View style={styles.featureList}>
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
-            <Text style={styles.featureText}>Safari、Chrome、その他のアプリから共有可能</Text>
+          <View style={styles.featureList}>
+            <View style={styles.featureItem}>
+              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Text style={styles.featureText}>Safari、Chrome、その他のアプリから共有可能</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Text style={styles.featureText}>URLとページタイトルを自動取得</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Text style={styles.featureText}>ワンタップでLinksDeckに保存</Text>
+            </View>
           </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
-            <Text style={styles.featureText}>URLとページタイトルを自動取得</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
-            <Text style={styles.featureText}>ワンタップでLinksDeckに保存</Text>
-          </View>
+
+          <TouchableOpacity
+            style={[styles.button, styles.shortcutButton]}
+            onPress={handleOpenShortcut}
+          >
+            <Ionicons name="download-outline" size={20} color="#FFFFFF" style={styles.buttonIcon} />
+            <Text style={styles.buttonText}>ショートカットをインストール</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.hint}>
+            ※ iOSの「ショートカット」アプリが必要です。タップするとショートカットのダウンロードページが開きます。
+          </Text>
         </View>
-
-        <TouchableOpacity
-          style={[styles.button, styles.shortcutButton]}
-          onPress={handleOpenShortcut}
-        >
-          <Ionicons name="download-outline" size={20} color="#FFFFFF" style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>ショートカットをインストール</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.hint}>
-          ※ iOSの「ショートカット」アプリが必要です。タップするとショートカットのダウンロードページが開きます。
-        </Text>
-      </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>リンク管理</Text>
