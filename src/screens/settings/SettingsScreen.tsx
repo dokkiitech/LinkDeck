@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { saveGeminiApiKey, getGeminiApiKey, removeGeminiApiKey } from '../../utils/storage';
 import { validateApiKey } from '../../services/gemini';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
@@ -180,7 +181,7 @@ const SettingsScreen: React.FC = () => {
         </Text>
 
         {isLoading ? (
-          <ActivityIndicator size="small" color="#007AFF" />
+          <ActivityIndicator size="small" color={colors.primary} />
         ) : hasApiKey ? (
           <View>
             <View style={styles.statusContainer}>
@@ -213,7 +214,7 @@ const SettingsScreen: React.FC = () => {
               disabled={isSaving}
             >
               {isSaving ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.text.inverse} />
               ) : (
                 <Text style={styles.buttonText}>APIキーを保存</Text>
               )}
@@ -231,15 +232,15 @@ const SettingsScreen: React.FC = () => {
 
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.semantic.success} style={styles.featureIcon} />
               <Text style={styles.featureText}>Safari、Chrome、その他のアプリから共有可能</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.semantic.success} style={styles.featureIcon} />
               <Text style={styles.featureText}>URLとページタイトルを自動取得</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.semantic.success} style={styles.featureIcon} />
               <Text style={styles.featureText}>ワンタップでLinksDeckに保存</Text>
             </View>
           </View>
@@ -248,7 +249,7 @@ const SettingsScreen: React.FC = () => {
             style={[styles.button, styles.shortcutButton]}
             onPress={handleOpenShortcut}
           >
-            <Ionicons name="download-outline" size={20} color="#FFFFFF" style={styles.buttonIcon} />
+            <Ionicons name="download-outline" size={20} color={colors.text.inverse} style={styles.buttonIcon} />
             <Text style={styles.buttonText}>ショートカットをインストール</Text>
           </TouchableOpacity>
 
@@ -265,10 +266,10 @@ const SettingsScreen: React.FC = () => {
           onPress={() => (navigation as any).navigate('Links', { screen: 'ArchivedLinks' })}
         >
           <View style={styles.menuItemContent}>
-            <Ionicons name="archive-outline" size={24} color="#007AFF" style={styles.menuIcon} />
+            <Ionicons name="archive-outline" size={24} color={colors.primary} style={styles.menuIcon} />
             <Text style={styles.menuItemText}>アーカイブしたリンク</Text>
           </View>
-          <Ionicons name="chevron-forward" size={24} color="#C7C7CC" />
+          <Ionicons name="chevron-forward" size={24} color={colors.text.subtlest} />
         </TouchableOpacity>
       </View>
 
@@ -295,139 +296,139 @@ const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    marginTop: 20,
-    padding: 20,
+    backgroundColor: colors.surface.default,
+    marginTop: semanticSpacing.sectionGap,
+    padding: semanticSpacing.screenPadding,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 15,
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space200,
   },
   description: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 15,
-    lineHeight: 20,
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space200,
+    lineHeight: textStyles.label.lineHeight,
   },
   infoContainer: {
-    marginBottom: 15,
+    marginBottom: spacing.space200,
   },
   label: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 5,
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space75,
   },
   value: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.default,
     fontWeight: '500',
   },
   input: {
-    height: 50,
+    height: semanticSpacing.inputHeight,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    backgroundColor: '#F9F9F9',
+    borderColor: colors.border.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space200,
+    marginBottom: spacing.space200,
+    fontSize: textStyles.body.fontSize,
+    backgroundColor: colors.background.neutral,
   },
   button: {
-    height: 50,
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
+    height: semanticSpacing.buttonHeight,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.interactive.disabled,
   },
   removeButton: {
-    backgroundColor: '#FF9500',
-    marginTop: 10,
+    backgroundColor: colors.semantic.warning,
+    marginTop: spacing.space150,
   },
   upgradeButton: {
-    backgroundColor: '#34C759',
-    marginTop: 15,
-    marginBottom: 10,
+    backgroundColor: colors.semantic.success,
+    marginTop: spacing.space200,
+    marginBottom: spacing.space150,
   },
   logoutButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.semantic.danger,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
-    padding: 15,
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
+    marginBottom: spacing.space200,
+    padding: spacing.space200,
+    backgroundColor: colors.background.neutral,
+    borderRadius: semanticSpacing.radiusMedium,
   },
   statusLabel: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginRight: 10,
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
+    marginRight: spacing.space150,
   },
   statusSuccess: {
-    fontSize: 14,
-    color: '#34C759',
-    fontWeight: '600',
+    fontSize: textStyles.label.fontSize,
+    color: colors.semantic.success,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   hint: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginTop: 10,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
+    marginTop: spacing.space150,
     fontStyle: 'italic',
   },
   shortcutButton: {
-    backgroundColor: '#5856D6',
+    backgroundColor: colors.semantic.discovery,
     flexDirection: 'row',
-    marginBottom: 5,
+    marginBottom: spacing.space75,
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: spacing.space100,
   },
   featureList: {
-    marginBottom: 20,
+    marginBottom: semanticSpacing.sectionGap,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.space150,
   },
   featureIcon: {
-    marginRight: 10,
+    marginRight: spacing.space150,
   },
   featureText: {
-    fontSize: 14,
-    color: '#000000',
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.default,
     flex: 1,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: spacing.space150,
   },
   menuItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   menuIcon: {
-    marginRight: 12,
+    marginRight: spacing.space150,
   },
   menuItemText: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.default,
   },
 });
 

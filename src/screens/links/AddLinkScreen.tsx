@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -24,6 +23,8 @@ import { TitleInput } from '../../components/links/TitleInput';
 import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
+import { Button } from '../../components/ui/Button';
+import { colors, spacing, semanticSpacing } from '../../theme/tokens';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -232,17 +233,13 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
           disabled={loading}
         />
 
-        <TouchableOpacity
-          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+        <Button
+          title="保存"
           onPress={handleAddLink}
           disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.saveButtonText}>保存</Text>
-          )}
-        </TouchableOpacity>
+          loading={loading}
+          variant="primary"
+        />
       </ScrollView>
 
       <QRCodeScanner
@@ -257,46 +254,31 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   urlSection: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 25,
-    gap: 10,
+    marginBottom: semanticSpacing.sectionGap,
+    gap: spacing.space150,
   },
   urlInputWrapper: {
     flex: 1,
   },
   qrButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
     width: 60,
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 32,
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#B0B0B0',
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
   },
 });
 

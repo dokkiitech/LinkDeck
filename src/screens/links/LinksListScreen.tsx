@@ -19,6 +19,7 @@ import { getUserLinks, deleteLink, createLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -200,7 +201,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -211,17 +212,18 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       {/* 検索バー */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color={colors.text.subtle} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="タイトル、URL、タグで検索..."
+          placeholderTextColor={colors.text.subtle}
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-            <Ionicons name="close-circle" size={20} color="#8E8E93" />
+            <Ionicons name="close-circle" size={20} color={colors.text.subtle} />
           </TouchableOpacity>
         )}
       </View>
@@ -302,7 +304,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.fabMenuButton}
             onPress={handleManualAdd}
           >
-            <Ionicons name="create-outline" size={24} color="#FFFFFF" />
+            <Ionicons name="create-outline" size={24} color={colors.text.inverse} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -337,7 +339,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.fabMenuButton}
             onPress={handleQRScan}
           >
-            <Ionicons name="qr-code" size={24} color="#FFFFFF" />
+            <Ionicons name="qr-code" size={24} color={colors.text.inverse} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -379,140 +381,140 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    margin: 10,
-    marginBottom: 5,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    shadowColor: '#000',
+    backgroundColor: colors.surface.default,
+    margin: spacing.space150,
+    marginBottom: spacing.space75,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space150,
+    paddingVertical: spacing.space100,
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: spacing.space100,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#000000',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.default,
     padding: 0,
   },
   clearButton: {
-    padding: 4,
+    padding: spacing.space50,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginBottom: 10,
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.subtle,
+    marginBottom: spacing.space150,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
     textAlign: 'center',
   },
   listContent: {
-    padding: 10,
+    padding: spacing.space150,
   },
   sectionHeader: {
-    backgroundColor: '#F2F2F7',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    marginTop: 10,
+    backgroundColor: colors.background.default,
+    paddingHorizontal: spacing.space200,
+    paddingVertical: spacing.space100,
+    marginTop: spacing.space150,
   },
   sectionHeaderText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.default,
   },
   linkItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 10,
+    backgroundColor: colors.surface.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    marginBottom: spacing.space150,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   linkContent: {
-    padding: 15,
+    padding: spacing.space200,
   },
   linkTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 5,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.bodyBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space75,
   },
   linkUrl: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginBottom: 10,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space150,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 10,
+    marginBottom: spacing.space150,
   },
   tag: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 5,
-    marginBottom: 5,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space150,
+    paddingVertical: spacing.space75,
+    marginRight: spacing.space75,
+    marginBottom: spacing.space75,
   },
   tagText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    color: colors.text.inverse,
+    fontSize: textStyles.caption.fontSize,
   },
   linkDate: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
   },
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 20,
+    right: semanticSpacing.screenPadding,
+    bottom: semanticSpacing.screenPadding,
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     zIndex: 10,
   },
   fabRotated: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.semantic.danger,
   },
   fabText: {
-    color: '#FFFFFF',
+    color: colors.text.inverse,
     fontSize: 32,
     fontWeight: '300',
     marginTop: -2,
@@ -523,13 +525,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: colors.surface.overlay,
     zIndex: 8,
   },
   fabMenuItem: {
     position: 'absolute',
-    right: 20,
-    bottom: 20,
+    right: semanticSpacing.screenPadding,
+    bottom: semanticSpacing.screenPadding,
     alignItems: 'center',
     zIndex: 9,
   },
@@ -544,25 +546,25 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
   fabMenuLabel: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 5,
-    marginRight: 8,
+    color: colors.text.inverse,
+    fontSize: textStyles.caption.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    marginBottom: spacing.space75,
+    marginRight: spacing.space100,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    paddingHorizontal: spacing.space100,
+    paddingVertical: spacing.space50,
+    borderRadius: spacing.space50,
   },
 });
 
