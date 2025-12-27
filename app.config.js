@@ -9,6 +9,40 @@ if (result.error) {
   console.warn('Warning: .env file not found or could not be loaded');
 }
 
+// プラグインリストを構築（Web版では一部のネイティブプラグインを除外）
+const buildPlugins = () => {
+  const plugins = [
+    "expo-font",
+    "expo-dev-client",
+    [
+      "expo-camera",
+      {
+        "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
+      }
+    ]
+  ];
+
+  // Web版ビルドではreact-native-share-menuを除外
+  // (react-native-share-menuはネイティブ専用)
+  // コマンドライン引数に'web'が含まれているか、'--platform web'が指定されているかチェック
+  const args = process.argv.join(' ');
+  const isWebBuild = args.includes('web') && (args.includes('--platform') || args.includes('export'));
+
+  if (!isWebBuild) {
+    plugins.push([
+      "react-native-share-menu",
+      {
+        iosActivationRules: {
+          NSExtensionActivationSupportsWebURLWithMaxCount: 1,
+          NSExtensionActivationSupportsText: true
+        }
+      }
+    ]);
+  }
+
+  return plugins;
+};
+
 module.exports = {
   expo: {
     name: "LinksDeck",
@@ -98,24 +132,6 @@ module.exports = {
       firebaseMessagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
     },
-    plugins: [
-      "expo-font",
-      "expo-dev-client",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
-        }
-      ],
-      [
-        "react-native-share-menu",
-        {
-          iosActivationRules: {
-            NSExtensionActivationSupportsWebURLWithMaxCount: 1,
-            NSExtensionActivationSupportsText: true
-          }
-        }
-      ]
-    ]
+    plugins: buildPlugins()
   }
 };
