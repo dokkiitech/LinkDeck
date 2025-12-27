@@ -23,8 +23,7 @@ import { TitleInput } from '../../components/links/TitleInput';
 import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
-import { Button } from '../../components/ui/Button';
-import { colors, spacing, semanticSpacing } from '../../theme/tokens';
+import NFCReader from '../../components/links/NFCReader';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -47,6 +46,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
   const [newTagName, setNewTagName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showNFCReader, setShowNFCReader] = useState(false);
   const [fetchingTitle, setFetchingTitle] = useState(false);
 
   // カスタムフックを使用してタグ管理
@@ -188,6 +188,14 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
     setInputText(url);
   };
 
+  const handleNFCScanned = (url: string) => {
+    setInputText(url);
+    // タイトルが未入力の場合は自動取得
+    if (!titleText) {
+      fetchAndSetTitle(url);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -198,21 +206,32 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.urlSection}>
-          <View style={styles.urlInputWrapper}>
-            <URLInput
-              value={inputText}
-              onChangeText={setInputText}
-              editable={!loading}
-            />
+        <URLInput
+          value={inputText}
+          onChangeText={setInputText}
+          editable={!loading}
+        />
+
+        <View style={styles.scanButtonsSection}>
+          <Text style={styles.scanButtonsLabel}>スキャン</Text>
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setShowNFCReader(true)}
+              disabled={loading}
+            >
+              <Ionicons name="radio-outline" size={24} color="#007AFF" />
+              <Text style={styles.scanButtonText}>NFC</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setShowQRScanner(true)}
+              disabled={loading}
+            >
+              <Ionicons name="qr-code" size={24} color="#007AFF" />
+              <Text style={styles.scanButtonText}>QR</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.qrButton}
-            onPress={() => setShowQRScanner(true)}
-            disabled={loading}
-          >
-            <Ionicons name="qr-code" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
         </View>
 
         <TitleInput
@@ -247,6 +266,12 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
         onClose={() => setShowQRScanner(false)}
         onScan={handleQRCodeScanned}
       />
+
+      <NFCReader
+        visible={showNFCReader}
+        onClose={() => setShowNFCReader(false)}
+        onScan={handleNFCScanned}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -262,23 +287,36 @@ const styles = StyleSheet.create({
   content: {
     padding: semanticSpacing.screenPadding,
   },
-  urlSection: {
+  scanButtonsSection: {
+    marginBottom: 25,
+  },
+  scanButtonsLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 10,
+  },
+  buttonGroup: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: semanticSpacing.sectionGap,
-    gap: spacing.space150,
+    gap: 15,
   },
-  urlInputWrapper: {
+  scanButton: {
     flex: 1,
-  },
-  qrButton: {
-    backgroundColor: colors.primary,
-    borderRadius: semanticSpacing.radiusMedium,
-    width: 60,
-    height: 60,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 32,
+    gap: 8,
+  },
+  scanButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#007AFF',
   },
 });
 

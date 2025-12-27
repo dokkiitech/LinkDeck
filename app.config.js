@@ -9,6 +9,40 @@ if (result.error) {
   console.warn('Warning: .env file not found or could not be loaded');
 }
 
+// プラグインリストを構築（Web版では一部のネイティブプラグインを除外）
+const buildPlugins = () => {
+  const plugins = [
+    "expo-font",
+    "expo-dev-client",
+    [
+      "expo-camera",
+      {
+        "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
+      }
+    ]
+  ];
+
+  // Web版ビルドではexpo-share-intentを除外
+  // (expo-share-intentはネイティブ専用)
+  // コマンドライン引数に'web'が含まれているか、'--platform web'が指定されているかチェック
+  const args = process.argv.join(' ');
+  const isWebBuild = args.includes('web') && (args.includes('--platform') || args.includes('export'));
+
+  if (!isWebBuild) {
+    plugins.push([
+      "expo-share-intent",
+      {
+        iosActivationRules: {
+          NSExtensionActivationSupportsWebURLWithMaxCount: 1,
+          NSExtensionActivationSupportsText: true
+        }
+      }
+    ]);
+  }
+
+  return plugins;
+};
+
 module.exports = {
   expo: {
     name: "LinksDeck",
@@ -43,7 +77,17 @@ module.exports = {
           NSAllowsArbitraryLoads: true
         },
         ITSAppUsesNonExemptEncryption: false,
-        NSCameraUsageDescription: "QRコードを読み取るためにカメラへのアクセスが必要です"
+        NSCameraUsageDescription: "QRコードを読み取るためにカメラへのアクセスが必要です",
+        NFCReaderUsageDescription: "NFCタグからURLを読み取るためにNFCへのアクセスが必要です",
+        CFBundleURLTypes: [
+          {
+            CFBundleURLSchemes: ["linkdeck"]
+          }
+        ]
+      },
+      entitlements: {
+        "com.apple.developer.nfc.readersession.formats": ["TAG"],
+        "com.apple.security.application-groups": ["group.com.linkdeck.app"]
       }
     },
     android: {
@@ -54,7 +98,7 @@ module.exports = {
       package: "com.linkdeck.app",
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      permissions: ["CAMERA"],
+      permissions: ["CAMERA", "NFC"],
       intentFilters: [
         {
           action: "VIEW",
@@ -88,15 +132,6 @@ module.exports = {
       firebaseMessagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
     },
-    plugins: [
-      "expo-font",
-      "expo-dev-client",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
-        }
-      ]
-    ]
+    plugins: buildPlugins()
   }
 };
