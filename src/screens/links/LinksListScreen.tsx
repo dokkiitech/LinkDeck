@@ -19,6 +19,7 @@ import { getUserLinks, deleteLink, createLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
+import NFCReader from '../../components/links/NFCReader';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -37,6 +38,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFabMenu, setShowFabMenu] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showNFCReader, setShowNFCReader] = useState(false);
   const [fabAnimation] = useState(new Animated.Value(0));
 
   const loadLinks = async () => {
@@ -105,6 +107,22 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const handleQRCodeScanned = (url: string) => {
     setShowQRScanner(false);
     // QRコードから読み取ったURLを持ってAddLink画面に遷移
+    navigation.navigate('AddLink', { initialUrl: url } as any);
+  };
+
+  const handleNFCScan = () => {
+    setShowFabMenu(false);
+    Animated.timing(fabAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+    setShowNFCReader(true);
+  };
+
+  const handleNFCScanned = (url: string) => {
+    setShowNFCReader(false);
+    // NFCから読み取ったURLを持ってAddLink画面に遷移
     navigation.navigate('AddLink', { initialUrl: url } as any);
   };
 
@@ -342,6 +360,47 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         </Animated.View>
       )}
 
+      {/* FAB Menu Items - NFC（右上） */}
+      {showFabMenu && (
+        <Animated.View
+          style={[
+            styles.fabMenuItem,
+            styles.fabMenuItemTopRight,
+            {
+              transform: [
+                {
+                  translateX: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 80],
+                  }),
+                },
+                {
+                  translateY: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -80],
+                  }),
+                },
+                {
+                  scale: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ],
+              opacity: fabAnimation,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.fabMenuButton}
+            onPress={handleNFCScan}
+          >
+            <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.fabMenuLabelRight}>NFC</Text>
+        </Animated.View>
+      )}
+
       {/* Floating Action Button */}
       <TouchableOpacity
         style={[styles.fab, showFabMenu && styles.fabRotated]}
@@ -371,6 +430,13 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         visible={showQRScanner}
         onClose={() => setShowQRScanner(false)}
         onScan={handleQRCodeScanned}
+      />
+
+      {/* NFC Reader */}
+      <NFCReader
+        visible={showNFCReader}
+        onClose={() => setShowNFCReader(false)}
+        onScan={handleNFCScanned}
       />
     </View>
   );
@@ -540,6 +606,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  fabMenuItemTopRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   fabMenuButton: {
     width: 50,
     height: 50,
@@ -559,6 +629,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 5,
     marginRight: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  fabMenuLabelRight: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 5,
+    marginLeft: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,
