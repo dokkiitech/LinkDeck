@@ -284,24 +284,51 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {/* FAB Menu Items - 手動入力（左上） */}
+      {/* FAB Menu Items - NFC */}
       {showFabMenu && (
         <Animated.View
           style={[
             styles.fabMenuItem,
-            styles.fabMenuItemTopLeft,
             {
               transform: [
                 {
-                  translateX: fabAnimation.interpolate({
+                  translateY: fabAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -80],
+                    outputRange: [0, -250],
                   }),
                 },
                 {
+                  scale: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ],
+              opacity: fabAnimation,
+            },
+          ]}
+        >
+          <Text style={styles.fabMenuLabel}>NFC</Text>
+          <TouchableOpacity
+            style={styles.fabMenuButton}
+            onPress={handleNFCScan}
+          >
+            <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      {/* FAB Menu Items - 手動入力 */}
+      {showFabMenu && (
+        <Animated.View
+          style={[
+            styles.fabMenuItem,
+            {
+              transform: [
+                {
                   translateY: fabAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -80],
+                    outputRange: [0, -165],
                   }),
                 },
                 {
@@ -325,55 +352,13 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         </Animated.View>
       )}
 
-      {/* FAB Menu Items - QRコード（真上） */}
+      {/* FAB Menu Items - QRコード */}
       {showFabMenu && (
         <Animated.View
           style={[
             styles.fabMenuItem,
-            styles.fabMenuItemTop,
             {
               transform: [
-                {
-                  translateY: fabAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -100],
-                  }),
-                },
-                {
-                  scale: fabAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 1],
-                  }),
-                },
-              ],
-              opacity: fabAnimation,
-            },
-          ]}
-        >
-          <Text style={styles.fabMenuLabel}>QRコード</Text>
-          <TouchableOpacity
-            style={styles.fabMenuButton}
-            onPress={handleQRScan}
-          >
-            <Ionicons name="qr-code" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-
-      {/* FAB Menu Items - NFC（右上） */}
-      {showFabMenu && (
-        <Animated.View
-          style={[
-            styles.fabMenuItem,
-            styles.fabMenuItemTopRight,
-            {
-              transform: [
-                {
-                  translateX: fabAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 80],
-                  }),
-                },
                 {
                   translateY: fabAnimation.interpolate({
                     inputRange: [0, 1],
@@ -391,13 +376,13 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
+          <Text style={styles.fabMenuLabel}>QR</Text>
           <TouchableOpacity
             style={styles.fabMenuButton}
-            onPress={handleNFCScan}
+            onPress={handleQRScan}
           >
-            <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+            <Ionicons name="qr-code" size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.fabMenuLabelRight}>NFC</Text>
         </Animated.View>
       )}
 
@@ -596,19 +581,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
+    flexDirection: 'row',
     alignItems: 'center',
     zIndex: 9,
-  },
-  fabMenuItemTop: {
-    alignItems: 'center',
-  },
-  fabMenuItemTopLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fabMenuItemTopRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   fabMenuButton: {
     width: 50,
@@ -627,19 +602,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
-    marginBottom: 5,
     marginRight: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  fabMenuLabelRight: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 5,
-    marginLeft: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,

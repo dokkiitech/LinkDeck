@@ -207,28 +207,30 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.urlSection}>
-          <View style={styles.urlInputWrapper}>
-            <URLInput
-              value={inputText}
-              onChangeText={setInputText}
-              editable={!loading}
-            />
-          </View>
+        <URLInput
+          value={inputText}
+          onChangeText={setInputText}
+          editable={!loading}
+        />
+
+        <View style={styles.scanButtonsSection}>
+          <Text style={styles.scanButtonsLabel}>スキャン</Text>
           <View style={styles.buttonGroup}>
-            <TouchableOpacity
-              style={styles.scanButton}
-              onPress={() => setShowQRScanner(true)}
-              disabled={loading}
-            >
-              <Ionicons name="qr-code" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
             <TouchableOpacity
               style={styles.scanButton}
               onPress={() => setShowNFCReader(true)}
               disabled={loading}
             >
-              <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+              <Ionicons name="radio-outline" size={24} color="#007AFF" />
+              <Text style={styles.scanButtonText}>NFC</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setShowQRScanner(true)}
+              disabled={loading}
+            >
+              <Ionicons name="qr-code" size={24} color="#007AFF" />
+              <Text style={styles.scanButtonText}>QR</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -290,27 +292,36 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  urlSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  scanButtonsSection: {
     marginBottom: 25,
-    gap: 10,
   },
-  urlInputWrapper: {
-    flex: 1,
+  scanButtonsLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 10,
   },
   buttonGroup: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 32,
+    gap: 15,
   },
   scanButton: {
-    backgroundColor: '#007AFF',
+    flex: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    width: 60,
-    height: 60,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 8,
+  },
+  scanButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#007AFF',
   },
   saveButton: {
     backgroundColor: '#007AFF',
