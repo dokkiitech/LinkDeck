@@ -415,14 +415,26 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
 
         <TouchableOpacity
-          style={styles.generateSummaryButton}
+          style={[
+            styles.generateSummaryButton,
+            Platform.OS === 'web' && styles.disabledButton
+          ]}
           onPress={handleGenerateSummary}
-          disabled={generatingSummary}
+          disabled={generatingSummary || Platform.OS === 'web'}
         >
-          <Text style={styles.generateSummaryButtonText}>
+          <Text style={[
+            styles.generateSummaryButtonText,
+            Platform.OS === 'web' && styles.disabledButtonText
+          ]}>
             {generatingSummary ? 'AI要約生成中...' : 'AI要約を生成'}
           </Text>
         </TouchableOpacity>
+
+        {Platform.OS === 'web' && (
+          <Text style={styles.webNotice}>
+            要約機能はアプリ版から利用してください
+          </Text>
+        )}
 
         {link.summary && (
           <View style={styles.summaryContainer}>
@@ -711,6 +723,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabledButton: {
+    backgroundColor: '#C7C7CC',
+  },
+  disabledButtonText: {
+    color: '#8E8E93',
+  },
+  webNotice: {
+    fontSize: 12,
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginTop: -15,
+    marginBottom: 20,
   },
   menuOverlay: {
     flex: 1,
