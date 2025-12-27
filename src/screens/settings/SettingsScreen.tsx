@@ -173,54 +173,56 @@ const SettingsScreen: React.FC = () => {
         )}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Gemini API設定</Text>
-        <Text style={styles.description}>
-          AI要約機能を使用するには、Google AI Studioで取得したGemini APIキーを入力してください。
-        </Text>
+      {Platform.OS !== 'web' && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Gemini API設定</Text>
+          <Text style={styles.description}>
+            AI要約機能を使用するには、Google AI Studioで取得したGemini APIキーを入力してください。
+          </Text>
 
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#007AFF" />
-        ) : hasApiKey ? (
-          <View>
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusLabel}>状態:</Text>
-              <Text style={styles.statusSuccess}>APIキー設定済み ✓</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#007AFF" />
+          ) : hasApiKey ? (
+            <View>
+              <View style={styles.statusContainer}>
+                <Text style={styles.statusLabel}>状態:</Text>
+                <Text style={styles.statusSuccess}>APIキー設定済み ✓</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.button, styles.removeButton]}
+                onPress={handleRemoveApiKey}
+              >
+                <Text style={styles.buttonText}>APIキーを削除</Text>
+              </TouchableOpacity>
+              <Text style={styles.hint}>
+                ※ 新しいAPIキーを設定するには、まず既存のキーを削除してください
+              </Text>
             </View>
-            <TouchableOpacity
-              style={[styles.button, styles.removeButton]}
-              onPress={handleRemoveApiKey}
-            >
-              <Text style={styles.buttonText}>APIキーを削除</Text>
-            </TouchableOpacity>
-            <Text style={styles.hint}>
-              ※ 新しいAPIキーを設定するには、まず既存のキーを削除してください
-            </Text>
-          </View>
-        ) : (
-          <View>
-            <TextInput
-              style={styles.input}
-              placeholder="Gemini APIキー"
-              value={geminiApiKey}
-              onChangeText={setGeminiApiKey}
-              secureTextEntry
-              editable={!isSaving}
-            />
-            <TouchableOpacity
-              style={[styles.button, isSaving && styles.buttonDisabled]}
-              onPress={handleSaveApiKey}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.buttonText}>APIキーを保存</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+          ) : (
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="Gemini APIキー"
+                value={geminiApiKey}
+                onChangeText={setGeminiApiKey}
+                secureTextEntry
+                editable={!isSaving}
+              />
+              <TouchableOpacity
+                style={[styles.button, isSaving && styles.buttonDisabled]}
+                onPress={handleSaveApiKey}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.buttonText}>APIキーを保存</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
 
       {Platform.OS === 'ios' && (
         <View style={styles.section}>

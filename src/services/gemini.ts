@@ -78,11 +78,22 @@ export const summarizeURL = async (
   } catch (error: any) {
     if (__DEV__) {
       console.error('[Gemini] Error summarizing URL:', error);
+      console.error('[Gemini] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
     }
     // 十分なコンテンツがない場合は専用のエラーコードを返す
     if (error.message === 'INSUFFICIENT_CONTENT') {
       throw error;
     }
+
+    // TLSエラーの詳細をユーザーに伝える
+    if (error.message?.includes('TLS') || error.message?.includes('SSL') || error.message?.includes('certificate')) {
+      throw new Error('ネットワーク接続エラー: セキュアな接続を確立できませんでした');
+    }
+
     throw new Error(error.message || 'URL要約中にエラーが発生しました');
   }
 };
