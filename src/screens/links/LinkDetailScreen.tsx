@@ -161,7 +161,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         return;
       }
 
-      const summary = await summarizeURL(apiKey, link.url);
+      const summary = await summarizeURL(link.url);
       await updateLink(linkId, { summary });
       setLink((prev) => (prev ? { ...prev, summary } : null));
 

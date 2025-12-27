@@ -38,13 +38,17 @@ service cloud.firestore {
       allow create: if isOwner(userId)
                     && request.resource.data.keys().hasAll(['email', 'createdAt'])
                     && request.resource.data.email is string
-                    && request.resource.data.createdAt is timestamp;
+                    && request.resource.data.createdAt is timestamp
+                    // encryptedGeminiKeyはクライアントから直接設定不可
+                    && !request.resource.data.keys().hasAny(['encryptedGeminiKey']);
 
       // 更新: 自分のユーザー情報のみ更新可能
       // userIdとcreatedAtは変更不可
+      // encryptedGeminiKeyはクライアントから直接変更不可（Cloud Functionsのみ）
       allow update: if isOwner(userId)
                     && request.resource.data.userId == resource.data.userId
-                    && request.resource.data.createdAt == resource.data.createdAt;
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && !request.resource.data.keys().hasAny(['encryptedGeminiKey']);
 
       // 削除: 自分のユーザー情報のみ削除可能
       allow delete: if isOwner(userId);
