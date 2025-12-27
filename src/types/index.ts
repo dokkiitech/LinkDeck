@@ -89,6 +89,7 @@ export type LinksStackParamList = {
   AddLink: { initialUrl?: string } | undefined;
   LinkDetail: { linkId: string };
   ArchivedLinks: undefined;
+  AgentSearch: undefined;
 };
 
 export type TagsStackParamList = {
