@@ -59,6 +59,7 @@ module.exports = {
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       permissions: ["CAMERA", "NFC"],
+      usesCleartextTraffic: true,
       intentFilters: [
         {
           action: "VIEW",
