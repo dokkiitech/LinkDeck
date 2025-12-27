@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 interface URLInputProps {
   value: string;
@@ -35,20 +36,20 @@ export const URLInput: React.FC<URLInputProps> = ({
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: 25,
+    marginBottom: semanticSpacing.sectionGap,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 10,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space100,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
+    backgroundColor: colors.surface.default,
+    borderRadius: spacing.space100,
+    padding: spacing.space150,
+    fontSize: textStyles.body.fontSize,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.border.default,
   },
 });

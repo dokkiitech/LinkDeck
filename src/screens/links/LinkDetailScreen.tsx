@@ -21,6 +21,7 @@ import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, dele
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 type LinkDetailScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -60,7 +61,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           onPress={() => setShowMenu(true)}
           style={{ marginRight: 15, padding: 8 }}
         >
-          <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
+          <Ionicons name="ellipsis-horizontal" size={24} color={colors.text.default} />
         </TouchableOpacity>
       ),
     });
@@ -372,7 +373,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -398,7 +399,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           <View style={styles.tagsHeader}>
             <Text style={styles.tagsLabel}>タグ:</Text>
             <TouchableOpacity onPress={handleOpenTagModal} style={styles.editTagButton}>
-              <Ionicons name="add-circle" size={24} color="#007AFF" />
+              <Ionicons name="add-circle" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
           {link.tags.length > 0 ? (
@@ -606,7 +607,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                       {tag.name}
                     </Text>
                     {isSelected && (
-                      <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
+                      <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
                     )}
                   </TouchableOpacity>
                 );
@@ -622,208 +623,208 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   errorText: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.subtle,
   },
   content: {
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 10,
+    fontSize: textStyles.h2.fontSize,
+    fontWeight: textStyles.h2.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space150,
   },
   urlContainer: {
-    marginBottom: 15,
+    marginBottom: spacing.space200,
   },
   url: {
-    fontSize: 14,
-    color: '#007AFF',
+    fontSize: textStyles.label.fontSize,
+    color: colors.primary,
     textDecorationLine: 'underline',
   },
   tagsContainer: {
-    marginBottom: 20,
+    marginBottom: semanticSpacing.sectionGap,
   },
   tagsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.space150,
   },
   tagsLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
+    fontSize: textStyles.label.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    color: colors.text.default,
   },
   editTagButton: {
-    padding: 4,
+    padding: spacing.space50,
   },
   editTagButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.caption.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   tags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   tag: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 5,
-    marginBottom: 5,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space150,
+    paddingVertical: spacing.space75,
+    marginRight: spacing.space75,
+    marginBottom: spacing.space75,
   },
   tagText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    color: colors.text.inverse,
+    fontSize: textStyles.caption.fontSize,
   },
   noTagsText: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
     fontStyle: 'italic',
   },
   generateSummaryButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
-    padding: 15,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
+    padding: spacing.space200,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: semanticSpacing.sectionGap,
   },
   generateSummaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.surface.overlay,
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
     paddingTop: 100,
-    paddingRight: 10,
+    paddingRight: spacing.space150,
   },
   menuContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: colors.surface.default,
+    borderRadius: semanticSpacing.radiusMedium,
     minWidth: 200,
-    shadowColor: '#000',
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 5,
   },
   menuItem: {
-    padding: 16,
+    padding: spacing.space200,
     alignItems: 'center',
   },
   menuItemText: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.default,
   },
   menuItemDangerText: {
-    fontSize: 16,
-    color: '#FF3B30',
+    fontSize: textStyles.body.fontSize,
+    color: colors.semantic.danger,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.border.default,
   },
   summaryContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
+    backgroundColor: colors.surface.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    padding: spacing.space200,
+    marginBottom: semanticSpacing.sectionGap,
   },
   summaryLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 10,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space150,
   },
   summaryText: {
-    fontSize: 14,
-    color: '#000000',
-    lineHeight: 20,
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.default,
+    lineHeight: textStyles.label.lineHeight,
   },
   date: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
     textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.surface.overlay,
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    backgroundColor: colors.surface.default,
+    borderTopLeftRadius: semanticSpacing.sectionGap,
+    borderTopRightRadius: semanticSpacing.sectionGap,
+    padding: semanticSpacing.screenPadding,
     maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: semanticSpacing.sectionGap,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.default,
   },
   modalCloseButton: {
     fontSize: 32,
-    color: '#8E8E93',
+    color: colors.text.subtle,
     fontWeight: '300',
   },
   newTagContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: semanticSpacing.sectionGap,
   },
   newTagInput: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-    marginRight: 10,
+    backgroundColor: colors.background.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    padding: spacing.space150,
+    fontSize: textStyles.body.fontSize,
+    marginRight: spacing.space150,
   },
   addNewTagButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
-    paddingHorizontal: 20,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: semanticSpacing.sectionGap,
     justifyContent: 'center',
   },
   addNewTagButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   existingTagsLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 10,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space150,
   },
   tagsList: {
     maxHeight: 300,
@@ -832,64 +833,64 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
+    backgroundColor: colors.background.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    padding: spacing.space200,
+    marginBottom: spacing.space150,
   },
   tagItemSelected: {
     backgroundColor: '#E3F2FD',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   tagItemText: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.default,
   },
   tagItemTextSelected: {
-    color: '#007AFF',
-    fontWeight: '600',
+    color: colors.primary,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   checkmark: {
     fontSize: 18,
-    color: '#007AFF',
+    color: colors.primary,
     fontWeight: 'bold',
   },
   editFormContainer: {
-    marginBottom: 20,
+    marginBottom: semanticSpacing.sectionGap,
   },
   inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 8,
-    marginTop: 10,
+    fontSize: textStyles.label.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space100,
+    marginTop: spacing.space150,
   },
   editInput: {
-    backgroundColor: '#F2F2F7',
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
+    backgroundColor: colors.background.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    padding: spacing.space150,
+    fontSize: textStyles.body.fontSize,
     minHeight: 44,
     maxHeight: 120,
   },
   inputHint: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginTop: 5,
-    marginBottom: 10,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
+    marginTop: spacing.space75,
+    marginBottom: spacing.space150,
   },
   saveButton: {
-    backgroundColor: '#34C759',
-    borderRadius: 10,
-    padding: 15,
+    backgroundColor: colors.semantic.success,
+    borderRadius: semanticSpacing.radiusMedium,
+    padding: spacing.space200,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: semanticSpacing.sectionGap,
   },
   saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
 });
 

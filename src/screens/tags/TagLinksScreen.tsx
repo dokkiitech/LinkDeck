@@ -13,6 +13,7 @@ import { RouteProp } from '@react-navigation/native';
 import { TagsStackParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getLinksByTag } from '../../services/firestore';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 type TagLinksScreenNavigationProp = NativeStackNavigationProp<
   TagsStackParamList,
@@ -104,7 +105,7 @@ const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -145,90 +146,90 @@ const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 15,
+    backgroundColor: colors.surface.default,
+    padding: spacing.space200,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.border.default,
     alignItems: 'center',
   },
   tagBadge: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 8,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space200,
+    paddingVertical: spacing.space100,
+    marginBottom: spacing.space100,
   },
   tagText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
   },
   countText: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.subtle,
     textAlign: 'center',
   },
   listContent: {
-    padding: 10,
+    padding: spacing.space150,
   },
   sectionHeader: {
-    backgroundColor: '#F2F2F7',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    marginTop: 10,
+    backgroundColor: colors.background.default,
+    paddingHorizontal: spacing.space200,
+    paddingVertical: spacing.space100,
+    marginTop: spacing.space150,
   },
   sectionHeaderText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.default,
   },
   linkItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 10,
+    backgroundColor: colors.surface.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    marginBottom: spacing.space150,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   linkContent: {
-    padding: 15,
+    padding: spacing.space200,
   },
   linkTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 5,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.bodyBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space75,
   },
   linkUrl: {
-    fontSize: 12,
-    color: '#007AFF',
-    marginBottom: 5,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.primary,
+    marginBottom: spacing.space75,
   },
   linkDate: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
   },
 });
 

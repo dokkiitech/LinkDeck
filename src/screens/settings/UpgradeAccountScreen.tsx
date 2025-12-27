@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 type UpgradeAccountScreenNavigationProp = NativeStackNavigationProp<SettingsStackParamList, 'UpgradeAccount'>;
 
@@ -130,7 +131,7 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.text.inverse} />
             ) : (
               <Text style={styles.buttonText}>アカウントを作成</Text>
             )}
@@ -155,79 +156,79 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   scrollContent: {
     flexGrow: 1,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 10,
-    marginTop: 20,
+    fontWeight: textStyles.h1.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space150,
+    marginTop: semanticSpacing.sectionGap,
   },
   description: {
-    fontSize: 16,
-    color: '#8E8E93',
-    marginBottom: 30,
+    fontSize: textStyles.body.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space400,
     lineHeight: 22,
   },
   input: {
     width: '100%',
-    height: 50,
+    height: semanticSpacing.inputHeight,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.border.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space200,
+    marginBottom: spacing.space200,
+    fontSize: textStyles.body.fontSize,
+    backgroundColor: colors.surface.default,
   },
   button: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#34C759',
-    borderRadius: 10,
+    height: semanticSpacing.buttonHeight,
+    backgroundColor: colors.semantic.success,
+    borderRadius: semanticSpacing.radiusMedium,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: spacing.space150,
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.interactive.disabled,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   loadingText: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: spacing.space150,
   },
   infoBox: {
-    marginTop: 30,
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    marginTop: spacing.space400,
+    padding: semanticSpacing.screenPadding,
+    backgroundColor: colors.surface.default,
+    borderRadius: semanticSpacing.radiusMedium,
   },
   infoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 15,
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space200,
   },
   infoText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 10,
-    lineHeight: 20,
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space150,
+    lineHeight: textStyles.label.lineHeight,
   },
 });
 

@@ -14,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -93,7 +94,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.text.inverse} />
           ) : (
             <Text style={styles.buttonText}>ログイン</Text>
           )}
@@ -124,74 +125,74 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface.default,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 10,
+    fontSize: textStyles.h1.fontSize,
+    fontWeight: textStyles.h1.fontWeight,
+    color: colors.primary,
+    marginBottom: spacing.space150,
   },
   catchphrase: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 30,
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space400,
   },
   subtitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 40,
+    fontSize: textStyles.h2.fontSize,
+    fontWeight: textStyles.h2.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space500,
   },
   input: {
     width: '100%',
-    height: 50,
+    height: semanticSpacing.inputHeight,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    backgroundColor: '#F9F9F9',
+    borderColor: colors.border.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space200,
+    marginBottom: spacing.space200,
+    fontSize: textStyles.body.fontSize,
+    backgroundColor: colors.background.neutral,
   },
   errorText: {
-    color: '#FF3B30',
-    fontSize: 14,
-    marginBottom: 10,
+    color: colors.semantic.danger,
+    fontSize: textStyles.label.fontSize,
+    marginBottom: spacing.space150,
     textAlign: 'center',
   },
   button: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
+    height: semanticSpacing.buttonHeight,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: spacing.space150,
   },
   guestButton: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: colors.secondary.default,
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.interactive.disabled,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
   },
   linkButton: {
-    marginTop: 20,
+    marginTop: semanticSpacing.sectionGap,
   },
   linkText: {
-    color: '#007AFF',
-    fontSize: 14,
+    color: colors.primary,
+    fontSize: textStyles.label.fontSize,
   },
 });
 

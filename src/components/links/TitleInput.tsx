@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 interface TitleInputProps {
   value: string;
@@ -47,40 +48,40 @@ export const TitleInput: React.FC<TitleInputProps> = ({
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: 25,
+    marginBottom: semanticSpacing.sectionGap,
   },
   labelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.space100,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.labelBold.fontWeight,
+    color: colors.text.default,
   },
   loadingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 10,
+    marginLeft: spacing.space100,
   },
   loadingText: {
-    fontSize: 12,
-    color: '#007AFF',
-    marginLeft: 5,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.primary,
+    marginLeft: spacing.space50,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
+    backgroundColor: colors.surface.default,
+    borderRadius: spacing.space100,
+    padding: spacing.space150,
+    fontSize: textStyles.body.fontSize,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-    minHeight: 50,
+    borderColor: colors.border.default,
+    minHeight: semanticSpacing.inputHeight,
   },
   hint: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginTop: 5,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
+    marginTop: spacing.space50,
   },
 });

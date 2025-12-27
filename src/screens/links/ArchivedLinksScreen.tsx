@@ -14,6 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getUserLinks, deleteLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors, spacing, semanticSpacing, textStyles } from '../../theme/tokens';
 
 type ArchivedLinksScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -145,7 +146,7 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -184,90 +185,90 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background.default,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: semanticSpacing.screenPadding,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginBottom: 10,
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.subtle,
+    marginBottom: spacing.space150,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: textStyles.label.fontSize,
+    color: colors.text.subtle,
     textAlign: 'center',
   },
   listContent: {
-    padding: 10,
+    padding: spacing.space150,
   },
   sectionHeader: {
-    backgroundColor: '#F2F2F7',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    marginTop: 10,
+    backgroundColor: colors.background.default,
+    paddingHorizontal: spacing.space200,
+    paddingVertical: spacing.space100,
+    marginTop: spacing.space150,
   },
   sectionHeaderText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: textStyles.h3.fontSize,
+    fontWeight: textStyles.h3.fontWeight,
+    color: colors.text.default,
   },
   linkItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 10,
+    backgroundColor: colors.surface.default,
+    borderRadius: semanticSpacing.radiusMedium,
+    marginBottom: spacing.space150,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.text.default,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   linkContent: {
-    padding: 15,
+    padding: spacing.space200,
   },
   linkTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 5,
+    fontSize: textStyles.body.fontSize,
+    fontWeight: textStyles.bodyBold.fontWeight,
+    color: colors.text.default,
+    marginBottom: spacing.space75,
   },
   linkUrl: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginBottom: 10,
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
+    marginBottom: spacing.space150,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 10,
+    marginBottom: spacing.space150,
   },
   tag: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 5,
-    marginBottom: 5,
+    backgroundColor: colors.primary,
+    borderRadius: semanticSpacing.radiusMedium,
+    paddingHorizontal: spacing.space150,
+    paddingVertical: spacing.space75,
+    marginRight: spacing.space75,
+    marginBottom: spacing.space75,
   },
   tagText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    color: colors.text.inverse,
+    fontSize: textStyles.caption.fontSize,
   },
   linkDate: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: textStyles.caption.fontSize,
+    color: colors.text.subtle,
   },
 });
 
