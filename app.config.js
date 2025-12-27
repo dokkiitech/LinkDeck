@@ -43,7 +43,11 @@ module.exports = {
           NSAllowsArbitraryLoads: true
         },
         ITSAppUsesNonExemptEncryption: false,
-        NSCameraUsageDescription: "QRコードを読み取るためにカメラへのアクセスが必要です"
+        NSCameraUsageDescription: "QRコードを読み取るためにカメラへのアクセスが必要です",
+        NFCReaderUsageDescription: "NFCタグからURLを読み取るためにNFCへのアクセスが必要です"
+      },
+      entitlements: {
+        "com.apple.developer.nfc.readersession.formats": ["NDEF"]
       }
     },
     android: {
@@ -54,7 +58,7 @@ module.exports = {
       package: "com.linkdeck.app",
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      permissions: ["CAMERA"],
+      permissions: ["CAMERA", "NFC"],
       intentFilters: [
         {
           action: "VIEW",

@@ -24,6 +24,7 @@ import { TitleInput } from '../../components/links/TitleInput';
 import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
+import NFCReader from '../../components/links/NFCReader';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -46,6 +47,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
   const [newTagName, setNewTagName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showNFCReader, setShowNFCReader] = useState(false);
   const [fetchingTitle, setFetchingTitle] = useState(false);
 
   // カスタムフックを使用してタグ管理
@@ -187,6 +189,14 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
     setInputText(url);
   };
 
+  const handleNFCScanned = (url: string) => {
+    setInputText(url);
+    // タイトルが未入力の場合は自動取得
+    if (!titleText) {
+      fetchAndSetTitle(url);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -205,13 +215,22 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
               editable={!loading}
             />
           </View>
-          <TouchableOpacity
-            style={styles.qrButton}
-            onPress={() => setShowQRScanner(true)}
-            disabled={loading}
-          >
-            <Ionicons name="qr-code" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setShowQRScanner(true)}
+              disabled={loading}
+            >
+              <Ionicons name="qr-code" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setShowNFCReader(true)}
+              disabled={loading}
+            >
+              <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <TitleInput
@@ -250,6 +269,12 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
         onClose={() => setShowQRScanner(false)}
         onScan={handleQRCodeScanned}
       />
+
+      <NFCReader
+        visible={showNFCReader}
+        onClose={() => setShowNFCReader(false)}
+        onScan={handleNFCScanned}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -274,14 +299,18 @@ const styles = StyleSheet.create({
   urlInputWrapper: {
     flex: 1,
   },
-  qrButton: {
+  buttonGroup: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 32,
+  },
+  scanButton: {
     backgroundColor: '#007AFF',
     borderRadius: 10,
     width: 60,
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 32,
   },
   saveButton: {
     backgroundColor: '#007AFF',
