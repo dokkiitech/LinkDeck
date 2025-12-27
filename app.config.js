@@ -22,15 +22,15 @@ const buildPlugins = () => {
     ]
   ];
 
-  // Web版ビルドではreact-native-share-menuを除外
-  // (react-native-share-menuはネイティブ専用)
+  // Web版ビルドではexpo-share-intentを除外
+  // (expo-share-intentはネイティブ専用)
   // コマンドライン引数に'web'が含まれているか、'--platform web'が指定されているかチェック
   const args = process.argv.join(' ');
   const isWebBuild = args.includes('web') && (args.includes('--platform') || args.includes('export'));
 
   if (!isWebBuild) {
     plugins.push([
-      "react-native-share-menu",
+      "expo-share-intent",
       {
         iosActivationRules: {
           NSExtensionActivationSupportsWebURLWithMaxCount: 1,

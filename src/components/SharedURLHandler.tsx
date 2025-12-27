@@ -1,23 +1,41 @@
 import { useEffect, useState, useRef } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as Linking from 'expo-linking';
-import ShareMenu, { ShareData } from 'react-native-share-menu';
+import { useShareIntent } from 'expo-share-intent';
 import { useAuth } from '../contexts/AuthContext';
 import { createLink } from '../services/firestore';
 import { fetchUrlTitle } from '../utils/urlMetadata';
 import { extractURLFromText } from '../utils/urlValidation';
 
 /**
- * URLスキーム経由またはiOS共有拡張機能で共有されたURLを処理するコンポーネント
+ * URLスキーム経由またはiOS/Android共有拡張機能で共有されたURLを処理するコンポーネント
  * - URLスキーム: linkdeck://share?url=...&title=... の形式
- * - iOS共有拡張: react-native-share-menuを使用
+ * - iOS/Android共有拡張: expo-share-intentを使用
  */
 const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
   const isProcessingRef = useRef(false);
   const processedURLsRef = useRef<Set<string>>(new Set());
   const hasHandledInitialURL = useRef(false);
-  const hasHandledInitialShare = useRef(false);
+  const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntent();
+
+  // 共有インテントの処理
+  useEffect(() => {
+    if (!user || !hasShareIntent || !shareIntent) {
+      return;
+    }
+
+    console.log('[SharedURLHandler] Share intent received:', shareIntent);
+    handleShareIntent(shareIntent);
+  }, [user, hasShareIntent, shareIntent]);
+
+  // 共有インテントエラーの処理
+  useEffect(() => {
+    if (error) {
+      console.error('[SharedURLHandler] Share intent error:', error);
+      Alert.alert('エラー', '共有データの取得に失敗しました。');
+    }
+  }, [error]);
 
   useEffect(() => {
     // ユーザーがログインしていない場合は何もしない
@@ -44,41 +62,13 @@ const SharedURLHandler: React.FC = () => {
       }
     };
 
-    // iOS共有拡張からの初回データを処理（1回だけ）
-    const handleInitialShare = async () => {
-      if (hasHandledInitialShare.current || Platform.OS !== 'ios') {
-        return;
-      }
-
-      try {
-        const shareData = await ShareMenu.getInitialShare();
-        if (shareData) {
-          console.log('[SharedURLHandler] Processing initial share:', shareData);
-          hasHandledInitialShare.current = true;
-          await processShareData(shareData);
-        }
-      } catch (error) {
-        console.error('[SharedURLHandler] Error handling initial share:', error);
-      }
-    };
-
     handleInitialURL();
-    handleInitialShare();
 
     // アプリがフォアグラウンドにある時のURL受信を監視
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
-    // iOS共有拡張からのデータを監視
-    let shareSubscription: any;
-    if (Platform.OS === 'ios') {
-      shareSubscription = ShareMenu.addNewShareListener(handleShareMenu);
-    }
-
     return () => {
       subscription.remove();
-      if (shareSubscription) {
-        shareSubscription.remove();
-      }
     };
   }, [user]);
 
@@ -108,14 +98,7 @@ const SharedURLHandler: React.FC = () => {
       });
   };
 
-  const handleShareMenu = (shareData: ShareData | null) => {
-    console.log('[SharedURLHandler] Share menu event received:', shareData);
-
-    if (!shareData) {
-      console.log('[SharedURLHandler] No share data received');
-      return;
-    }
-
+  const handleShareIntent = async (intent: any) => {
     // === ロック機構による排他制御 ===
     if (isProcessingRef.current) {
       console.log('[SharedURLHandler] Already processing, blocking duplicate share event');
@@ -124,18 +107,19 @@ const SharedURLHandler: React.FC = () => {
 
     // ロック取得
     isProcessingRef.current = true;
-    console.log('[SharedURLHandler] Lock acquired for share');
+    console.log('[SharedURLHandler] Lock acquired for share intent');
 
-    // 処理実行
-    processShareData(shareData)
-      .catch(error => {
-        console.error('[SharedURLHandler] Error in processShareData:', error);
-      })
-      .finally(() => {
-        // ロック解放（必ず実行）
-        isProcessingRef.current = false;
-        console.log('[SharedURLHandler] Lock released');
-      });
+    try {
+      await processShareIntent(intent);
+    } catch (error) {
+      console.error('[SharedURLHandler] Error in processShareIntent:', error);
+    } finally {
+      // ロック解放（必ず実行）
+      isProcessingRef.current = false;
+      console.log('[SharedURLHandler] Lock released');
+      // 共有インテントをリセット
+      resetShareIntent();
+    }
   };
 
   const processURL = async (url: string) => {
@@ -262,25 +246,29 @@ const SharedURLHandler: React.FC = () => {
     }
   };
 
-  const processShareData = async (shareData: ShareData) => {
+  const processShareIntent = async (intent: any) => {
     // ユーザーがログインしていない場合は処理しない
     if (!user) {
       console.log('[SharedURLHandler] User not logged in, skipping share');
       return;
     }
 
-    console.log('[SharedURLHandler] Processing share data:', shareData);
-
-    // mimeTypeとdataを取得
-    let sharedText = '';
+    console.log('[SharedURLHandler] Processing share intent:', intent);
 
     // URLまたはテキストを抽出
-    if (shareData.mimeType.startsWith('text/')) {
-      sharedText = shareData.data || '';
+    let sharedText = '';
+
+    // webUrlが存在する場合はそれを使用
+    if (intent.webUrl) {
+      sharedText = intent.webUrl;
+    }
+    // textが存在する場合はそれを使用
+    else if (intent.text) {
+      sharedText = intent.text;
     }
 
     if (!sharedText) {
-      console.warn('[SharedURLHandler] No text data in share');
+      console.warn('[SharedURLHandler] No text data in share intent');
       Alert.alert(
         'エラー',
         '共有データからテキストが見つかりませんでした。'
@@ -292,7 +280,7 @@ const SharedURLHandler: React.FC = () => {
     const extractedURL = extractURLFromText(sharedText);
 
     if (!extractedURL) {
-      console.warn('[SharedURLHandler] No valid URL found in share data');
+      console.warn('[SharedURLHandler] No valid URL found in share intent');
       Alert.alert(
         'エラー',
         '共有されたテキストから有効なURLが見つかりませんでした。'
@@ -300,7 +288,7 @@ const SharedURLHandler: React.FC = () => {
       return;
     }
 
-    console.log('[SharedURLHandler] Extracted URL from share:', extractedURL);
+    console.log('[SharedURLHandler] Extracted URL from share intent:', extractedURL);
 
     // === シンプルな重複防止ロジック ===
     const now = Date.now();
@@ -319,14 +307,14 @@ const SharedURLHandler: React.FC = () => {
     );
 
     if (isDuplicate) {
-      console.log('[SharedURLHandler] Duplicate URL detected in share, skipping');
+      console.log('[SharedURLHandler] Duplicate URL detected in share intent, skipping');
       return;
     }
 
     // URLを処理リストに追加
     const urlKey = `${extractedURL}-${now}`;
     processedURLsRef.current.add(urlKey);
-    console.log('[SharedURLHandler] Processing share URL:', extractedURL);
+    console.log('[SharedURLHandler] Processing share intent URL:', extractedURL);
 
     try {
       // タイトル取得
@@ -335,7 +323,7 @@ const SharedURLHandler: React.FC = () => {
         const fetchedTitle = await fetchUrlTitle(extractedURL);
         title = fetchedTitle || extractedURL;
       } catch (error) {
-        console.warn('[SharedURLHandler] Failed to fetch title for share, using URL');
+        console.warn('[SharedURLHandler] Failed to fetch title for share intent, using URL');
       }
 
       // Firestoreに保存
