@@ -47,7 +47,7 @@ module.exports = {
         NFCReaderUsageDescription: "NFCタグからURLを読み取るためにNFCへのアクセスが必要です"
       },
       entitlements: {
-        "com.apple.developer.nfc.readersession.formats": ["NDEF"]
+        "com.apple.developer.nfc.readersession.formats": ["TAG"]
       }
     },
     android: {
