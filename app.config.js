@@ -44,10 +44,16 @@ module.exports = {
         },
         ITSAppUsesNonExemptEncryption: false,
         NSCameraUsageDescription: "QRコードを読み取るためにカメラへのアクセスが必要です",
-        NFCReaderUsageDescription: "NFCタグからURLを読み取るためにNFCへのアクセスが必要です"
+        NFCReaderUsageDescription: "NFCタグからURLを読み取るためにNFCへのアクセスが必要です",
+        CFBundleURLTypes: [
+          {
+            CFBundleURLSchemes: ["linkdeck"]
+          }
+        ]
       },
       entitlements: {
-        "com.apple.developer.nfc.readersession.formats": ["TAG"]
+        "com.apple.developer.nfc.readersession.formats": ["TAG"],
+        "com.apple.security.application-groups": ["group.com.linkdeck.app"]
       }
     },
     android: {
@@ -99,6 +105,15 @@ module.exports = {
         "expo-camera",
         {
           "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
+        }
+      ],
+      [
+        "react-native-share-menu",
+        {
+          iosActivationRules: {
+            NSExtensionActivationSupportsWebURLWithMaxCount: 1,
+            NSExtensionActivationSupportsText: true
+          }
         }
       ]
     ]
