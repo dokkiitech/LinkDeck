@@ -19,6 +19,7 @@ import { getUserLinks, deleteLink, createLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
+import NFCReader from '../../components/links/NFCReader';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -37,6 +38,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFabMenu, setShowFabMenu] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showNFCReader, setShowNFCReader] = useState(false);
   const [fabAnimation] = useState(new Animated.Value(0));
 
   const loadLinks = async () => {
@@ -105,6 +107,22 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const handleQRCodeScanned = (url: string) => {
     setShowQRScanner(false);
     // QRコードから読み取ったURLを持ってAddLink画面に遷移
+    navigation.navigate('AddLink', { initialUrl: url } as any);
+  };
+
+  const handleNFCScan = () => {
+    setShowFabMenu(false);
+    Animated.timing(fabAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+    setShowNFCReader(true);
+  };
+
+  const handleNFCScanned = (url: string) => {
+    setShowNFCReader(false);
+    // NFCから読み取ったURLを持ってAddLink画面に遷移
     navigation.navigate('AddLink', { initialUrl: url } as any);
   };
 
@@ -266,24 +284,51 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {/* FAB Menu Items - 手動入力（左上） */}
+      {/* FAB Menu Items - NFC */}
       {showFabMenu && (
         <Animated.View
           style={[
             styles.fabMenuItem,
-            styles.fabMenuItemTopLeft,
             {
               transform: [
                 {
-                  translateX: fabAnimation.interpolate({
+                  translateY: fabAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -80],
+                    outputRange: [0, -250],
                   }),
                 },
                 {
+                  scale: fabAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ],
+              opacity: fabAnimation,
+            },
+          ]}
+        >
+          <Text style={styles.fabMenuLabel}>NFC</Text>
+          <TouchableOpacity
+            style={styles.fabMenuButton}
+            onPress={handleNFCScan}
+          >
+            <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      {/* FAB Menu Items - 手動入力 */}
+      {showFabMenu && (
+        <Animated.View
+          style={[
+            styles.fabMenuItem,
+            {
+              transform: [
+                {
                   translateY: fabAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -80],
+                    outputRange: [0, -165],
                   }),
                 },
                 {
@@ -307,18 +352,17 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         </Animated.View>
       )}
 
-      {/* FAB Menu Items - QRコード（真上） */}
+      {/* FAB Menu Items - QRコード */}
       {showFabMenu && (
         <Animated.View
           style={[
             styles.fabMenuItem,
-            styles.fabMenuItemTop,
             {
               transform: [
                 {
                   translateY: fabAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -100],
+                    outputRange: [0, -80],
                   }),
                 },
                 {
@@ -332,7 +376,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
-          <Text style={styles.fabMenuLabel}>QRコード</Text>
+          <Text style={styles.fabMenuLabel}>QR</Text>
           <TouchableOpacity
             style={styles.fabMenuButton}
             onPress={handleQRScan}
@@ -371,6 +415,13 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         visible={showQRScanner}
         onClose={() => setShowQRScanner(false)}
         onScan={handleQRCodeScanned}
+      />
+
+      {/* NFC Reader */}
+      <NFCReader
+        visible={showNFCReader}
+        onClose={() => setShowNFCReader(false)}
+        onScan={handleNFCScanned}
       />
     </View>
   );
@@ -530,15 +581,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
-    alignItems: 'center',
-    zIndex: 9,
-  },
-  fabMenuItemTop: {
-    alignItems: 'center',
-  },
-  fabMenuItemTopLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    zIndex: 9,
   },
   fabMenuButton: {
     width: 50,
@@ -557,7 +602,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
-    marginBottom: 5,
     marginRight: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
