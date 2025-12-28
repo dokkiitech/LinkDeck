@@ -17,6 +17,7 @@ LinkDeck/
 │   │   ├── MainNavigator.tsx       # メイン画面タブナビゲーター
 │   │   ├── LinksNavigator.tsx      # リンク画面スタックナビゲーター
 │   │   ├── TagsNavigator.tsx       # タグ画面スタックナビゲーター
+│   │   ├── AgentNavigator.tsx      # エージェント画面スタックナビゲーター
 │   │   └── SettingsNavigator.tsx   # 設定画面スタックナビゲーター
 │   ├── screens/          # 画面コンポーネント
 │   │   ├── auth/
@@ -28,6 +29,8 @@ LinkDeck/
 │   │   │   ├── LinkDetailScreen.tsx   # リンク詳細
 │   │   │   ├── ArchivedLinksScreen.tsx # アーカイブ済みリンク
 │   │   │   └── TagsScreen.tsx         # タグ一覧（旧）
+│   │   ├── search/
+│   │   │   └── AgentSearchScreen.tsx  # AIエージェント検索
 │   │   ├── tags/
 │   │   │   └── TagLinksScreen.tsx  # タグ別リンク一覧
 │   │   └── settings/
@@ -104,6 +107,7 @@ LinkDeck/
 **MainNavigator.tsx**（タブ）
 - Links タブ（LinksNavigator）
 - Tags タブ（TagsNavigator）
+- Agent タブ（AgentNavigator）※APIキー登録時のみ表示
 - Settings タブ（SettingsNavigator）
 
 **LinksNavigator.tsx**（スタック）
@@ -111,6 +115,9 @@ LinkDeck/
 - AddLink（追加）
 - LinkDetail（詳細）
 - ArchivedLinks（アーカイブ）
+
+**AgentNavigator.tsx**（スタック）
+- AgentSearch（AIエージェント検索）
 
 **TagsNavigator.tsx**（スタック）
 - TagsList（タグ一覧）

@@ -81,6 +81,7 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Links: undefined;
   Tags: undefined;
+  Agent: undefined;
   Settings: undefined;
 };
 
@@ -89,12 +90,15 @@ export type LinksStackParamList = {
   AddLink: { initialUrl?: string } | undefined;
   LinkDetail: { linkId: string };
   ArchivedLinks: undefined;
-  AgentSearch: undefined;
 };
 
 export type TagsStackParamList = {
   TagsList: undefined;
   TagLinks: { tagName: string };
+};
+
+export type AgentStackParamList = {
+  AgentSearch: undefined;
 };
 
 export type SettingsStackParamList = {

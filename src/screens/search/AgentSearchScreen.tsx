@@ -12,16 +12,19 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { LinksStackParamList, Link } from '../../types';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { AgentStackParamList, MainTabParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getGeminiApiKey } from '../../utils/storage';
 import { searchWithAgent, getSearchQuerySuggestions } from '../../services/agentSearch';
+import { getUserLinks } from '../../services/firestore';
 import { ERROR_MESSAGES } from '../../constants/messages';
 
-type AgentSearchScreenNavigationProp = NativeStackNavigationProp<
-  LinksStackParamList,
-  'AgentSearch'
+type AgentSearchScreenNavigationProp = CompositeNavigationProp<
+  NativeStackNavigationProp<AgentStackParamList, 'AgentSearch'>,
+  BottomTabNavigationProp<MainTabParamList>
 >;
 
 interface Props {
@@ -37,11 +40,21 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
   const [searchResults, setSearchResults] = useState<Link[]>([]);
   const [explanation, setExplanation] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [userLinks, setUserLinks] = useState<Link[]>([]);
+  const [loadingLinks, setLoadingLinks] = useState(true);
 
-  // Gemini APIキーの確認
+  // Gemini APIキーとユーザーリンクの確認
   useEffect(() => {
     checkApiKey();
-  }, []);
+    loadUserLinks();
+
+    // 画面に戻ってきたときにリンクを再読み込み（検索例を更新）
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadUserLinks();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const checkApiKey = async () => {
     try {
@@ -51,6 +64,22 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       setHasApiKey(false);
     } finally {
       setCheckingApiKey(false);
+    }
+  };
+
+  const loadUserLinks = async () => {
+    if (!user) return;
+
+    try {
+      const links = await getUserLinks(user.uid, false);
+      setUserLinks(links);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[AgentSearch] Error loading links:', error);
+      }
+      setUserLinks([]);
+    } finally {
+      setLoadingLinks(false);
     }
   };
 
@@ -96,9 +125,9 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     setSearchQuery(suggestion);
   };
 
-  // リンクをタップ
+  // リンクをタップ（URLを直接開く）
   const handleLinkPress = (link: Link) => {
-    navigation.navigate('LinkDetail', { linkId: link.id });
+    handleOpenUrl(link.url);
   };
 
   // URLを開く
@@ -139,7 +168,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             style={styles.settingsButton}
-            onPress={() => navigation.navigate('LinksList')}
+            onPress={() => navigation.navigate('Settings')}
           >
             <Ionicons name="settings-outline" size={20} color="#fff" />
             <Text style={styles.settingsButtonText}>設定画面へ</Text>
@@ -200,15 +229,22 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         {!hasSearched && (
           <View style={styles.suggestionsSection}>
             <Text style={styles.suggestionsTitle}>検索例:</Text>
-            {getSearchQuerySuggestions().map((suggestion, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.suggestionChip}
-                onPress={() => handleSuggestionPress(suggestion)}
-              >
-                <Text style={styles.suggestionText}>{suggestion}</Text>
-              </TouchableOpacity>
-            ))}
+            {loadingLinks ? (
+              <View style={styles.suggestionLoadingContainer}>
+                <ActivityIndicator size="small" color="#007AFF" />
+                <Text style={styles.suggestionLoadingText}>検索例を生成中...</Text>
+              </View>
+            ) : (
+              getSearchQuerySuggestions(userLinks).map((suggestion, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.suggestionChip}
+                  onPress={() => handleSuggestionPress(suggestion)}
+                >
+                  <Text style={styles.suggestionText}>{suggestion}</Text>
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         )}
 
@@ -414,6 +450,17 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: 14,
     color: '#333',
+  },
+  suggestionLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 8,
+  },
+  suggestionLoadingText: {
+    fontSize: 14,
+    color: '#666',
   },
   resultsSection: {
     flex: 1,
