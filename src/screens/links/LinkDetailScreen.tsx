@@ -415,6 +415,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
 
         <TouchableOpacity
+          style={styles.openLinkButton}
+          onPress={handleOpenLink}
+        >
+          <Ionicons name="open-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Text style={styles.openLinkButtonText}>リンクを開く</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[
             styles.generateSummaryButton,
             Platform.OS === 'web' && styles.disabledButton
@@ -711,6 +719,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#8E8E93',
     fontStyle: 'italic',
+  },
+  openLinkButton: {
+    backgroundColor: '#34C759',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  openLinkButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   generateSummaryButton: {
     backgroundColor: '#007AFF',
