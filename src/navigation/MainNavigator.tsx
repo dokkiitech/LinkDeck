@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { MainTabParamList } from '../types';
 import LinksNavigator from './LinksNavigator';
 import TagsNavigator from './TagsNavigator';
+import AgentNavigator from './AgentNavigator';
 import SettingsNavigator from './SettingsNavigator';
+import { getGeminiApiKey } from '../utils/storage';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainNavigator: React.FC = () => {
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    checkApiKey();
+  }, []);
+
+  const checkApiKey = async () => {
+    try {
+      const apiKey = await getGeminiApiKey();
+      setHasApiKey(!!apiKey);
+    } catch (error) {
+      setHasApiKey(false);
+    }
+  };
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -39,6 +56,19 @@ const MainNavigator: React.FC = () => {
           ),
         }}
       />
+      {hasApiKey && (
+        <Tab.Screen
+          name="Agent"
+          component={AgentNavigator}
+          options={{
+            headerShown: false,
+            title: 'エージェント',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="sparkles" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
       <Tab.Screen
         name="Settings"
         component={SettingsNavigator}

@@ -20,7 +20,6 @@ import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
 import NFCReader from '../../components/links/NFCReader';
-import { getGeminiApiKey } from '../../utils/storage';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -41,7 +40,6 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showNFCReader, setShowNFCReader] = useState(false);
   const [fabAnimation] = useState(new Animated.Value(0));
-  const [hasGeminiApiKey, setHasGeminiApiKey] = useState(false);
 
   const loadLinks = async () => {
     if (!user) return;
@@ -60,23 +58,12 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const checkGeminiApiKey = async () => {
-    try {
-      const apiKey = await getGeminiApiKey();
-      setHasGeminiApiKey(!!apiKey);
-    } catch (error) {
-      setHasGeminiApiKey(false);
-    }
-  };
-
   useEffect(() => {
     loadLinks();
-    checkGeminiApiKey();
 
     // 画面に戻ってきたときにリンクを再読み込み
     const unsubscribe = navigation.addListener('focus', () => {
       loadLinks();
-      checkGeminiApiKey();
     });
 
     return unsubscribe;
@@ -256,19 +243,6 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         )}
       </View>
-
-      {/* AIエージェント検索ボタン */}
-      {hasGeminiApiKey && (
-        <View style={styles.agentSearchButtonContainer}>
-          <TouchableOpacity
-            style={styles.agentSearchButton}
-            onPress={() => navigation.navigate('AgentSearch')}
-          >
-            <Ionicons name="sparkles" size={18} color="#007AFF" />
-            <Text style={styles.agentSearchButtonText}>AIエージェント検索</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
       {links.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -484,25 +458,6 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
-  },
-  agentSearchButtonContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 5,
-  },
-  agentSearchButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E3F2FD',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 6,
-  },
-  agentSearchButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#007AFF',
   },
   loadingContainer: {
     flex: 1,

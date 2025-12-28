@@ -125,15 +125,84 @@ ${JSON.stringify(linksData, null, 2)}
 };
 
 /**
- * 検索クエリの提案を生成
+ * 検索クエリの提案を生成（ユーザーのリンクデータに基づく）
+ * @param links ユーザーの保存リンク
  * @returns クエリの例の配列
  */
-export const getSearchQuerySuggestions = (): string[] => {
-  return [
-    '3月くらいにReactについて調べた気がする',
-    '最近保存したデザインに関する記事',
-    '去年の夏にAIについて見たやつ',
-    'TypeScriptのチュートリアル',
-    'Node.jsの設定方法',
-  ];
+export const getSearchQuerySuggestions = (links: Link[]): string[] => {
+  // リンクがない場合はデフォルトの例を返す
+  if (links.length === 0) {
+    return [
+      'リンクを保存すると、ここに検索例が表示されます',
+    ];
+  }
+
+  const suggestions: string[] = [];
+
+  // タグの抽出（使用頻度が高い順）
+  const tagCounts = new Map<string, number>();
+  links.forEach((link) => {
+    link.tags.forEach((tag) => {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    });
+  });
+  const topTags = Array.from(tagCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([tag]) => tag);
+
+  // 月の抽出（最近の3ヶ月）
+  const monthCounts = new Map<string, number>();
+  links.forEach((link) => {
+    const date = new Date(link.createdAt);
+    const monthKey = `${date.getFullYear()}/${date.getMonth() + 1}`;
+    monthCounts.set(monthKey, (monthCounts.get(monthKey) || 0) + 1);
+  });
+  const recentMonths = Array.from(monthCounts.entries())
+    .sort((a, b) => {
+      const [yearA, monthA] = a[0].split('/').map(Number);
+      const [yearB, monthB] = b[0].split('/').map(Number);
+      return yearB * 12 + monthB - (yearA * 12 + monthA);
+    })
+    .slice(0, 3)
+    .map(([month]) => {
+      const [year, monthNum] = month.split('/').map(Number);
+      return `${monthNum}月`;
+    });
+
+  // 1. タグベースの検索例
+  if (topTags.length > 0) {
+    suggestions.push(`${topTags[0]}に関する記事`);
+    if (topTags.length > 1) {
+      suggestions.push(`${topTags[1]}について調べたやつ`);
+    }
+  }
+
+  // 2. 時期ベースの検索例
+  if (recentMonths.length > 0) {
+    suggestions.push(`${recentMonths[0]}に保存したリンク`);
+    if (recentMonths.length > 1 && topTags.length > 0) {
+      suggestions.push(`${recentMonths[1]}くらいに${topTags[0]}について見た気がする`);
+    }
+  }
+
+  // 3. 最近の保存
+  const recentLink = links[0];
+  if (recentLink && recentLink.tags.length > 0) {
+    suggestions.push(`最近保存した${recentLink.tags[0]}の記事`);
+  } else {
+    suggestions.push('最近保存した記事');
+  }
+
+  // 提案が少ない場合は汎用的な例を追加
+  if (suggestions.length < 3) {
+    const genericSuggestions = [
+      'タイトルに「チュートリアル」が含まれるリンク',
+      '先週保存したやつ',
+      'ドキュメント系のリンク',
+    ];
+    suggestions.push(...genericSuggestions.slice(0, 5 - suggestions.length));
+  }
+
+  return suggestions.slice(0, 5);
 };

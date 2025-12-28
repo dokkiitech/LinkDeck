@@ -5,7 +5,6 @@ import LinksListScreen from '../screens/links/LinksListScreen';
 import AddLinkScreen from '../screens/links/AddLinkScreen';
 import LinkDetailScreen from '../screens/links/LinkDetailScreen';
 import ArchivedLinksScreen from '../screens/links/ArchivedLinksScreen';
-import AgentSearchScreen from '../screens/search/AgentSearchScreen';
 
 const Stack = createNativeStackNavigator<LinksStackParamList>();
 
@@ -38,13 +37,6 @@ const LinksNavigator: React.FC = () => {
         component={ArchivedLinksScreen}
         options={{
           title: 'アーカイブ',
-        }}
-      />
-      <Stack.Screen
-        name="AgentSearch"
-        component={AgentSearchScreen}
-        options={{
-          title: 'AIエージェント検索',
         }}
       />
     </Stack.Navigator>
