@@ -4,6 +4,17 @@ import { getUserLinks } from './firestore';
 import { ERROR_MESSAGES } from '../constants/messages';
 
 /**
+ * 会話メッセージの型
+ */
+export interface ConversationMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  links?: Link[];
+  timestamp: number;
+}
+
+/**
  * エージェント検索結果の型
  */
 export interface AgentSearchResult {
@@ -16,12 +27,14 @@ export interface AgentSearchResult {
  * @param apiKey ユーザーのGemini APIキー
  * @param userId ユーザーID
  * @param query 自然言語の検索クエリ（例: "3月くらいにReactについて調べた気がする"）
+ * @param conversationHistory 会話履歴（省略可）
  * @returns 検索結果とエージェントの説明
  */
 export const searchWithAgent = async (
   apiKey: string,
   userId: string,
-  query: string
+  query: string,
+  conversationHistory: ConversationMessage[] = []
 ): Promise<AgentSearchResult> => {
   try {
     if (!apiKey || apiKey.trim() === '') {
@@ -57,8 +70,25 @@ export const searchWithAgent = async (
       isArchived: link.isArchived,
     }));
 
+    // 会話履歴の整形
+    let conversationContext = '';
+    if (conversationHistory.length > 0) {
+      conversationContext = '\n\n過去の会話履歴:\n';
+      conversationHistory.forEach((msg) => {
+        if (msg.role === 'user') {
+          conversationContext += `ユーザー: ${msg.content}\n`;
+        } else {
+          conversationContext += `アシスタント: ${msg.content}\n`;
+          if (msg.links && msg.links.length > 0) {
+            conversationContext += `  (${msg.links.length}件のリンクを提示)\n`;
+          }
+        }
+      });
+    }
+
     // プロンプトの作成
     const prompt = `あなたは、ユーザーが保存したリンク集から関連する情報を検索するAIアシスタントです。
+会話の文脈を理解して、適切に応答してください。${conversationContext}
 
 ユーザーの検索クエリ:
 ${query}
@@ -68,10 +98,11 @@ ${JSON.stringify(linksData, null, 2)}
 
 指示:
 1. ユーザーの検索クエリを分析し、関連性の高いリンクを見つけてください
-2. 日付の表現（"3月くらい"、"最近"、"去年"など）も考慮してください
-3. キーワードだけでなく、文脈や意図も理解してください
-4. 見つかったリンクのindexを配列で返してください
-5. 検索結果について日本語で簡潔な説明を付けてください
+2. 会話の文脈を考慮してください（例: 「それ」「前回の」などの指示代名詞を理解）
+3. 日付の表現（"3月くらい"、"最近"、"去年"など）も考慮してください
+4. キーワードだけでなく、文脈や意図も理解してください
+5. 見つかったリンクのindexを配列で返してください
+6. 検索結果について日本語で簡潔な説明を付けてください
 
 回答は必ず以下のJSON形式で返してください:
 {
