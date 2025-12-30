@@ -69,8 +69,6 @@ platform :ios do
     # TestFlightにアップロード
     upload_to_testflight(
       skip_waiting_for_build_processing: true,
-      apple_id: ENV["APPLE_ID"],
-      team_id: ENV["APP_STORE_CONNECT_TEAM_ID"],
       api_key: api_key
     )
   end
