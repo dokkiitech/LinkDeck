@@ -274,10 +274,6 @@ export const searchWithAgentStream = async (
     // ユーザーのすべてのリンクを取得（アーカイブ含む）
     const allLinks = await getUserLinks(userId, true);
 
-    // Gemini APIクライアントの初期化
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'models/gemini-flash-latest' });
-
     // リンクデータをJSON形式で整形
     const linksData = allLinks.map((link, index) => ({
       index,
