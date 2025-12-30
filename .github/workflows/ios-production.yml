@@ -20,8 +20,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10.12.1
 
       - name: Install dependencies
         run: pnpm install
@@ -89,5 +87,5 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          security delete-keychain build.keychain
+          security delete-keychain build.keychain || true
           rm -f certificate.p12 profile.mobileprovision
