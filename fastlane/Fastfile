@@ -40,9 +40,16 @@ platform :ios do
       profile_name: ENV["PROVISIONING_PROFILE_SPECIFIER"]
     )
 
-    # ビルド番号を自動インクリメント
+    # TestFlightから最新のビルド番号を取得
+    latest_build = latest_testflight_build_number(
+      app_identifier: "com.linkdeck.app",
+      api_key: api_key
+    )
+
+    # ビルド番号を最新+1に設定
     increment_build_number(
-      xcodeproj: "ios/LinksDeck.xcodeproj"
+      xcodeproj: "ios/LinksDeck.xcodeproj",
+      build_number: latest_build + 1
     )
 
     # ビルドとアーカイブ
@@ -106,9 +113,16 @@ platform :ios do
       profile_name: ENV["PROVISIONING_PROFILE_SPECIFIER"]
     )
 
-    # ビルド番号を自動インクリメント
+    # TestFlightから最新のビルド番号を取得
+    latest_build = latest_testflight_build_number(
+      app_identifier: "com.linkdeck.app",
+      api_key: api_key
+    )
+
+    # ビルド番号を最新+1に設定
     increment_build_number(
-      xcodeproj: "ios/LinksDeck.xcodeproj"
+      xcodeproj: "ios/LinksDeck.xcodeproj",
+      build_number: latest_build + 1
     )
 
     # ビルドとアーカイブ
