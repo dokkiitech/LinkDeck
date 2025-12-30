@@ -3,6 +3,9 @@ default_platform(:ios)
 platform :ios do
   desc "Build and upload Preview build to TestFlight"
   lane :preview do
+    # CI環境のセットアップ（一時キーチェーンを作成）
+    setup_ci if ENV['CI']
+
     # App Store Connect API Keyのセットアップ
     if ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
       api_key = app_store_connect_api_key(
@@ -13,12 +16,10 @@ platform :ios do
       )
     end
 
-    # 証明書のインポート（GitHub Actionsで作成したキーチェーンを使用）
+    # 証明書のインポート
     import_certificate(
       certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
-      certificate_password: ENV["P12_PASSWORD"],
-      keychain_name: ENV["KEYCHAIN_NAME"] || "login.keychain",
-      keychain_password: ENV["KEYCHAIN_PASSWORD"]
+      certificate_password: ENV["P12_PASSWORD"]
     )
 
     # プロビジョニングプロファイルのインストール
@@ -74,6 +75,9 @@ platform :ios do
 
   desc "Build and submit Production build to App Store"
   lane :production do
+    # CI環境のセットアップ（一時キーチェーンを作成）
+    setup_ci if ENV['CI']
+
     # App Store Connect API Keyのセットアップ
     if ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
       api_key = app_store_connect_api_key(
@@ -84,12 +88,10 @@ platform :ios do
       )
     end
 
-    # 証明書のインポート（GitHub Actionsで作成したキーチェーンを使用）
+    # 証明書のインポート
     import_certificate(
       certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
-      certificate_password: ENV["P12_PASSWORD"],
-      keychain_name: ENV["KEYCHAIN_NAME"] || "login.keychain",
-      keychain_password: ENV["KEYCHAIN_PASSWORD"]
+      certificate_password: ENV["P12_PASSWORD"]
     )
 
     # プロビジョニングプロファイルのインストール
