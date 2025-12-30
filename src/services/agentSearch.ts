@@ -1,6 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import firebase from '@react-native-firebase/app';
-import vertexAI, { getGenerativeModel } from '@react-native-firebase/ai';
 import { Link } from '../types';
 import { getUserLinks } from './firestore';
 import { ERROR_MESSAGES } from '../constants/messages';
@@ -400,14 +398,11 @@ ${JSON.stringify(linksData, null, 2)}
 }`;
     }
 
-    // Firebase AI Logicを使用した本物のストリーミング
-    const app = firebase.app();
-    const ai = vertexAI(app);
-    const firebaseModel = getGenerativeModel(ai, {
-      model: 'gemini-1.5-flash',
-    });
+    // ユーザーのAPIキーで本物のストリーミング（ポリフィル使用）
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const streamModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const result = await firebaseModel.generateContentStream(prompt);
+    const result = await streamModel.generateContentStream(prompt);
 
     let fullText = '';
     for await (const chunk of result.stream) {

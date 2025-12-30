@@ -1,3 +1,6 @@
+// Polyfills must be imported BEFORE any other imports
+import 'react-native-polyfill-globals/auto';
+
 import { registerRootComponent } from 'expo';
 
 import App from './App';
