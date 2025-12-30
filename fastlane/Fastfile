@@ -36,13 +36,13 @@ platform :ios do
       use_automatic_signing: false,
       path: "ios/LinksDeck.xcodeproj",
       team_id: ENV["APPLE_TEAM_ID"],
-      bundle_identifier: "com.linkdeck.app",
+      bundle_identifier: "com.linksdeck.app",
       profile_name: ENV["PROVISIONING_PROFILE_SPECIFIER"]
     )
 
     # TestFlightから最新のビルド番号を取得
     latest_build = latest_testflight_build_number(
-      app_identifier: "com.linkdeck.app",
+      app_identifier: "com.linksdeck.app",
       api_key: api_key
     )
 
@@ -60,7 +60,7 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+          "com.linksdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
         }
       }
     )
@@ -109,13 +109,13 @@ platform :ios do
       use_automatic_signing: false,
       path: "ios/LinksDeck.xcodeproj",
       team_id: ENV["APPLE_TEAM_ID"],
-      bundle_identifier: "com.linkdeck.app",
+      bundle_identifier: "com.linksdeck.app",
       profile_name: ENV["PROVISIONING_PROFILE_SPECIFIER"]
     )
 
     # TestFlightから最新のビルド番号を取得
     latest_build = latest_testflight_build_number(
-      app_identifier: "com.linkdeck.app",
+      app_identifier: "com.linksdeck.app",
       api_key: api_key
     )
 
@@ -133,7 +133,7 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+          "com.linksdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
         }
       }
     )
