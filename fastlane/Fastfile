@@ -19,7 +19,8 @@ platform :ios do
     # 証明書のインポート
     import_certificate(
       certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
-      certificate_password: ENV["P12_PASSWORD"]
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: "fastlane_tmp_keychain"
     )
 
     # プロビジョニングプロファイルのインストール
@@ -91,7 +92,8 @@ platform :ios do
     # 証明書のインポート
     import_certificate(
       certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
-      certificate_password: ENV["P12_PASSWORD"]
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: "fastlane_tmp_keychain"
     )
 
     # プロビジョニングプロファイルのインストール
