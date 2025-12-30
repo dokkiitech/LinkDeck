@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [labeled]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
     # CDラベルがついている場合のみ実行
