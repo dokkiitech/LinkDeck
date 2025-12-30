@@ -1,0 +1,99 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload Preview build to TestFlight"
+  lane :preview do
+    # 証明書とプロビジョニングプロファイルのセットアップ
+    setup_ci if ENV['CI']
+
+    # 証明書のインポート
+    import_certificate(
+      certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: ENV["KEYCHAIN_NAME"] || "login.keychain"
+    )
+
+    # プロビジョニングプロファイルのインストール
+    install_provisioning_profile(
+      path: ENV["BUILD_PROVISION_PROFILE_PATH"]
+    )
+
+    # Expo prebuildでネイティブプロジェクトを生成
+    sh("cd .. && npx expo prebuild --platform ios --clean")
+
+    # ビルド番号を自動インクリメント
+    increment_build_number(
+      xcodeproj: "ios/LinksDeck.xcodeproj"
+    )
+
+    # ビルドとアーカイブ
+    build_app(
+      scheme: "LinksDeck",
+      workspace: "ios/LinksDeck.xcworkspace",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+        }
+      }
+    )
+
+    # TestFlightにアップロード
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      apple_id: ENV["APPLE_ID"],
+      team_id: ENV["APP_STORE_CONNECT_TEAM_ID"]
+    )
+  end
+
+  desc "Build and submit Production build to App Store"
+  lane :production do
+    # 証明書とプロビジョニングプロファイルのセットアップ
+    setup_ci if ENV['CI']
+
+    # 証明書のインポート
+    import_certificate(
+      certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: ENV["KEYCHAIN_NAME"] || "login.keychain"
+    )
+
+    # プロビジョニングプロファイルのインストール
+    install_provisioning_profile(
+      path: ENV["BUILD_PROVISION_PROFILE_PATH"]
+    )
+
+    # Expo prebuildでネイティブプロジェクトを生成
+    sh("cd .. && npx expo prebuild --platform ios --clean")
+
+    # ビルド番号を自動インクリメント
+    increment_build_number(
+      xcodeproj: "ios/LinksDeck.xcodeproj"
+    )
+
+    # ビルドとアーカイブ
+    build_app(
+      scheme: "LinksDeck",
+      workspace: "ios/LinksDeck.xcworkspace",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+        }
+      }
+    )
+
+    # App Store Connectにアップロード
+    upload_to_app_store(
+      force: true,
+      submit_for_review: true,
+      automatic_release: false,
+      submission_information: {
+        add_id_info_uses_idfa: false
+      },
+      precheck_include_in_app_purchases: false
+    )
+  end
+end
