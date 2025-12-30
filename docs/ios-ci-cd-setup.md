@@ -33,7 +33,9 @@ GitHub ActionsでiOSアプリのビルドと配信を自動化するための設
 
 | Secret名 | 説明 | 取得方法 |
 |---------|------|---------|
-| `APP_STORE_CONNECT_API_KEY` | App Store Connect APIキー | [App Store Connect](https://appstoreconnect.apple.com/access/api) → Keys → Generate API Key |
+| `APP_STORE_CONNECT_API_KEY_ID` | App Store Connect API Key ID | .p8ファイル名の`AuthKey_`の後の部分（例：`AuthKey_ABCD1234.p8` → `ABCD1234`） |
+| `APP_STORE_CONNECT_ISSUER_ID` | App Store Connect Issuer ID | [App Store Connect](https://appstoreconnect.apple.com/access/api) → Keysページの「Issuer ID」 |
+| `APP_STORE_CONNECT_API_KEY_CONTENT` | .p8ファイルの内容全体 | 下記「App Store Connect APIキーの準備」参照 |
 
 ### その他
 
@@ -92,7 +94,9 @@ base64 -i /path/to/profile.mobileprovision | pbcopy
 
 クリップボードにコピーされたBase64文字列を`BUILD_PROVISION_PROFILE_BASE64`に設定
 
-## App Store Connect API Keyの取得
+## App Store Connect API Keyの準備
+
+### 1. API Keyの生成
 
 1. [App Store Connect](https://appstoreconnect.apple.com/access/api) にアクセス
 2. `Keys` タブから `Generate API Key` をクリック
@@ -100,8 +104,24 @@ base64 -i /path/to/profile.mobileprovision | pbcopy
 4. アクセス権限を「App Manager」に設定
 5. 生成されたキーをダウンロード（`.p8`ファイル）
 
-**注意**: App Store Connect API Keyは、アプリ特定パスワード（App-Specific Password）で代用できます。
-その場合は[Apple ID](https://appleid.apple.com/)からアプリ特定パスワードを生成してください。
+### 2. 必要な情報の取得
+
+**Key ID（`APP_STORE_CONNECT_API_KEY_ID`）:**
+- ダウンロードしたファイル名：`AuthKey_XXXXXXXXXX.p8`
+- `XXXXXXXXXX`の部分がKey IDです
+
+**Issuer ID（`APP_STORE_CONNECT_ISSUER_ID`）:**
+- App Store Connect APIページの上部に表示されている「Issuer ID」をコピー
+
+**Key Content（`APP_STORE_CONNECT_API_KEY_CONTENT`）:**
+- ターミナルで以下を実行：
+
+```bash
+cat /path/to/AuthKey_XXXXXXXXXX.p8
+```
+
+- 出力された内容全体（`-----BEGIN PRIVATE KEY-----`から`-----END PRIVATE KEY-----`まで）をコピー
+- GitHub Secretsの`APP_STORE_CONNECT_API_KEY_CONTENT`に貼り付け
 
 ## 使い方
 
