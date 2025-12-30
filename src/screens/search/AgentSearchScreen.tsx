@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp } from '@react-navigation/native';
@@ -22,7 +23,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { AgentStackParamList, MainTabParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getGeminiApiKey } from '../../utils/storage';
-import { searchWithAgent, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
+import { searchWithAgentStream, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
 import { getUserLinks } from '../../services/firestore';
 import { ERROR_MESSAGES } from '../../constants/messages';
 
@@ -44,6 +45,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [userLinks, setUserLinks] = useState<Link[]>([]);
   const [loadingLinks, setLoadingLinks] = useState(true);
+  const [onlineSearchEnabled, setOnlineSearchEnabled] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   // Gemini APIキーとユーザーリンクの確認
@@ -124,8 +126,21 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const queryText = inputText.trim();
     setInputText('');
     setIsProcessing(true);
+
+    // ストリーミング用のアシスタントメッセージを作成
+    const assistantMessageId = (Date.now() + 1).toString();
+    const initialAssistantMessage: ConversationMessage = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, initialAssistantMessage]);
 
     // メッセージ追加後にスクロール
     setTimeout(() => {
@@ -136,25 +151,55 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       const apiKey = await getGeminiApiKey();
       if (!apiKey) {
         Alert.alert('エラー', 'Gemini APIキーが設定されていません');
+        setIsProcessing(false);
+        // エラー時はストリーミングメッセージを削除
+        setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId));
         return;
       }
 
       // 会話履歴から直近のメッセージを取得（最大10件）
       const recentHistory = messages.slice(-10);
 
-      const result = await searchWithAgent(apiKey, user.uid, inputText.trim(), recentHistory);
+      // ストリーミングコールバック
+      const onStreamChunk = (chunk: string) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: msg.content + chunk }
+              : msg
+          )
+        );
 
-      const assistantMessage: ConversationMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: result.explanation,
-        links: result.links,
-        timestamp: Date.now(),
+        // ストリーミング中も自動スクロール
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 50);
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      const result = await searchWithAgentStream(
+        apiKey,
+        user.uid,
+        queryText,
+        recentHistory,
+        onlineSearchEnabled,
+        onStreamChunk
+      );
 
-      // メッセージが追加されたら最下部にスクロール
+      // ストリーミング完了後、最終的なメッセージを更新
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? {
+                ...msg,
+                content: result.explanation,
+                links: result.links,
+                isStreaming: false,
+              }
+            : msg
+        )
+      );
+
+      // 最終スクロール
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -162,6 +207,10 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       if (__DEV__) {
         console.error('[AgentSearch] Error:', error);
       }
+
+      // エラー時はストリーミングメッセージを削除
+      setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId));
+
       Alert.alert('検索エラー', error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
     } finally {
       setIsProcessing(false);
@@ -375,12 +424,29 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
             会話しながらリンクを探せます
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.resetButton}
-          onPress={handleResetSession}
-        >
-          <Ionicons name="add-circle-outline" size={28} color="#007AFF" />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <View style={styles.toggleContainer}>
+            <Ionicons
+              name="globe-outline"
+              size={16}
+              color={onlineSearchEnabled ? '#007AFF' : '#999'}
+              style={styles.toggleIcon}
+            />
+            <Switch
+              value={onlineSearchEnabled}
+              onValueChange={setOnlineSearchEnabled}
+              trackColor={{ false: '#d0d0d0', true: '#007AFF80' }}
+              thumbColor={onlineSearchEnabled ? '#007AFF' : '#f4f3f4'}
+              ios_backgroundColor="#d0d0d0"
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.resetButton}
+            onPress={handleResetSession}
+          >
+            <Ionicons name="add-circle-outline" size={28} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <KeyboardAvoidingView
@@ -487,6 +553,11 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -496,6 +567,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     marginTop: 2,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  toggleIcon: {
+    marginRight: 2,
   },
   resetButton: {
     padding: 4,
