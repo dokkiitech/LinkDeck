@@ -398,17 +398,23 @@ ${JSON.stringify(linksData, null, 2)}
 }`;
     }
 
-    // ストリーミングでエージェントに検索を依頼
-    const result = await model.generateContentStream(prompt);
+    // エージェントに検索を依頼（疑似ストリーミング）
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const fullText = response.text();
 
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullText += chunkText;
+    // 疑似ストリーミング：テキストを少しずつ表示
+    if (onStreamChunk) {
+      // 10文字ずつチャンクで送信（より自然な表示のため）
+      const chunkSize = 10;
+      for (let i = 0; i < fullText.length; i += chunkSize) {
+        const chunk = fullText.slice(i, Math.min(i + chunkSize, fullText.length));
+        onStreamChunk(chunk);
 
-      // コールバックでチャンクを送信
-      if (onStreamChunk) {
-        onStreamChunk(chunkText);
+        // 少し待機してストリーミング感を出す（オプション）
+        if (i + chunkSize < fullText.length) {
+          await new Promise(resolve => setTimeout(resolve, 30));
+        }
       }
     }
 
