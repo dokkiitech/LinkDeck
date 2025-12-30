@@ -71,6 +71,9 @@ platform :ios do
       skip_waiting_for_build_processing: true,
       api_key: api_key
     )
+
+    # ビルド情報をファイルに書き出し（GitHub Actionsで使用）
+    File.write("../build_info.txt", "BUILD_NUMBER=#{latest_build + 1}\nVERSION=1.0.0")
   end
 
   desc "Build and submit Production build to App Store"
