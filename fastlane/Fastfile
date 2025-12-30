@@ -58,7 +58,7 @@ platform :ios do
       workspace: "ios/LinksDeck.xcworkspace",
       configuration: "Release",
       export_method: "app-store",
-      codesign_identity: "Apple Distribution",
+      codesigning_identity: "Apple Distribution",
       export_options: {
         provisioningProfiles: {
           "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
@@ -132,7 +132,7 @@ platform :ios do
       workspace: "ios/LinksDeck.xcworkspace",
       configuration: "Release",
       export_method: "app-store",
-      codesign_identity: "Apple Distribution",
+      codesigning_identity: "Apple Distribution",
       export_options: {
         provisioningProfiles: {
           "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
