@@ -1,4 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import firebase from '@react-native-firebase/app';
+import vertexAI, { getGenerativeModel } from '@react-native-firebase/ai';
 import { Link } from '../types';
 import { getUserLinks } from './firestore';
 import { ERROR_MESSAGES } from '../constants/messages';
@@ -398,23 +400,23 @@ ${JSON.stringify(linksData, null, 2)}
 }`;
     }
 
-    // エージェントに検索を依頼（疑似ストリーミング）
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const fullText = response.text();
+    // Firebase AI Logicを使用した本物のストリーミング
+    const app = firebase.app();
+    const ai = vertexAI(app);
+    const firebaseModel = getGenerativeModel(ai, {
+      model: 'gemini-1.5-flash',
+    });
 
-    // 疑似ストリーミング：テキストを少しずつ表示
-    if (onStreamChunk) {
-      // 10文字ずつチャンクで送信（より自然な表示のため）
-      const chunkSize = 10;
-      for (let i = 0; i < fullText.length; i += chunkSize) {
-        const chunk = fullText.slice(i, Math.min(i + chunkSize, fullText.length));
-        onStreamChunk(chunk);
+    const result = await firebaseModel.generateContentStream(prompt);
 
-        // 少し待機してストリーミング感を出す（オプション）
-        if (i + chunkSize < fullText.length) {
-          await new Promise(resolve => setTimeout(resolve, 30));
-        }
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullText += chunkText;
+
+      // リアルタイムでコールバックを呼び出し
+      if (onStreamChunk) {
+        onStreamChunk(chunkText);
       }
     }
 
