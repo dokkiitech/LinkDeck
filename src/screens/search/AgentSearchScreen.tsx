@@ -13,6 +13,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp } from '@react-navigation/native';
@@ -126,6 +127,11 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     setInputText('');
     setIsProcessing(true);
 
+    // メッセージ追加後にスクロール
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+
     try {
       const apiKey = await getGeminiApiKey();
       if (!apiKey) {
@@ -219,6 +225,77 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       </SafeAreaView>
     );
   }
+
+  // 思考中インジケーター
+  const ThinkingIndicator = () => {
+    const dot1Opacity = useRef(new Animated.Value(0.3)).current;
+    const dot2Opacity = useRef(new Animated.Value(0.3)).current;
+    const dot3Opacity = useRef(new Animated.Value(0.3)).current;
+
+    useEffect(() => {
+      const animate = () => {
+        Animated.sequence([
+          Animated.timing(dot1Opacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot1Opacity, {
+            toValue: 0.3,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+        ]).start();
+
+        setTimeout(() => {
+          Animated.sequence([
+            Animated.timing(dot2Opacity, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(dot2Opacity, {
+              toValue: 0.3,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }, 200);
+
+        setTimeout(() => {
+          Animated.sequence([
+            Animated.timing(dot3Opacity, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(dot3Opacity, {
+              toValue: 0.3,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }, 400);
+      };
+
+      animate();
+      const interval = setInterval(animate, 1200);
+
+      return () => clearInterval(interval);
+    }, []);
+
+    return (
+      <View style={styles.assistantMessageContainer}>
+        <View style={styles.assistantMessageBubble}>
+          <View style={styles.thinkingContainer}>
+            <Animated.View style={[styles.thinkingDot, { opacity: dot1Opacity }]} />
+            <Animated.View style={[styles.thinkingDot, { opacity: dot2Opacity }]} />
+            <Animated.View style={[styles.thinkingDot, { opacity: dot3Opacity }]} />
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   // メッセージアイテムのレンダリング
   const renderMessage = ({ item }: { item: ConversationMessage }) => {
@@ -335,14 +412,21 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
             )}
           </View>
         ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.messagesContent}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-          />
+          <>
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              renderItem={renderMessage}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.messagesContent}
+              onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+            />
+            {isProcessing && (
+              <View style={styles.thinkingIndicatorWrapper}>
+                <ThinkingIndicator />
+              </View>
+            )}
+          </>
         )}
 
         {/* 入力エリア */}
@@ -627,6 +711,21 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: '#ccc',
+  },
+  thinkingIndicatorWrapper: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  thinkingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  thinkingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#666',
   },
 });
 
