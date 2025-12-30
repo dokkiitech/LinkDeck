@@ -36,7 +36,7 @@ module.exports = {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.linkdeck.app",
+      bundleIdentifier: "com.linksdeck.app",
       buildNumber: "19",
       infoPlist: {
         NSAppTransportSecurity: {
@@ -55,7 +55,7 @@ module.exports = {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      package: "com.linkdeck.app",
+      package: "com.linksdeck.app",
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       permissions: ["CAMERA", "NFC"],
