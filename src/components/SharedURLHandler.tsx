@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { createLink } from '../services/firestore';
 import { fetchUrlTitle } from '../utils/urlMetadata';
 import { extractURLFromText } from '../utils/urlValidation';
+import { colors } from '../theme';
 
 /**
  * URLスキーム経由で共有されたURLを処理するコンポーネント

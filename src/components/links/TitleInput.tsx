@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import { colors } from '../../theme';
 
 interface TitleInputProps {
   value: string;
@@ -26,7 +27,7 @@ export const TitleInput: React.FC<TitleInputProps> = ({
         <Text style={styles.label}>タイトル</Text>
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#007AFF" />
+            <ActivityIndicator size="small" color={colors.primary} />
             <Text style={styles.loadingText}>取得中...</Text>
           </View>
         )}
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: colors.text.primary,
   },
   loadingContainer: {
     flexDirection: 'row',
@@ -66,21 +67,21 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 12,
-    color: '#007AFF',
+    color: colors.primary,
     marginLeft: 5,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     minHeight: 50,
   },
   hint: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginTop: 5,
   },
 });

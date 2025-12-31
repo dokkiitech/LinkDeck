@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { isValidURL } from '../../utils/urlValidation';
+import { colors } from '../../theme';
 
 interface QRCodeScannerProps {
   visible: boolean;
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   closeButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   rescanButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,

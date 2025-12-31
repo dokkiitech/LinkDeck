@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Tag } from '../../types';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors } from '../../theme';
 
 interface TagSelectorProps {
   selectedTags: string[];
@@ -113,13 +114,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: colors.text.primary,
     marginBottom: 10,
   },
   subLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginTop: 15,
     marginBottom: 8,
   },
@@ -129,25 +130,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   existingTag: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
   },
   existingTagSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   existingTagText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.text.primary,
   },
   existingTagTextSelected: {
-    color: '#FFFFFF',
+    color: 'colors.white',
     fontWeight: '600',
   },
   tagInputContainer: {
@@ -156,22 +157,22 @@ const styles = StyleSheet.create({
   },
   tagInput: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     marginRight: 10,
   },
   addTagButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     paddingHorizontal: 20,
     paddingVertical: 15,
   },
   addTagButtonText: {
-    color: '#FFFFFF',
+    color: 'colors.white',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   tag: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -191,11 +192,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tagText: {
-    color: '#FFFFFF',
+    color: 'colors.white',
     fontSize: 14,
   },
   tagRemove: {
-    color: '#FFFFFF',
+    color: 'colors.white',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 5,

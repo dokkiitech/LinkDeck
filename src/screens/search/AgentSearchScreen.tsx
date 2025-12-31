@@ -25,6 +25,7 @@ import { getGeminiApiKey } from '../../utils/storage';
 import { searchWithAgent, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
 import { getUserLinks } from '../../services/firestore';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors } from '../../theme';
 
 type AgentSearchScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<AgentStackParamList, 'AgentSearch'>,
@@ -196,7 +197,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
   if (checkingApiKey) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>読み込み中...</Text>
       </View>
     );
@@ -331,7 +332,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
                         onPress={() => handleOpenUrl(link.url)}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
-                        <Ionicons name="open-outline" size={18} color="#007AFF" />
+                        <Ionicons name="open-outline" size={18} color={colors.primary} />
                       </TouchableOpacity>
                     </View>
                     <Text style={styles.linkUrl} numberOfLines={1}>
@@ -379,7 +380,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.resetButton}
           onPress={handleResetSession}
         >
-          <Ionicons name="add-circle-outline" size={28} color="#007AFF" />
+          <Ionicons name="add-circle-outline" size={28} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -466,7 +467,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.lightGray,
   },
   centerContainer: {
     flex: 1,
@@ -482,7 +483,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.borderGray,
   },
   headerLeft: {
     flex: 1,
@@ -523,7 +524,7 @@ const styles = StyleSheet.create({
   settingsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -569,7 +570,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   suggestionChip: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.lightGray,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -589,7 +590,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   userMessageBubble: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 18,
@@ -632,12 +633,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   linkCard: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.white,
     padding: 12,
     borderRadius: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.borderGray,
   },
   linkHeader: {
     flexDirection: 'row',
@@ -654,7 +655,7 @@ const styles = StyleSheet.create({
   },
   linkUrl: {
     fontSize: 12,
-    color: '#007AFF',
+    color: colors.primary,
     marginBottom: 6,
   },
   linkMeta: {
@@ -671,19 +672,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tag: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: colors.background,
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 10,
   },
   tagText: {
     fontSize: 10,
-    color: '#0D47A1',
+    color: colors.text.primary,
   },
   inputContainer: {
     backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: colors.borderGray,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -693,7 +694,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.lightGray,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -702,7 +703,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   sendButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,

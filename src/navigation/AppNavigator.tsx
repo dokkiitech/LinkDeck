@@ -7,6 +7,7 @@ import MainNavigator from './MainNavigator';
 import SharedURLHandler from '../components/SharedURLHandler';
 import { RootStackParamList } from '../types';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { colors } from '../theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -16,7 +17,7 @@ const AppNavigator: React.FC = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
 });
 

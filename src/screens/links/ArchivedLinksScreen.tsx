@@ -14,6 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getUserLinks, deleteLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors } from '../../theme';
 
 type ArchivedLinksScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -145,7 +146,7 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -184,13 +185,13 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   emptyContainer: {
     flex: 1,
@@ -201,19 +202,19 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginBottom: 10,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     textAlign: 'center',
   },
   listContent: {
     padding: 10,
   },
   sectionHeader: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     paddingHorizontal: 15,
     paddingVertical: 8,
     marginTop: 10,
@@ -221,10 +222,10 @@ const styles = StyleSheet.create({
   sectionHeaderText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000000',
+    color: colors.text.primary,
   },
   linkItem: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 12,
     marginBottom: 10,
     overflow: 'hidden',
@@ -240,12 +241,12 @@ const styles = StyleSheet.create({
   linkTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: colors.text.primary,
     marginBottom: 5,
   },
   linkUrl: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginBottom: 10,
   },
   tagsContainer: {
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   tag: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -262,12 +263,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tagText: {
-    color: '#FFFFFF',
+    color: 'colors.white',
     fontSize: 12,
   },
   linkDate: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
   },
 });
 

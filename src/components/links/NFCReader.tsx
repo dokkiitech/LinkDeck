@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { isValidURL } from '../../utils/urlValidation';
+import { colors } from '../../theme';
 
 interface NFCReaderProps {
   visible: boolean;
@@ -279,18 +280,18 @@ const NFCReader: React.FC<NFCReaderProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     padding: 20,
   },
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   header: {
     flexDirection: 'row',
@@ -299,9 +300,9 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.borderGray,
   },
   headerText: {
     fontSize: 20,
@@ -351,23 +352,23 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: '#C7C7CC',
+    borderColor: 'colors.borderGray',
   },
   nfcIndicatorRingActive: {
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   nfcIndicatorDot: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#C7C7CC',
+    backgroundColor: colors.borderGray,
   },
   nfcIndicatorDotActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
   },
   hintText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   closeButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,
@@ -389,7 +390,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,

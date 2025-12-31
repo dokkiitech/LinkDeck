@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { saveGeminiApiKey, getGeminiApiKey, removeGeminiApiKey } from '../../utils/storage';
 import { validateApiKey } from '../../services/gemini';
+import { colors } from '../../theme';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
@@ -181,7 +182,7 @@ const SettingsScreen: React.FC = () => {
           </Text>
 
           {isLoading ? (
-            <ActivityIndicator size="small" color="#007AFF" />
+            <ActivityIndicator size="small" color={colors.primary} />
           ) : hasApiKey ? (
             <View>
               <View style={styles.statusContainer}>
@@ -214,7 +215,7 @@ const SettingsScreen: React.FC = () => {
                 disabled={isSaving}
               >
                 {isSaving ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={colors.white} />
                 ) : (
                   <Text style={styles.buttonText}>APIキーを保存</Text>
                 )}
@@ -233,15 +234,15 @@ const SettingsScreen: React.FC = () => {
 
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.featureIcon} />
               <Text style={styles.featureText}>Safari、Chrome、その他のアプリから共有可能</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.featureIcon} />
               <Text style={styles.featureText}>URLとページタイトルを自動取得</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#34C759" style={styles.featureIcon} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.featureIcon} />
               <Text style={styles.featureText}>ワンタップでLinksDeckに保存</Text>
             </View>
           </View>
@@ -250,7 +251,7 @@ const SettingsScreen: React.FC = () => {
             style={[styles.button, styles.shortcutButton]}
             onPress={handleOpenShortcut}
           >
-            <Ionicons name="download-outline" size={20} color="#FFFFFF" style={styles.buttonIcon} />
+            <Ionicons name="download-outline" size={20} color={colors.white} style={styles.buttonIcon} />
             <Text style={styles.buttonText}>ショートカットをインストール</Text>
           </TouchableOpacity>
 
@@ -267,10 +268,10 @@ const SettingsScreen: React.FC = () => {
           onPress={() => (navigation as any).navigate('Links', { screen: 'ArchivedLinks' })}
         >
           <View style={styles.menuItemContent}>
-            <Ionicons name="archive-outline" size={24} color="#007AFF" style={styles.menuIcon} />
+            <Ionicons name="archive-outline" size={24} color={colors.primary} style={styles.menuIcon} />
             <Text style={styles.menuItemText}>アーカイブしたリンク</Text>
           </View>
-          <Ionicons name="chevron-forward" size={24} color="#C7C7CC" />
+          <Ionicons name="chevron-forward" size={24} color="colors.borderGray" />
         </TouchableOpacity>
       </View>
 
@@ -297,22 +298,22 @@ const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     marginTop: 20,
     padding: 20,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000000',
+    color: colors.text.primary,
     marginBottom: 15,
   },
   description: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginBottom: 15,
     lineHeight: 20,
   },
@@ -321,48 +322,48 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginBottom: 5,
   },
   value: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.text.primary,
     fontWeight: '500',
   },
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: colors.white,
   },
   button: {
     height: 50,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.button.disabled,
   },
   removeButton: {
-    backgroundColor: '#FF9500',
+    backgroundColor: colors.warning,
     marginTop: 10,
   },
   upgradeButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: colors.success,
     marginTop: 15,
     marginBottom: 10,
   },
   logoutButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.error,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: 'colors.white',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -371,27 +372,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 15,
     padding: 15,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: colors.white,
     borderRadius: 10,
   },
   statusLabel: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginRight: 10,
   },
   statusSuccess: {
     fontSize: 14,
-    color: '#34C759',
+    color: colors.success,
     fontWeight: '600',
   },
   hint: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginTop: 10,
     fontStyle: 'italic',
   },
   shortcutButton: {
-    backgroundColor: '#5856D6',
+    backgroundColor: 'colors.accent2',
     flexDirection: 'row',
     marginBottom: 5,
   },
@@ -411,7 +412,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.text.primary,
     flex: 1,
   },
   menuItem: {
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.text.primary,
   },
 });
 

@@ -7,6 +7,7 @@ import TagsNavigator from './TagsNavigator';
 import AgentNavigator from './AgentNavigator';
 import SettingsNavigator from './SettingsNavigator';
 import { getGeminiApiKey } from '../utils/storage';
+import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -30,8 +31,8 @@ const MainNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: true,
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.text.tertiary,
       }}
     >
       <Tab.Screen

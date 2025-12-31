@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors } from '../../theme';
 
 type SignUpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
 
@@ -149,7 +150,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -160,48 +161,48 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: colors.primary,
     marginBottom: 10,
   },
   catchphrase: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.tertiary,
     marginBottom: 30,
   },
   subtitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#000000',
+    color: colors.text.primary,
     marginBottom: 40,
   },
   input: {
     width: '100%',
     height: 50,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: colors.white,
   },
   button: {
     width: '100%',
     height: 50,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
   },
   guestButton: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: colors.gray,
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.button.disabled,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   linkText: {
-    color: '#007AFF',
+    color: colors.primary,
     fontSize: 14,
   },
 });
