@@ -14,33 +14,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
-import { saveGeminiApiKey, getGeminiApiKey, removeGeminiApiKey } from '../../utils/storage';
+import { useApiKey } from '../../contexts/ApiKeyContext';
 import { validateApiKey } from '../../services/gemini';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const navigation = useNavigation();
+  const { hasApiKey, isLoading, saveApiKey, deleteApiKey } = useApiKey();
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasApiKey, setHasApiKey] = useState(false);
-
-  useEffect(() => {
-    loadApiKey();
-  }, []);
-
-  const loadApiKey = async () => {
-    try {
-      const savedKey = await getGeminiApiKey();
-      if (savedKey) {
-        setHasApiKey(true);
-      }
-    } catch (error) {
-      console.error('Error loading API key:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSaveApiKey = async () => {
     if (!geminiApiKey.trim()) {
@@ -59,9 +41,8 @@ const SettingsScreen: React.FC = () => {
         return;
       }
 
-      // AsyncStorageに保存
-      await saveGeminiApiKey(geminiApiKey.trim());
-      setHasApiKey(true);
+      // Contextを使って保存（自動的にhasApiKeyが更新される）
+      await saveApiKey(geminiApiKey.trim());
       setGeminiApiKey('');
       Alert.alert('成功', 'APIキーを保存しました');
     } catch (error: any) {
@@ -83,8 +64,8 @@ const SettingsScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await removeGeminiApiKey();
-              setHasApiKey(false);
+              // Contextを使って削除（自動的にhasApiKeyが更新される）
+              await deleteApiKey();
               setGeminiApiKey('');
               Alert.alert('成功', 'APIキーを削除しました');
             } catch (error) {
