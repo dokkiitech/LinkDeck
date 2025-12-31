@@ -1,6 +1,3 @@
-// Polyfills for ReadableStream (needed for @google/generative-ai streaming)
-import 'react-native-polyfill-globals/src/readable-stream';
-
 import { registerRootComponent } from 'expo';
 
 import App from './App';
