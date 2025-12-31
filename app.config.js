@@ -24,14 +24,6 @@ module.exports = {
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
-    updates: {
-      enabled: true,
-      checkAutomatically: "ON_ERROR_RECOVERY",
-      fallbackToCacheTimeout: 0
-    },
-    runtimeVersion: {
-      policy: "appVersion"
-    },
     assetBundlePatterns: [
       "**/*"
     ],
@@ -101,12 +93,6 @@ module.exports = {
         "expo-camera",
         {
           "cameraPermission": "QRコードを読み取るためにカメラへのアクセスが必要です"
-        }
-      ],
-      [
-        "expo-updates",
-        {
-          "username": "dokkiitech"
         }
       ]
     ]
