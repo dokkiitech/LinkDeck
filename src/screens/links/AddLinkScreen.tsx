@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
+  
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { createLink, createTag } from '../../services/firestore';
 import { extractURLFromText } from '../../utils/urlValidation';
 import { fetchUrlTitle } from '../../utils/urlMetadata';
@@ -40,6 +41,7 @@ interface Props {
 
 const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const initialUrl = route.params?.initialUrl || '';
   const [inputText, setInputText] = useState(initialUrl);
   const [titleText, setTitleText] = useState('');
@@ -88,12 +90,12 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const handleAddLink = async () => {
     if (!user) {
-      Alert.alert('エラー', ERROR_MESSAGES.AUTH.LOGIN_REQUIRED);
+      showError('エラー', ERROR_MESSAGES.AUTH.LOGIN_REQUIRED);
       return;
     }
 
     if (!inputText.trim()) {
-      Alert.alert('エラー', ERROR_MESSAGES.LINKS.URL_REQUIRED);
+      showError('エラー', ERROR_MESSAGES.LINKS.URL_REQUIRED);
       return;
     }
 
@@ -104,7 +106,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
       const extractedUrl = extractURLFromText(inputText);
 
       if (!extractedUrl) {
-        Alert.alert('エラー', ERROR_MESSAGES.LINKS.NO_VALID_URL);
+        showError('エラー', ERROR_MESSAGES.LINKS.NO_VALID_URL);
         setLoading(false);
         return;
       }
@@ -118,7 +120,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
       setTitleText('');
       setSelectedTags([]);
 
-      Alert.alert('成功', SUCCESS_MESSAGES.LINKS.SAVED, [
+      showSuccess('成功', SUCCESS_MESSAGES.LINKS.SAVED, [
         {
           text: 'OK',
           onPress: () => navigation.goBack(),
@@ -128,7 +130,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
       if (__DEV__) {
         console.error('[AddLink] Error adding link:', error);
       }
-      Alert.alert('エラー', ERROR_MESSAGES.LINKS.SAVE_FAILED);
+      showError('エラー', ERROR_MESSAGES.LINKS.SAVE_FAILED);
     } finally {
       setLoading(false);
     }
@@ -136,7 +138,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const handleAddTag = async () => {
     if (!user) {
-      Alert.alert('エラー', ERROR_MESSAGES.AUTH.LOGIN_REQUIRED);
+      showError('エラー', ERROR_MESSAGES.AUTH.LOGIN_REQUIRED);
       return;
     }
 
@@ -148,7 +150,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
 
     // 選択中のタグに既に含まれているかチェック
     if (selectedTags.includes(tagName)) {
-      Alert.alert('エラー', ERROR_MESSAGES.TAGS.ALREADY_ADDED);
+      showError('エラー', ERROR_MESSAGES.TAGS.ALREADY_ADDED);
       return;
     }
 
@@ -167,7 +169,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
       if (__DEV__) {
         console.error('[AddLink] Error creating tag:', error);
       }
-      Alert.alert('エラー', ERROR_MESSAGES.TAGS.CREATE_FAILED);
+      showError('エラー', ERROR_MESSAGES.TAGS.CREATE_FAILED);
     }
   };
 

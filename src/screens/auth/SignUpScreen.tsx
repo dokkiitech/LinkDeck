@@ -7,11 +7,12 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
 
 type SignUpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
@@ -30,17 +31,17 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSignUp = async () => {
     if (!displayName || !email || !password || !confirmPassword) {
-      Alert.alert('エラー', 'すべてのフィールドを入力してください');
+      showError('エラー', 'すべてのフィールドを入力してください');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('エラー', 'パスワードが一致しません');
+      showError('エラー', 'パスワードが一致しません');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('エラー', 'パスワードは6文字以上で入力してください');
+      showError('エラー', 'パスワードは6文字以上で入力してください');
       return;
     }
 
@@ -51,7 +52,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         { text: 'OK', onPress: () => navigation.navigate('Login') },
       ]);
     } catch (error: any) {
-      Alert.alert('エラー', error.message || ERROR_MESSAGES.AUTH.SIGN_UP_FAILED);
+      showError('エラー', error.message || ERROR_MESSAGES.AUTH.SIGN_UP_FAILED);
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await signInAsGuest();
     } catch (error: any) {
-      Alert.alert('エラー', error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
+      showError('エラー', error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
     } finally {
       setLoading(false);
     }

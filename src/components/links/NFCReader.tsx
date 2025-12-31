@@ -5,9 +5,11 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  Alert,
+  
   Platform,
 } from 'react-native';
+import { useDialog } from '../../contexts/DialogContext';
+import { useDialog } from '../../contexts/DialogContext';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { isValidURL } from '../../utils/urlValidation';
 
@@ -23,6 +25,7 @@ const NFCReader: React.FC<NFCReaderProps> = ({
   onScan,
 }) => {
   const [isReading, setIsReading] = useState(false);
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
 
   useEffect(() => {
