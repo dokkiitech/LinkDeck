@@ -245,13 +245,12 @@ export const getSearchQuerySuggestions = (links: Link[]): string[] => {
 };
 
 /**
- * Gemini AIエージェントを使って自然言語クエリでリンクを検索する（ストリーミング版）
+ * Gemini AIエージェントを使って自然言語クエリでリンクを検索する
  * @param apiKey ユーザーのGemini APIキー
  * @param userId ユーザーID
  * @param query 自然言語の検索クエリ
  * @param conversationHistory 会話履歴（省略可）
  * @param onlineSearchEnabled オンライン検索を有効にするか
- * @param onStreamChunk ストリーミング中のテキストチャンクを受け取るコールバック
  * @returns 検索結果とエージェントの説明
  */
 export const searchWithAgentStream = async (
@@ -259,8 +258,7 @@ export const searchWithAgentStream = async (
   userId: string,
   query: string,
   conversationHistory: ConversationMessage[] = [],
-  onlineSearchEnabled: boolean = false,
-  onStreamChunk?: StreamCallback
+  onlineSearchEnabled: boolean = false
 ): Promise<AgentSearchResult> => {
   try {
     if (!apiKey || apiKey.trim() === '') {
@@ -394,22 +392,13 @@ ${JSON.stringify(linksData, null, 2)}
 }`;
     }
 
-    // ユーザーのAPIキーで本物のストリーミング（ポリフィル使用）
+    // ユーザーのAPIキーで生成（非ストリーミング）
     const genAI = new GoogleGenerativeAI(apiKey);
-    const streamModel = genAI.getGenerativeModel({ model: 'models/gemini-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'models/gemini-flash-latest' });
 
-    const result = await streamModel.generateContentStream(prompt);
-
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullText += chunkText;
-
-      // リアルタイムでコールバックを呼び出し
-      if (onStreamChunk) {
-        onStreamChunk(chunkText);
-      }
-    }
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const fullText = response.text();
 
     // JSON部分を抽出
     const jsonMatch = fullText.match(/\{[\s\S]*\}/);

@@ -130,18 +130,6 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     setInputText('');
     setIsProcessing(true);
 
-    // ストリーミング用のアシスタントメッセージを作成
-    const assistantMessageId = (Date.now() + 1).toString();
-    const initialAssistantMessage: ConversationMessage = {
-      id: assistantMessageId,
-      role: 'assistant',
-      content: '',
-      isStreaming: true,
-      timestamp: Date.now(),
-    };
-
-    setMessages((prev) => [...prev, initialAssistantMessage]);
-
     // メッセージ追加後にスクロール
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
@@ -152,52 +140,30 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       if (!apiKey) {
         Alert.alert('エラー', 'Gemini APIキーが設定されていません');
         setIsProcessing(false);
-        // エラー時はストリーミングメッセージを削除
-        setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId));
         return;
       }
 
       // 会話履歴から直近のメッセージを取得（最大10件）
       const recentHistory = messages.slice(-10);
 
-      // ストリーミングコールバック
-      const onStreamChunk = (chunk: string) => {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMessageId
-              ? { ...msg, content: msg.content + chunk }
-              : msg
-          )
-        );
-
-        // ストリーミング中も自動スクロール
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd({ animated: true });
-        }, 50);
-      };
-
       const result = await searchWithAgentStream(
         apiKey,
         user.uid,
         queryText,
         recentHistory,
-        onlineSearchEnabled,
-        onStreamChunk
+        onlineSearchEnabled
       );
 
-      // ストリーミング完了後、最終的なメッセージを更新
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantMessageId
-            ? {
-                ...msg,
-                content: result.explanation,
-                links: result.links,
-                isStreaming: false,
-              }
-            : msg
-        )
-      );
+      // 結果をアシスタントメッセージとして追加
+      const assistantMessage: ConversationMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: result.explanation,
+        links: result.links,
+        timestamp: Date.now(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // 最終スクロール
       setTimeout(() => {

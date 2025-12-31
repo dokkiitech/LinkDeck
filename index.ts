@@ -1,7 +1,3 @@
-// Use Expo's streaming-capable fetch for @google/generative-ai
-import { fetch as expoFetch } from 'expo/fetch';
-globalThis.fetch = expoFetch as any;
-
 import { registerRootComponent } from 'expo';
 
 import App from './App';
