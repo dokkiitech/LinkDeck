@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
+  
   Linking,
   TextInput,
   Modal,
@@ -21,6 +21,7 @@ import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, dele
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 
 type LinkDetailScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -37,6 +38,7 @@ interface Props {
 const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { linkId } = route.params;
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [link, setLink] = useState<Link | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -75,7 +77,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('エラー: リンクの読み込みに失敗しました');
       } else {
-        Alert.alert('エラー', 'リンクの読み込みに失敗しました');
+        showError('エラー', 'リンクの読み込みに失敗しました');
       }
     } finally {
       setLoading(false);
@@ -93,14 +95,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         if (Platform.OS === 'web') {
           alert('エラー: このURLを開くことができません');
         } else {
-          Alert.alert('エラー', 'このURLを開くことができません');
+          showError('エラー', 'このURLを開くことができません');
         }
       }
     } catch (error) {
       if (Platform.OS === 'web') {
         alert('エラー: URLを開く際にエラーが発生しました');
       } else {
-        Alert.alert('エラー', 'URLを開く際にエラーが発生しました');
+        showError('エラー', 'URLを開く際にエラーが発生しました');
       }
     }
   };
@@ -113,20 +115,11 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     if (link.summary) {
-      if (Platform.OS === 'web') {
-        if (window.confirm('既に要約が生成されています。新しく生成しますか？')) {
-          proceed();
-        }
-      } else {
-        Alert.alert(
-          '確認',
-          '既に要約が生成されています。新しく生成しますか？',
-          [
-            { text: 'キャンセル', style: 'cancel' },
-            { text: '生成', onPress: proceed },
-          ]
-        );
-      }
+      showConfirm(
+        '確認',
+        '既に要約が生成されています。新しく生成しますか？',
+        proceed
+      );
     } else {
       await proceed();
     }
@@ -143,20 +136,11 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (!apiKey) {
         const navigateToSettings = () => navigation.navigate('LinksList' as any);
 
-        if (Platform.OS === 'web') {
-          if (window.confirm('APIキーが未設定です。設定画面に移動しますか？')) {
-            navigateToSettings();
-          }
-        } else {
-          Alert.alert(
-            'APIキー未設定',
-            '設定画面でGemini APIキーを設定してください。',
-            [
-              { text: 'キャンセル', style: 'cancel' },
-              { text: '設定画面へ', onPress: navigateToSettings },
-            ]
-          );
-        }
+        showConfirm(
+          'APIキー未設定',
+          '設定画面でGemini APIキーを設定してください。',
+          navigateToSettings
+        );
         setGeneratingSummary(false);
         return;
       }
@@ -165,25 +149,17 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       await updateLink(linkId, { summary });
       setLink((prev) => (prev ? { ...prev, summary } : null));
 
-      if (Platform.OS === 'web') {
-        alert('要約を生成しました');
-      } else {
-        Alert.alert('成功', '要約を生成しました');
-      }
+      showSuccess('成功', '要約を生成しました');
     } catch (error: any) {
       console.error('Error generating summary:', error);
-      const errorMessage = error.message === 'INSUFFICIENT_CONTENT'
+      const errorMessage = error?.message === 'INSUFFICIENT_CONTENT'
         ? 'このリンクは要約できません。\n十分なテキストコンテンツが取得できませんでした。'
-        : error.message || '要約の生成に失敗しました';
+        : error?.message || '要約の生成に失敗しました';
 
-      if (Platform.OS === 'web') {
-        alert(`エラー: ${errorMessage}`);
-      } else {
-        Alert.alert(
-          error.message === 'INSUFFICIENT_CONTENT' ? '要約不可' : 'エラー',
-          errorMessage
-        );
-      }
+      showError(
+        error?.message === 'INSUFFICIENT_CONTENT' ? '要約不可' : 'エラー',
+        errorMessage
+      );
     } finally {
       setGeneratingSummary(false);
     }
@@ -199,13 +175,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert(message);
       } else {
-        Alert.alert('成功', message);
+        showSuccess('成功', message);
       }
     } catch (error) {
       if (Platform.OS === 'web') {
         alert('エラー: 更新に失敗しました');
       } else {
-        Alert.alert('エラー', '更新に失敗しました');
+        showError('エラー', '更新に失敗しました');
       }
     }
   };
@@ -221,7 +197,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('エラー: タグの読み込みに失敗しました');
       } else {
-        Alert.alert('エラー', 'タグの読み込みに失敗しました');
+        showError('エラー', 'タグの読み込みに失敗しました');
       }
     }
   };
@@ -247,7 +223,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert(`エラー: ${message}`);
       } else {
-        Alert.alert('エラー', message);
+        showError('エラー', message);
       }
     }
   };
@@ -278,7 +254,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('エラー: タグの作成に失敗しました');
       } else {
-        Alert.alert('エラー', 'タグの作成に失敗しました');
+        showError('エラー', 'タグの作成に失敗しました');
       }
     }
   };
@@ -299,7 +275,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert(`エラー: ${message}`);
       } else {
-        Alert.alert('エラー', message);
+        showError('エラー', message);
       }
       return;
     }
@@ -321,13 +297,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('リンクを更新しました');
       } else {
-        Alert.alert('成功', 'リンクを更新しました');
+        showSuccess('成功', 'リンクを更新しました');
       }
     } catch (error) {
       if (Platform.OS === 'web') {
         alert('エラー: リンクの更新に失敗しました');
       } else {
-        Alert.alert('エラー', 'リンクの更新に失敗しました');
+        showError('エラー', 'リンクの更新に失敗しました');
       }
     }
   };
@@ -340,7 +316,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           alert('リンクを削除しました');
           navigation.goBack();
         } else {
-          Alert.alert('成功', 'リンクを削除しました', [
+          showSuccess('成功', 'リンクを削除しました', [
             { text: 'OK', onPress: () => navigation.goBack() },
           ]);
         }
@@ -348,25 +324,12 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         if (Platform.OS === 'web') {
           alert('エラー: リンクの削除に失敗しました');
         } else {
-          Alert.alert('エラー', 'リンクの削除に失敗しました');
+          showError('エラー', 'リンクの削除に失敗しました');
         }
       }
     };
 
-    if (Platform.OS === 'web') {
-      if (window.confirm('このリンクを削除しますか？')) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(
-        '確認',
-        'このリンクを削除しますか？',
-        [
-          { text: 'キャンセル', style: 'cancel' },
-          { text: '削除', style: 'destructive', onPress: performDelete },
-        ]
-      );
-    }
+    showConfirm('確認', 'このリンクを削除しますか？', performDelete);
   };
 
   if (loading) {
