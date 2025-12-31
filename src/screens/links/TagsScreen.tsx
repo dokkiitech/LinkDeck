@@ -98,9 +98,15 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       `「${tag.name}」を削除しますか？\nこのタグを使用している全てのリンクからも削除されます。`,
       async () => {
         try {
-              await deleteTag(user.uid, tag.id);
-              setTags(tags.filter((t) => t.id !== tag.id));
-              showSuccess('成功', SUCCESS_MESSAGES.TAGS.DELETED);
+          await deleteTag(user.uid, tag.id);
+          setTags(tags.filter((t) => t.id !== tag.id));
+          showSuccess('成功', SUCCESS_MESSAGES.TAGS.DELETED);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('[Tags] Error deleting tag:', error);
+          }
+          showError('エラー', ERROR_MESSAGES.TAGS.DELETE_FAILED);
+        }
       }
     );
   };
