@@ -207,6 +207,35 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // テキスト内のURLをクリック可能なリンクとしてレンダリング
+  const renderTextWithLinks = (text: string) => {
+    // URLを検出する正規表現
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return (
+      <Text style={styles.assistantMessageText}>
+        {parts.map((part, index) => {
+          if (part.match(urlRegex)) {
+            // URLの場合はクリック可能に
+            return (
+              <Text
+                key={index}
+                style={styles.linkTextInMessage}
+                onPress={() => handleOpenUrl(part)}
+              >
+                {part}
+              </Text>
+            );
+          } else {
+            // 通常のテキスト
+            return <Text key={index}>{part}</Text>;
+          }
+        })}
+      </Text>
+    );
+  };
+
   // APIキーが設定されていない場合
   if (checkingApiKey) {
     return (
@@ -326,7 +355,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       return (
         <View style={styles.assistantMessageContainer}>
           <View style={styles.assistantMessageBubble}>
-            <Text style={styles.assistantMessageText}>{item.content}</Text>
+            {renderTextWithLinks(item.content)}
             {item.links && item.links.length > 0 && (
               <View style={styles.linksContainer}>
                 <Text style={styles.linksHeader}>
@@ -666,6 +695,10 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 15,
     lineHeight: 20,
+  },
+  linkTextInMessage: {
+    color: '#007AFF',
+    textDecorationLine: 'underline',
   },
   linksContainer: {
     marginTop: 12,
