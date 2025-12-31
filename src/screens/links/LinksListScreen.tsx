@@ -233,7 +233,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
         <Ionicons name="search" size={20} color={colors.text.tertiary} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="タイトル、URL、タグで検索..."
+          placeholder="タイトル、URL、タグで検索"
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"

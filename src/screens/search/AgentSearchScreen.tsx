@@ -373,7 +373,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>AIエージェント</Text>
           <Text style={styles.headerSubtitle}>
-            会話しながらリンクを探せます
+            "あの"リンクを、AIに質問して探せます
           </Text>
         </View>
         <TouchableOpacity
@@ -393,9 +393,9 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         {messages.length === 0 ? (
           <View style={styles.emptyStateContainer}>
             <Ionicons name="chatbubbles-outline" size={80} color="#ccc" />
-            <Text style={styles.emptyStateTitle}>会話を始めましょう</Text>
+            <Text style={styles.emptyStateTitle}>Let`s Chat!</Text>
             <Text style={styles.emptyStateDescription}>
-              保存したリンクについて、自然な言葉で質問できます
+              保存したリンクについて質問できます
             </Text>
             {!loadingLinks && (
               <View style={styles.suggestionsSection}>
@@ -435,7 +435,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="メッセージを入力..."
+              placeholder="メッセージを入力"
               placeholderTextColor="#999"
               value={inputText}
               onChangeText={setInputText}
