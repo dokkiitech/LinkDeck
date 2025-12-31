@@ -24,7 +24,13 @@ module.exports = {
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
-    runtimeVersion: "1.0.0",
+    updates: {
+      url: "https://u.expo.dev/97bb1c45-d7d5-4f3d-8c6f-5a5cd4c60be3",
+      fallbackToCacheTimeout: 0
+    },
+    runtimeVersion: {
+      policy: "appVersion"
+    },
     assetBundlePatterns: [
       "**/*"
     ],
