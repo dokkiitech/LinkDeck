@@ -1,5 +1,6 @@
-// Polyfills must be imported BEFORE any other imports
-import 'react-native-polyfill-globals/auto';
+// Polyfills for ReadableStream (needed for @google/generative-ai streaming)
+// Only import specific polyfills to avoid conflicts with expo-updates
+import 'react-native-polyfill-globals/src/readable-stream';
 
 import { registerRootComponent } from 'expo';
 
