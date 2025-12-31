@@ -4,6 +4,54 @@ import { getUserLinks } from './firestore';
 import { ERROR_MESSAGES } from '../constants/messages';
 
 /**
+ * Gemini APIのエラーを解析してユーザーフレンドリーなメッセージを返す
+ */
+const parseGeminiError = (error: any): string => {
+  // エラーオブジェクトが存在しない場合
+  if (!error) {
+    return ERROR_MESSAGES.GEMINI.GENERIC_ERROR;
+  }
+
+  // エラーメッセージを安全に取得
+  const errorMessage = error?.message || error?.toString() || '';
+  const errorString = errorMessage.toLowerCase();
+
+  // クォータ超過エラー
+  if (
+    errorString.includes('quota') ||
+    errorString.includes('resource_exhausted') ||
+    errorString.includes('429') ||
+    errorString.includes('rate limit')
+  ) {
+    return ERROR_MESSAGES.GEMINI.QUOTA_EXCEEDED;
+  }
+
+  // 無効なAPIキーエラー
+  if (
+    errorString.includes('api key') ||
+    errorString.includes('api_key') ||
+    errorString.includes('invalid_argument') ||
+    errorString.includes('401') ||
+    errorString.includes('403')
+  ) {
+    return ERROR_MESSAGES.GEMINI.INVALID_API_KEY;
+  }
+
+  // ネットワークエラー
+  if (
+    errorString.includes('network') ||
+    errorString.includes('fetch') ||
+    errorString.includes('connection') ||
+    errorString.includes('timeout')
+  ) {
+    return ERROR_MESSAGES.GEMINI.NETWORK_ERROR;
+  }
+
+  // デフォルトのエラーメッセージ
+  return ERROR_MESSAGES.GEMINI.GENERIC_ERROR;
+};
+
+/**
  * 会話メッセージの型
  */
 export interface ConversationMessage {
@@ -157,7 +205,17 @@ ${JSON.stringify(linksData, null, 2)}
       throw new Error('検索結果の解析に失敗しました。もう一度お試しください。');
     }
 
-    throw new Error(error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
+    // エラーメッセージを安全に取得
+    const errorMessage = error?.message || '';
+
+    // すでにパース済みのGeminiエラーメッセージの場合はそのまま使う
+    if (errorMessage && Object.values(ERROR_MESSAGES.GEMINI).includes(errorMessage)) {
+      throw error;
+    }
+
+    // その他のエラーはパースして返す
+    const userFriendlyMessage = parseGeminiError(error);
+    throw new Error(userFriendlyMessage);
   }
 };
 
@@ -435,6 +493,16 @@ ${JSON.stringify(linksData, null, 2)}
       throw new Error('検索結果の解析に失敗しました。もう一度お試しください。');
     }
 
-    throw new Error(error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
+    // エラーメッセージを安全に取得
+    const errorMessage = error?.message || '';
+
+    // すでにパース済みのGeminiエラーメッセージの場合はそのまま使う
+    if (errorMessage && Object.values(ERROR_MESSAGES.GEMINI).includes(errorMessage)) {
+      throw error;
+    }
+
+    // その他のエラーはパースして返す
+    const userFriendlyMessage = parseGeminiError(error);
+    throw new Error(userFriendlyMessage);
   }
 };

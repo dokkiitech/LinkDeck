@@ -174,10 +174,10 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         console.error('[AgentSearch] Error:', error);
       }
 
-      // エラー時はストリーミングメッセージを削除
-      setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId));
+      // エラーメッセージを安全に取得
+      const errorMessage = error?.message || ERROR_MESSAGES.GEMINI.GENERIC_ERROR;
 
-      Alert.alert('検索エラー', error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
+      Alert.alert('検索エラー', errorMessage);
     } finally {
       setIsProcessing(false);
     }

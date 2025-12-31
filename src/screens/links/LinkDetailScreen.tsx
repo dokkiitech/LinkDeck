@@ -172,15 +172,15 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       }
     } catch (error: any) {
       console.error('Error generating summary:', error);
-      const errorMessage = error.message === 'INSUFFICIENT_CONTENT'
+      const errorMessage = error?.message === 'INSUFFICIENT_CONTENT'
         ? 'このリンクは要約できません。\n十分なテキストコンテンツが取得できませんでした。'
-        : error.message || '要約の生成に失敗しました';
+        : error?.message || '要約の生成に失敗しました';
 
       if (Platform.OS === 'web') {
         alert(`エラー: ${errorMessage}`);
       } else {
         Alert.alert(
-          error.message === 'INSUFFICIENT_CONTENT' ? '要約不可' : 'エラー',
+          error?.message === 'INSUFFICIENT_CONTENT' ? '要約不可' : 'エラー',
           errorMessage
         );
       }

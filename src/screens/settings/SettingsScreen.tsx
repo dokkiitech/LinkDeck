@@ -47,7 +47,7 @@ const SettingsScreen: React.FC = () => {
       Alert.alert('成功', 'APIキーを保存しました');
     } catch (error: any) {
       console.error('Error saving API key:', error);
-      Alert.alert('エラー', error.message || 'APIキーの保存に失敗しました');
+      Alert.alert('エラー', error?.message || 'APIキーの保存に失敗しました');
     } finally {
       setIsSaving(false);
     }
