@@ -396,7 +396,7 @@ ${JSON.stringify(linksData, null, 2)}
 
     // ユーザーのAPIキーで本物のストリーミング（ポリフィル使用）
     const genAI = new GoogleGenerativeAI(apiKey);
-    const streamModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const streamModel = genAI.getGenerativeModel({ model: 'models/gemini-flash-latest' });
 
     const result = await streamModel.generateContentStream(prompt);
 
