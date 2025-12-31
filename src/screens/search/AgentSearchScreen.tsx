@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp } from '@react-navigation/native';
@@ -22,7 +23,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { AgentStackParamList, MainTabParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getGeminiApiKey } from '../../utils/storage';
-import { searchWithAgent, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
+import { searchWithAgentStream, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
 import { getUserLinks } from '../../services/firestore';
 import { ERROR_MESSAGES } from '../../constants/messages';
 import { colors, theme } from '../../theme';
@@ -45,6 +46,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [userLinks, setUserLinks] = useState<Link[]>([]);
   const [loadingLinks, setLoadingLinks] = useState(true);
+  const [onlineSearchEnabled, setOnlineSearchEnabled] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   // Gemini APIキーとユーザーリンクの確認
@@ -125,6 +127,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const queryText = inputText.trim();
     setInputText('');
     setIsProcessing(true);
 
@@ -137,14 +140,22 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       const apiKey = await getGeminiApiKey();
       if (!apiKey) {
         Alert.alert('エラー', 'Gemini APIキーが設定されていません');
+        setIsProcessing(false);
         return;
       }
 
       // 会話履歴から直近のメッセージを取得（最大10件）
       const recentHistory = messages.slice(-10);
 
-      const result = await searchWithAgent(apiKey, user.uid, inputText.trim(), recentHistory);
+      const result = await searchWithAgentStream(
+        apiKey,
+        user.uid,
+        queryText,
+        recentHistory,
+        onlineSearchEnabled
+      );
 
+      // 結果をアシスタントメッセージとして追加
       const assistantMessage: ConversationMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -155,7 +166,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // メッセージが追加されたら最下部にスクロール
+      // 最終スクロール
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -163,6 +174,10 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       if (__DEV__) {
         console.error('[AgentSearch] Error:', error);
       }
+
+      // エラー時はストリーミングメッセージを削除
+      setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId));
+
       Alert.alert('検索エラー', error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
     } finally {
       setIsProcessing(false);
@@ -191,6 +206,35 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     } catch (error) {
       Alert.alert('エラー', 'URLを開く際にエラーが発生しました');
     }
+  };
+
+  // テキスト内のURLをクリック可能なリンクとしてレンダリング
+  const renderTextWithLinks = (text: string) => {
+    // URLを検出する正規表現
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return (
+      <Text style={styles.assistantMessageText}>
+        {parts.map((part, index) => {
+          if (part.match(urlRegex)) {
+            // URLの場合はクリック可能に
+            return (
+              <Text
+                key={index}
+                style={styles.linkTextInMessage}
+                onPress={() => handleOpenUrl(part)}
+              >
+                {part}
+              </Text>
+            );
+          } else {
+            // 通常のテキスト
+            return <Text key={index}>{part}</Text>;
+          }
+        })}
+      </Text>
+    );
   };
 
   // APIキーが設定されていない場合
@@ -312,7 +356,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       return (
         <View style={styles.assistantMessageContainer}>
           <View style={styles.assistantMessageBubble}>
-            <Text style={styles.assistantMessageText}>{item.content}</Text>
+            {renderTextWithLinks(item.content)}
             {item.links && item.links.length > 0 && (
               <View style={styles.linksContainer}>
                 <Text style={styles.linksHeader}>
@@ -488,6 +532,11 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   headerTitle: {
     fontSize: 24,
     fontFamily: theme.typography.fontFamily.bold,
@@ -498,6 +547,14 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily.regular,
     color: '#666',
     marginTop: 2,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  toggleIcon: {
+    marginRight: 2,
   },
   resetButton: {
     padding: 4,
@@ -629,6 +686,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: theme.typography.fontFamily.regular,
     lineHeight: 20,
+  },
+  linkTextInMessage: {
+    color: '#007AFF',
+    textDecorationLine: 'underline',
   },
   linksContainer: {
     marginTop: 12,

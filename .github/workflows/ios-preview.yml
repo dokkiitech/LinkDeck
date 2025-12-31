@@ -2,7 +2,7 @@ name: iOS Preview Build
 
 on:
   pull_request:
-    types: [labeled]
+    types: [labeled, synchronize]
 
 permissions:
   contents: read
