@@ -5,10 +5,9 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  
+
   Dimensions,
 } from 'react-native';
-import { useDialog } from '../../contexts/DialogContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { isValidURL } from '../../utils/urlValidation';

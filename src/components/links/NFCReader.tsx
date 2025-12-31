@@ -5,10 +5,9 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  
+
   Platform,
 } from 'react-native';
-import { useDialog } from '../../contexts/DialogContext';
 import { useDialog } from '../../contexts/DialogContext';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { isValidURL } from '../../utils/urlValidation';
