@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { MainTabParamList } from '../types';
@@ -6,25 +6,12 @@ import LinksNavigator from './LinksNavigator';
 import TagsNavigator from './TagsNavigator';
 import AgentNavigator from './AgentNavigator';
 import SettingsNavigator from './SettingsNavigator';
-import { getGeminiApiKey } from '../utils/storage';
+import { useApiKey } from '../contexts/ApiKeyContext';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainNavigator: React.FC = () => {
-  const [hasApiKey, setHasApiKey] = useState(false);
-
-  useEffect(() => {
-    checkApiKey();
-  }, []);
-
-  const checkApiKey = async () => {
-    try {
-      const apiKey = await getGeminiApiKey();
-      setHasApiKey(!!apiKey);
-    } catch (error) {
-      setHasApiKey(false);
-    }
-  };
+  const { hasApiKey } = useApiKey();
 
   return (
     <Tab.Navigator
