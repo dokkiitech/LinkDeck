@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type UpgradeAccountScreenNavigationProp = NativeStackNavigationProp<SettingsStackParamList, 'UpgradeAccount'>;
 
@@ -167,13 +167,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
     marginTop: 20,
   },
   description: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginBottom: 30,
     lineHeight: 22,
@@ -187,6 +188,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     backgroundColor: colors.white,
   },
   button: {
@@ -204,10 +206,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   loadingText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
     marginTop: 10,
@@ -220,12 +223,13 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 15,
   },
   infoText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginBottom: 10,
     lineHeight: 20,

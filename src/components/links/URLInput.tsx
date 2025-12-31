@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 interface URLInputProps {
   value: string;
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
   },
@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     borderWidth: 1,
     borderColor: colors.borderGray,
   },

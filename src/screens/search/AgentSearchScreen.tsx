@@ -25,7 +25,7 @@ import { getGeminiApiKey } from '../../utils/storage';
 import { searchWithAgent, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
 import { getUserLinks } from '../../services/firestore';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type AgentSearchScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<AgentStackParamList, 'AgentSearch'>,
@@ -490,11 +490,12 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#333',
   },
   headerSubtitle: {
     fontSize: 13,
+    fontFamily: theme.typography.fontFamily.regular,
     color: '#666',
     marginTop: 2,
   },
@@ -504,17 +505,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: '#666',
   },
   noApiKeyTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#333',
     marginTop: 20,
     textAlign: 'center',
   },
   noApiKeyDescription: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: '#666',
     marginTop: 12,
     textAlign: 'center',
@@ -533,7 +536,7 @@ const styles = StyleSheet.create({
   settingsButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     marginLeft: 8,
   },
   chatContainer: {
@@ -547,12 +550,13 @@ const styles = StyleSheet.create({
   },
   emptyStateTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#333',
     marginTop: 20,
   },
   emptyStateDescription: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: '#666',
     marginTop: 8,
     textAlign: 'center',
@@ -565,7 +569,7 @@ const styles = StyleSheet.create({
   },
   suggestionsTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#666',
     marginBottom: 12,
   },
@@ -578,6 +582,7 @@ const styles = StyleSheet.create({
   },
   suggestionText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: '#333',
   },
   messagesContent: {
@@ -599,6 +604,7 @@ const styles = StyleSheet.create({
   userMessageText: {
     color: '#fff',
     fontSize: 15,
+    fontFamily: theme.typography.fontFamily.regular,
     lineHeight: 20,
   },
   assistantMessageContainer: {
@@ -621,6 +627,7 @@ const styles = StyleSheet.create({
   assistantMessageText: {
     color: '#333',
     fontSize: 15,
+    fontFamily: theme.typography.fontFamily.regular,
     lineHeight: 20,
   },
   linksContainer: {
@@ -628,7 +635,7 @@ const styles = StyleSheet.create({
   },
   linksHeader: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#666',
     marginBottom: 8,
   },
@@ -649,12 +656,13 @@ const styles = StyleSheet.create({
   linkTitle: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#333',
     marginRight: 8,
   },
   linkUrl: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.primary,
     marginBottom: 6,
   },
@@ -665,6 +673,7 @@ const styles = StyleSheet.create({
   },
   linkDate: {
     fontSize: 11,
+    fontFamily: theme.typography.fontFamily.regular,
     color: '#999',
   },
   linkTags: {
@@ -679,6 +688,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 10,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
   },
   inputContainer: {
@@ -699,6 +709,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
+    fontFamily: theme.typography.fontFamily.regular,
     maxHeight: 100,
     marginRight: 8,
   },

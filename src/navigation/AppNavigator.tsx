@@ -7,7 +7,7 @@ import MainNavigator from './MainNavigator';
 import SharedURLHandler from '../components/SharedURLHandler';
 import { RootStackParamList } from '../types';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
-import { colors } from '../theme';
+import { colors, theme } from '../theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

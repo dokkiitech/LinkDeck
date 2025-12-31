@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { isValidURL } from '../../utils/urlValidation';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 interface NFCReaderProps {
   visible: boolean;
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#000',
   },
   closeIconButton: {
@@ -317,6 +317,7 @@ const styles = StyleSheet.create({
   },
   closeIconText: {
     fontSize: 28,
+    fontFamily: theme.typography.fontFamily.regular,
     fontWeight: '300',
     color: '#000',
   },
@@ -331,10 +332,11 @@ const styles = StyleSheet.create({
   },
   nfcIconText: {
     fontSize: 80,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   instructionText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#000',
     textAlign: 'center',
     marginBottom: 40,
@@ -368,12 +370,14 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
     marginBottom: 30,
   },
   messageText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     textAlign: 'center',
     marginBottom: 20,
     color: '#000',
@@ -387,7 +391,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   retryButton: {
     backgroundColor: colors.primary,
@@ -398,7 +402,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
 });
 

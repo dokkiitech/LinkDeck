@@ -15,7 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getUserTags, createTag, deleteTag } from '../../services/firestore';
 import { Tag, TagsStackParamList } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, CONFIRMATION_MESSAGES } from '../../constants/messages';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 interface Props {
   navigation: NativeStackNavigationProp<TagsStackParamList, 'TagsList'>;
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: 'colors.white',
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   emptyContainer: {
     flex: 1,
@@ -241,12 +241,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.tertiary,
     marginBottom: 10,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
   },
@@ -285,14 +286,16 @@ const styles = StyleSheet.create({
   tagName: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   tagDate: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
   },
   tapHint: {
     fontSize: 11,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.primary,
     marginTop: 5,
     fontStyle: 'italic',

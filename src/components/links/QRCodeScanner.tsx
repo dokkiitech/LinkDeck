@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { isValidURL } from '../../utils/urlValidation';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 interface QRCodeScannerProps {
   visible: boolean;
@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
   messageText: {
     color: '#fff',
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   cameraContainer: {
     flex: 1,
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   headerText: {
     color: '#fff',
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   closeIconButton: {
     width: 40,
@@ -220,6 +221,7 @@ const styles = StyleSheet.create({
   closeIconText: {
     color: '#fff',
     fontSize: 28,
+    fontFamily: theme.typography.fontFamily.regular,
     fontWeight: '300',
   },
   scanArea: {
@@ -243,6 +245,7 @@ const styles = StyleSheet.create({
   instructionText: {
     color: '#fff',
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
   rescanButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
 });
 

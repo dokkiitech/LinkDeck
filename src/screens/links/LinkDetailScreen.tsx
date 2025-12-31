@@ -21,7 +21,7 @@ import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, dele
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type LinkDetailScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -659,6 +659,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
   },
   content: {
@@ -666,7 +667,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
   },
@@ -675,6 +676,7 @@ const styles = StyleSheet.create({
   },
   url: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.primary,
     textDecorationLine: 'underline',
   },
@@ -689,7 +691,7 @@ const styles = StyleSheet.create({
   },
   tagsLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
   },
   editTagButton: {
@@ -698,7 +700,7 @@ const styles = StyleSheet.create({
   editTagButtonText: {
     color: 'colors.white',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   tags: {
     flexDirection: 'row',
@@ -715,9 +717,11 @@ const styles = StyleSheet.create({
   tagText: {
     color: 'colors.white',
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   noTagsText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     fontStyle: 'italic',
   },
@@ -733,7 +737,7 @@ const styles = StyleSheet.create({
   openLinkButtonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   generateSummaryButton: {
     backgroundColor: colors.primary,
@@ -745,7 +749,7 @@ const styles = StyleSheet.create({
   generateSummaryButtonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   disabledButton: {
     backgroundColor: colors.borderGray,
@@ -755,6 +759,7 @@ const styles = StyleSheet.create({
   },
   webNotice: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
     marginTop: -15,
@@ -784,10 +789,12 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
   },
   menuItemDangerText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.error,
   },
   menuDivider: {
@@ -802,17 +809,19 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
   },
   summaryText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
     lineHeight: 20,
   },
   date: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
   },
@@ -836,11 +845,12 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
   },
   modalCloseButton: {
     fontSize: 32,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     fontWeight: '300',
   },
@@ -854,6 +864,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     marginRight: 10,
   },
   addNewTagButton: {
@@ -865,11 +876,11 @@ const styles = StyleSheet.create({
   addNewTagButtonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   existingTagsLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
   },
@@ -892,23 +903,25 @@ const styles = StyleSheet.create({
   },
   tagItemText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
   },
   tagItemTextSelected: {
     color: colors.primary,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   checkmark: {
     fontSize: 18,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.primary,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   editFormContainer: {
     marginBottom: 20,
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 8,
     marginTop: 10,
@@ -918,11 +931,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     minHeight: 44,
     maxHeight: 120,
   },
   inputHint: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginTop: 5,
     marginBottom: 10,
@@ -937,7 +952,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
 });
 

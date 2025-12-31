@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { saveGeminiApiKey, getGeminiApiKey, removeGeminiApiKey } from '../../utils/storage';
 import { validateApiKey } from '../../services/gemini';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
@@ -307,12 +307,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 15,
   },
   description: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginBottom: 15,
     lineHeight: 20,
@@ -322,11 +323,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginBottom: 5,
   },
   value: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
     fontWeight: '500',
   },
@@ -338,6 +341,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     backgroundColor: colors.white,
   },
   button: {
@@ -365,7 +369,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   statusContainer: {
     flexDirection: 'row',
@@ -377,16 +381,19 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginRight: 10,
   },
   statusSuccess: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.success,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   hint: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginTop: 10,
     fontStyle: 'italic',
@@ -412,6 +419,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
     flex: 1,
   },
@@ -430,6 +438,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
   },
 });

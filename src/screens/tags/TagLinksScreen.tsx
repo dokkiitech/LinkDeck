@@ -13,7 +13,7 @@ import { RouteProp } from '@react-navigation/native';
 import { TagsStackParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { getLinksByTag } from '../../services/firestore';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type TagLinksScreenNavigationProp = NativeStackNavigationProp<
   TagsStackParamList,
@@ -171,10 +171,11 @@ const styles = StyleSheet.create({
   tagText: {
     color: 'colors.white',
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   countText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
   },
   emptyContainer: {
@@ -185,6 +186,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
   },
@@ -199,7 +201,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
   },
   linkItem: {
@@ -218,17 +220,19 @@ const styles = StyleSheet.create({
   },
   linkTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 5,
   },
   linkUrl: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.primary,
     marginBottom: 5,
   },
   linkDate: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
   },
 });

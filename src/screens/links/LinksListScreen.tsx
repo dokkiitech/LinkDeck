@@ -20,7 +20,7 @@ import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
 import NFCReader from '../../components/links/NFCReader';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -454,6 +454,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
     padding: 0,
   },
@@ -474,12 +475,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.tertiary,
     marginBottom: 10,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     textAlign: 'center',
   },
@@ -494,7 +496,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
   },
   linkItem: {
@@ -513,12 +515,13 @@ const styles = StyleSheet.create({
   },
   linkTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 5,
   },
   linkUrl: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginBottom: 10,
   },
@@ -538,9 +541,11 @@ const styles = StyleSheet.create({
   tagText: {
     color: 'colors.white',
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   linkDate: {
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
   },
   fab: {
@@ -566,6 +571,7 @@ const styles = StyleSheet.create({
   fabText: {
     color: 'colors.white',
     fontSize: 32,
+    fontFamily: theme.typography.fontFamily.regular,
     fontWeight: '300',
     marginTop: -2,
   },
@@ -602,7 +608,7 @@ const styles = StyleSheet.create({
   fabMenuLabel: {
     color: 'colors.white',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     marginRight: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,

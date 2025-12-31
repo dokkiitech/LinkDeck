@@ -25,7 +25,7 @@ import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
 import NFCReader from '../../components/links/NFCReader';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   scanButtonsLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   scanButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.primary,
   },
   saveButton: {
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'colors.white',
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
 });
 

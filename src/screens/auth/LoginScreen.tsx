@@ -14,7 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -135,18 +135,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.primary,
     marginBottom: 10,
   },
   catchphrase: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.tertiary,
     marginBottom: 30,
   },
   subtitle: {
     fontSize: 24,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 40,
   },
@@ -159,11 +160,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     backgroundColor: colors.white,
   },
   errorText: {
     color: colors.alert,
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -185,7 +188,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   linkButton: {
     marginTop: 20,
@@ -193,6 +196,7 @@ const styles = StyleSheet.create({
   linkText: {
     color: colors.primary,
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
   },
 });
 

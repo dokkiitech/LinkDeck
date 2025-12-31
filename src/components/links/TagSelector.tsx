@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Tag } from '../../types';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { colors } from '../../theme';
+import { colors, theme } from '../../theme';
 
 interface TagSelectorProps {
   selectedTags: string[];
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.primary,
     marginBottom: 10,
   },
   subLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: colors.text.tertiary,
     marginTop: 15,
     marginBottom: 8,
@@ -145,11 +145,12 @@ const styles = StyleSheet.create({
   },
   existingTagText: {
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     color: colors.text.primary,
   },
   existingTagTextSelected: {
     color: 'colors.white',
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   tagInputContainer: {
     flexDirection: 'row',
@@ -161,6 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     borderWidth: 1,
     borderColor: colors.borderGray,
     marginRight: 10,
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
   addTagButtonText: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -194,11 +196,12 @@ const styles = StyleSheet.create({
   tagText: {
     color: 'colors.white',
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   tagRemove: {
     color: 'colors.white',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.bold,
     marginLeft: 5,
   },
 });
