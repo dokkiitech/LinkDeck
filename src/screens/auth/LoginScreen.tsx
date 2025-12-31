@@ -8,11 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -27,6 +27,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { signIn, signInAsGuest } = useAuth();
+  const { showError } = useDialog();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -50,7 +51,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await signInAsGuest();
     } catch (error: any) {
-      Alert.alert('エラー', error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
+      showError('エラー', error.message || ERROR_MESSAGES.AUTH.GUEST_LOGIN_FAILED);
     } finally {
       setLoading(false);
     }

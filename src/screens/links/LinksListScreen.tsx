@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
+  
   TextInput,
   Animated,
   Modal,
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { getUserLinks, deleteLink, createLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
@@ -32,6 +33,7 @@ interface Props {
 
 const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,7 +53,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
       if (__DEV__) {
         console.error('[LinksList] Error loading links:', error);
       }
-      Alert.alert('エラー', ERROR_MESSAGES.LINKS.LOAD_FAILED);
+      showError('エラー', ERROR_MESSAGES.LINKS.LOAD_FAILED);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -165,24 +167,21 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleDeleteLink = (linkId: string) => {
-    Alert.alert(
+    showConfirm(
       '確認',
       'このリンクを削除しますか?',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteLink(linkId);
-              setLinks(links.filter((link) => link.id !== linkId));
-            } catch (error) {
-              Alert.alert('エラー', 'リンクの削除に失敗しました');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteLink(linkId);
+          setLinks(links.filter((link) => link.id !== linkId));
+          showSuccess('削除完了', SUCCESS_MESSAGES.LINKS.DELETED);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('[LinksList] Error deleting link:', error);
+          }
+          showError('エラー', ERROR_MESSAGES.LINKS.DELETE_FAILED);
+        }
+      }
     );
   };
 
