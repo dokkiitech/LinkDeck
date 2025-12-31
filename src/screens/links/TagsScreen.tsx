@@ -202,7 +202,9 @@ const styles = StyleSheet.create({
   },
   createTagContainer: {
     backgroundColor: '#FFFFFF',
-    padding: 15,
+    paddingTop: 60,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
