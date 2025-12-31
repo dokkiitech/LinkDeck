@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   ScrollView,
   SafeAreaView,
   Linking,
@@ -22,6 +21,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { AgentStackParamList, MainTabParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { getGeminiApiKey } from '../../utils/storage';
 import { searchWithAgentStream, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
 import { getUserLinks } from '../../services/firestore';
@@ -38,6 +38,7 @@ interface Props {
 
 const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
+  const { showError, showConfirm } = useDialog();
   const [hasApiKey, setHasApiKey] = useState(false);
   const [checkingApiKey, setCheckingApiKey] = useState(true);
   const [inputText, setInputText] = useState('');
@@ -90,27 +91,20 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
 
   // セッションをリセット
   const handleResetSession = () => {
-    Alert.alert(
+    showConfirm(
       '新しいセッションを開始',
       '会話履歴をクリアして新しいセッションを開始しますか？',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: 'リセット',
-          style: 'destructive',
-          onPress: () => {
-            setMessages([]);
-            setInputText('');
-          },
-        },
-      ]
+      () => {
+        setMessages([]);
+        setInputText('');
+      }
     );
   };
 
   // メッセージを送信
   const handleSendMessage = async () => {
     if (!user) {
-      Alert.alert('エラー', 'ログインが必要です');
+      showError('エラー', 'ログインが必要です');
       return;
     }
 
@@ -138,7 +132,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const apiKey = await getGeminiApiKey();
       if (!apiKey) {
-        Alert.alert('エラー', 'Gemini APIキーが設定されていません');
+        showError('エラー', 'Gemini APIキーが設定されていません');
         setIsProcessing(false);
         return;
       }
@@ -177,7 +171,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       // エラーメッセージを安全に取得
       const errorMessage = error?.message || ERROR_MESSAGES.GEMINI.GENERIC_ERROR;
 
-      Alert.alert('検索エラー', errorMessage);
+      showError('検索エラー', errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -200,10 +194,10 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        Alert.alert('エラー', 'このURLを開けません');
+        showError('エラー', 'このURLを開けません');
       }
     } catch (error) {
-      Alert.alert('エラー', 'URLを開く際にエラーが発生しました');
+      showError('エラー', 'URLを開く際にエラーが発生しました');
     }
   };
 

@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   ActivityIndicator,
   Platform,
@@ -15,18 +14,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApiKey } from '../../contexts/ApiKeyContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { validateApiKey } from '../../services/gemini';
 
 const SettingsScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const navigation = useNavigation();
   const { hasApiKey, isLoading, saveApiKey, deleteApiKey } = useApiKey();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveApiKey = async () => {
     if (!geminiApiKey.trim()) {
-      Alert.alert('エラー', 'APIキーを入力してください');
+      showError('エラー', 'APIキーを入力してください');
       return;
     }
 
@@ -36,7 +37,7 @@ const SettingsScreen: React.FC = () => {
       const isValid = await validateApiKey(geminiApiKey.trim());
 
       if (!isValid) {
-        Alert.alert('エラー', 'APIキーが無効です。正しいキーを入力してください。');
+        showError('エラー', 'APIキーが無効です。正しいキーを入力してください。');
         setIsSaving(false);
         return;
       }
@@ -44,36 +45,29 @@ const SettingsScreen: React.FC = () => {
       // Contextを使って保存（自動的にhasApiKeyが更新される）
       await saveApiKey(geminiApiKey.trim());
       setGeminiApiKey('');
-      Alert.alert('成功', 'APIキーを保存しました');
+      showSuccess('成功', 'APIキーを保存しました');
     } catch (error: any) {
       console.error('Error saving API key:', error);
-      Alert.alert('エラー', error?.message || 'APIキーの保存に失敗しました');
+      showError('エラー', error?.message || 'APIキーの保存に失敗しました');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleRemoveApiKey = async () => {
-    Alert.alert(
+    showConfirm(
       '確認',
       'APIキーを削除しますか？',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Contextを使って削除（自動的にhasApiKeyが更新される）
-              await deleteApiKey();
-              setGeminiApiKey('');
-              Alert.alert('成功', 'APIキーを削除しました');
-            } catch (error) {
-              Alert.alert('エラー', 'APIキーの削除に失敗しました');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          // Contextを使って削除（自動的にhasApiKeyが更新される）
+          await deleteApiKey();
+          setGeminiApiKey('');
+          showSuccess('成功', 'APIキーを削除しました');
+        } catch (error) {
+          showError('エラー', 'APIキーの削除に失敗しました');
+        }
+      }
     );
   };
 
@@ -84,10 +78,10 @@ const SettingsScreen: React.FC = () => {
       if (supported) {
         await Linking.openURL(shortcutUrl);
       } else {
-        Alert.alert('エラー', 'ショートカットを開けませんでした');
+        showError('エラー', 'ショートカットを開けませんでした');
       }
     } catch (error) {
-      Alert.alert('エラー', 'ショートカットを開けませんでした');
+      showError('エラー', 'ショートカットを開けませんでした');
     }
   };
 
@@ -96,28 +90,11 @@ const SettingsScreen: React.FC = () => {
       try {
         await logout();
       } catch (error) {
-        Alert.alert('エラー', 'ログアウトに失敗しました');
+        showError('エラー', 'ログアウトに失敗しました');
       }
     };
 
-    if (Platform.OS === 'web') {
-      if (window.confirm('ログアウトしますか？')) {
-        performLogout();
-      }
-    } else {
-      Alert.alert(
-        'ログアウト',
-        'ログアウトしますか？',
-        [
-          { text: 'キャンセル', style: 'cancel' },
-          {
-            text: 'ログアウト',
-            style: 'destructive',
-            onPress: performLogout,
-          },
-        ]
-      );
-    }
+    showConfirm('ログアウト', 'ログアウトしますか？', performLogout);
   };
 
   return (
