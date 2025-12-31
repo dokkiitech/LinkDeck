@@ -172,8 +172,15 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
       'このリンクを削除しますか?',
       async () => {
         try {
-              await deleteLink(linkId);
-              setLinks(links.filter((link) => link.id !== linkId));
+          await deleteLink(linkId);
+          setLinks(links.filter((link) => link.id !== linkId));
+          showSuccess('削除完了', SUCCESS_MESSAGES.LINKS.DELETED);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('[LinksList] Error deleting link:', error);
+          }
+          showError('エラー', ERROR_MESSAGES.LINKS.DELETE_FAILED);
+        }
       }
     );
   };
