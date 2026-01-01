@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  actions: write
 
 jobs:
   build:
@@ -55,7 +56,7 @@ jobs:
           echo "BUILD_CERTIFICATE_PATH=$PWD/certificate.p12" >> $GITHUB_ENV
           echo "BUILD_PROVISION_PROFILE_PATH=$PWD/profile.mobileprovision" >> $GITHUB_ENV
 
-      - name: Build and Upload to TestFlight
+      - name: Build iOS App
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -72,7 +73,54 @@ jobs:
           EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
         run: |
-          fastlane ios preview
+          fastlane ios preview_build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: |
+            LinksDeck.ipa
+            build_info.txt
+          retention-days: 3
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f certificate.p12 profile.mobileprovision
+
+  deploy:
+    needs: build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: |
+          gem install fastlane
+          fastlane --version
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          IPA_PATH: ${{ github.workspace }}/LinksDeck.ipa
+        run: |
+          fastlane ios preview_upload
 
       - name: Post Build Success Comment
         if: success()
@@ -84,7 +132,7 @@ jobs:
 
           # コメント内容を作成
           cat << EOF > comment.md
-          ## ✅ iOS Preview Build 成功
+          ## ✅ iOS Preview Build & Deploy 成功
 
           **ビルド情報:**
           - ビルド番号: \`${BUILD_NUMBER}\`
@@ -103,7 +151,69 @@ jobs:
           # PRにコメント投稿
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
 
+      - name: Post Deploy Failure Comment
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # ビルド情報を読み込み（存在する場合）
+          if [ -f build_info.txt ]; then
+            source build_info.txt
+          else
+            BUILD_NUMBER="不明"
+            VERSION="不明"
+          fi
+
+          # 失敗コメント内容を作成
+          cat << EOF > failure_comment.md
+          ## ❌ iOS Preview Deploy 失敗
+
+          **ビルド情報:**
+          - ビルド番号: \`${BUILD_NUMBER}\`
+          - バージョン: \`${VERSION}\`
+          - コミット: \`${{ github.sha }}\`
+          - ブランチ: \`${{ github.head_ref }}\`
+
+          **考えられる原因:**
+          - **ビルド番号の重複**: 同じビルド番号が既にTestFlightにアップロード済み
+          - **TestFlightの送信回数制限**: 1時間に複数回送信すると制限される場合があります
+          - **App Store Connect API の一時的なエラー**
+          - **ネットワークエラー**
+
+          **対処方法:**
+
+          ### ビルド番号重複エラーの場合
+          エラーメッセージに「The bundle version must be higher than the previously uploaded version」と表示されている場合：
+          - **buildジョブから再実行が必要です**
+          - GitHub Actionsの画面で「Re-run all jobs」をクリックしてください
+          - deployジョブのみの再実行では解決できません
+
+          ### 送信制限・一時的なエラーの場合
+          - 1-2時間待ってから「Re-run failed jobs」をクリック
+          - ビルドは再実行されず、送信のみが再実行されます
+          - アーティファクトは3日間保持されます
+
+          **詳細:**
+          - [ワークフロー実行](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [ログを確認](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }})
+          EOF
+
+          # PRにコメント投稿
+          gh pr comment ${{ github.event.pull_request.number }} --body-file failure_comment.md
+
+      - name: Delete Build Artifacts After Successful Deploy
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # 現在のワークフロー実行のアーティファクトを削除
+          ARTIFACTS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].id')
+          for artifact_id in $ARTIFACTS; do
+            echo "Deleting artifact ID: $artifact_id"
+            gh api -X DELETE "/repos/${{ github.repository }}/actions/artifacts/$artifact_id"
+          done
+
       - name: Cleanup
         if: always()
         run: |
-          rm -f certificate.p12 profile.mobileprovision build_info.txt comment.md
+          rm -f build_info.txt comment.md failure_comment.md LinksDeck.ipa
