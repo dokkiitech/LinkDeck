@@ -338,3 +338,27 @@ export const addSummaryToTimeline = async (
 
   await updateLink(linkId, { summary, timeline: updatedTimeline });
 };
+
+/**
+ * タイムラインからメモを削除
+ */
+export const deleteNoteFromTimeline = async (
+  linkId: string,
+  noteId: string
+): Promise<void> => {
+  const link = await getLink(linkId);
+  if (!link) {
+    throw new Error('Link not found');
+  }
+
+  // Filter out the note with the specified ID
+  const updatedTimeline = link.timeline
+    ?.filter((entry) => entry.id !== noteId)
+    .map((entry) => ({
+      content: entry.content,
+      createdAt: Timestamp.fromDate(entry.createdAt),
+      type: entry.type,
+    })) || [];
+
+  await updateLink(linkId, { timeline: updatedTimeline });
+};

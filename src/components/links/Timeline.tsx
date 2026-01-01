@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TimelineEntry } from '../../types';
 
 interface TimelineProps {
   entries: TimelineEntry[];
+  onDeleteNote?: (noteId: string) => void;
 }
 
-const Timeline: React.FC<TimelineProps> = ({ entries }) => {
+const Timeline: React.FC<TimelineProps> = ({ entries, onDeleteNote }) => {
   if (!entries || entries.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -20,6 +21,12 @@ const Timeline: React.FC<TimelineProps> = ({ entries }) => {
   const sortedEntries = [...entries].sort(
     (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
   );
+
+  const handleLongPress = (entry: TimelineEntry) => {
+    if (entry.type === 'note' && onDeleteNote) {
+      onDeleteNote(entry.id);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -37,10 +44,16 @@ const Timeline: React.FC<TimelineProps> = ({ entries }) => {
             <Text style={styles.date}>
               {formatDate(entry.createdAt)}
             </Text>
-            <View style={[
-              styles.card,
-              entry.type === 'summary' ? styles.summaryCard : styles.noteCard
-            ]}>
+            <TouchableOpacity
+              style={[
+                styles.card,
+                entry.type === 'summary' ? styles.summaryCard : styles.noteCard
+              ]}
+              onLongPress={() => handleLongPress(entry)}
+              delayLongPress={500}
+              activeOpacity={entry.type === 'note' ? 0.7 : 1}
+              disabled={entry.type === 'summary'}
+            >
               <View style={styles.cardHeader}>
                 <Ionicons
                   name={entry.type === 'summary' ? 'sparkles' : 'document-text'}
@@ -53,7 +66,7 @@ const Timeline: React.FC<TimelineProps> = ({ entries }) => {
                 </Text>
               </View>
               <Text style={styles.content}>{entry.content}</Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       ))}
