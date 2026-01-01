@@ -69,6 +69,28 @@ module.exports = {
             "BROWSABLE",
             "DEFAULT"
           ]
+        },
+        {
+          action: "SEND",
+          data: [
+            {
+              mimeType: "text/plain"
+            }
+          ],
+          category: [
+            "DEFAULT"
+          ]
+        },
+        {
+          action: "SEND_MULTIPLE",
+          data: [
+            {
+              mimeType: "text/plain"
+            }
+          ],
+          category: [
+            "DEFAULT"
+          ]
         }
       ]
     },
