@@ -17,11 +17,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
-import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag } from '../../services/firestore';
+import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag, addNoteToLink, addSummaryToTimeline } from '../../services/firestore';
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDialog } from '../../contexts/DialogContext';
+import Timeline from '../../components/links/Timeline';
 
 type LinkDetailScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -49,6 +50,8 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [editTitle, setEditTitle] = useState('');
   const [editUrl, setEditUrl] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
 
   useEffect(() => {
     loadLink();
@@ -146,8 +149,15 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       const summary = await summarizeURL(apiKey, link.url);
-      await updateLink(linkId, { summary });
-      setLink((prev) => (prev ? { ...prev, summary } : null));
+
+      // Add summary to timeline
+      await addSummaryToTimeline(linkId, summary);
+
+      // Reload link to get updated timeline
+      const updatedLink = await getLink(linkId);
+      if (updatedLink) {
+        setLink(updatedLink);
+      }
 
       showSuccess('成功', '要約を生成しました');
     } catch (error: any) {
@@ -332,6 +342,45 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     showConfirm('確認', 'このリンクを削除しますか？', performDelete);
   };
 
+  const handleAddNote = async () => {
+    if (!noteText.trim()) {
+      if (Platform.OS === 'web') {
+        alert('エラー: メモを入力してください');
+      } else {
+        showError('エラー', 'メモを入力してください');
+      }
+      return;
+    }
+
+    setAddingNote(true);
+
+    try {
+      await addNoteToLink(linkId, noteText.trim());
+
+      // Reload link to get updated timeline
+      const updatedLink = await getLink(linkId);
+      if (updatedLink) {
+        setLink(updatedLink);
+      }
+
+      setNoteText('');
+      if (Platform.OS === 'web') {
+        alert('メモを追加しました');
+      } else {
+        showSuccess('成功', 'メモを追加しました');
+      }
+    } catch (error) {
+      console.error('Error adding note:', error);
+      if (Platform.OS === 'web') {
+        alert('エラー: メモの追加に失敗しました');
+      } else {
+        showError('エラー', 'メモの追加に失敗しました');
+      }
+    } finally {
+      setAddingNote(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -412,6 +461,34 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.summaryLabel}>AI要約:</Text>
             <Text style={styles.summaryText}>{link.summary}</Text>
           </View>
+        )}
+
+        <View style={styles.noteInputContainer}>
+          <Text style={styles.noteInputLabel}>メモを追加</Text>
+          <View style={styles.noteInputRow}>
+            <TextInput
+              style={styles.noteInput}
+              placeholder="メモを入力してください..."
+              value={noteText}
+              onChangeText={setNoteText}
+              multiline
+              maxLength={500}
+            />
+          </View>
+          <TouchableOpacity
+            style={[styles.addNoteButton, addingNote && styles.disabledButton]}
+            onPress={handleAddNote}
+            disabled={addingNote}
+          >
+            <Ionicons name="add-circle" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.addNoteButtonText}>
+              {addingNote ? 'メモを追加中...' : 'メモを追加'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {link.timeline && link.timeline.length > 0 && (
+          <Timeline entries={link.timeline} />
         )}
 
         <Text style={styles.date}>
@@ -897,6 +974,44 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  noteInputContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    marginTop: 20,
+  },
+  noteInputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 10,
+  },
+  noteInputRow: {
+    marginBottom: 10,
+  },
+  noteInput: {
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 80,
+    maxHeight: 150,
+    textAlignVertical: 'top',
+  },
+  addNoteButton: {
+    backgroundColor: '#34C759',
+    borderRadius: 10,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addNoteButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

@@ -22,6 +22,25 @@ export interface UserDocument {
 }
 
 /**
+ * タイムラインエントリの型定義（メモや要約）
+ */
+export interface TimelineEntry {
+  id: string;
+  content: string;
+  createdAt: Date;
+  type: 'note' | 'summary';
+}
+
+/**
+ * Firestoreに保存されるタイムラインエントリデータの型
+ */
+export interface TimelineEntryDocument {
+  content: string;
+  createdAt: Timestamp;
+  type: 'note' | 'summary';
+}
+
+/**
  * 保存されたリンク情報の型定義
  */
 export interface Link {
@@ -32,6 +51,8 @@ export interface Link {
   tags: string[];
   isArchived: boolean;
   createdAt: Date;
+  summary?: string;
+  timeline?: TimelineEntry[];
 }
 
 /**
@@ -44,6 +65,8 @@ export interface LinkDocument {
   tags: string[];
   isArchived: boolean;
   createdAt: Timestamp;
+  summary?: string;
+  timeline?: TimelineEntryDocument[];
 }
 
 /**
