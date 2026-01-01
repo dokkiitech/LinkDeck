@@ -6,11 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
+  
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinksStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { getUserLinks, deleteLink } from '../../services/firestore';
 import { Link } from '../../types';
 import { ERROR_MESSAGES } from '../../constants/messages';
@@ -27,6 +28,7 @@ interface Props {
 
 const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,7 +45,7 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
       if (__DEV__) {
         console.error('[ArchivedLinks] Error loading archived links:', error);
       }
-      Alert.alert('エラー', ERROR_MESSAGES.LINKS.ARCHIVED_LOAD_FAILED);
+      showError('エラー', ERROR_MESSAGES.LINKS.ARCHIVED_LOAD_FAILED);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -93,24 +95,17 @@ const ArchivedLinksScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleDeleteLink = (linkId: string) => {
-    Alert.alert(
+    showConfirm(
       '確認',
       'このリンクを削除しますか?',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteLink(linkId);
-              setLinks(links.filter((link) => link.id !== linkId));
-            } catch (error) {
-              Alert.alert('エラー', 'リンクの削除に失敗しました');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteLink(linkId);
+          setLinks(links.filter((link) => link.id !== linkId));
+        } catch (error) {
+          showError('エラー', 'リンクの削除に失敗しました');
+        }
+      }
     );
   };
 

@@ -45,6 +45,10 @@ export const ERROR_MESSAGES = {
   GEMINI: {
     SUMMARY_FAILED: '要約の生成中にエラーが発生しました',
     INSUFFICIENT_CONTENT: 'ページの内容が取得できないか、要約するのに十分なテキストがありません',
+    QUOTA_EXCEEDED: 'APIの無料枠が上限に達しました。Google AI Studioで使用状況を確認するか、しばらく時間を置いてから再度お試しください。',
+    INVALID_API_KEY: 'APIキーが無効です。設定画面で正しいAPIキーを入力してください。',
+    NETWORK_ERROR: 'ネットワークエラーが発生しました。インターネット接続を確認してください。',
+    GENERIC_ERROR: 'AI処理中にエラーが発生しました。しばらく時間を置いてから再度お試しください。',
   },
 
   // 共有機能関連

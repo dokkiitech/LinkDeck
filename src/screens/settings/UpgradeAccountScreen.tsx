@@ -7,13 +7,14 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
 import { colors, theme } from '../../theme';
 
@@ -30,20 +31,21 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { linkGuestToAccount } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
 
   const handleUpgrade = async () => {
     if (!displayName || !email || !password || !confirmPassword) {
-      Alert.alert('エラー', 'すべてのフィールドを入力してください');
+      showError('エラー', 'すべてのフィールドを入力してください');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('エラー', 'パスワードが一致しません');
+      showError('エラー', 'パスワードが一致しません');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('エラー', 'パスワードは6文字以上で入力してください');
+      showError('エラー', 'パスワードは6文字以上で入力してください');
       return;
     }
 
@@ -69,7 +71,7 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
       if (Platform.OS === 'web') {
         alert('エラー: ' + error.message);
       } else {
-        Alert.alert('エラー', error.message);
+        showError('エラー', error.message);
       }
     } finally {
       setLoading(false);

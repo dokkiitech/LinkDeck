@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
+  
   Linking,
   TextInput,
   Modal,
@@ -17,11 +17,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
-import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag } from '../../services/firestore';
+import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag, addNoteToLink, addSummaryToTimeline, deleteNoteFromTimeline } from '../../services/firestore';
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
-import { colors, theme } from '../../theme';
+import { useDialog } from '../../contexts/DialogContext';
+import Timeline from '../../components/links/Timeline';
 
 type LinkDetailScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -38,6 +39,7 @@ interface Props {
 const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { linkId } = route.params;
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [link, setLink] = useState<Link | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -48,6 +50,8 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [editTitle, setEditTitle] = useState('');
   const [editUrl, setEditUrl] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
 
   useEffect(() => {
     loadLink();
@@ -76,7 +80,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('エラー: リンクの読み込みに失敗しました');
       } else {
-        Alert.alert('エラー', 'リンクの読み込みに失敗しました');
+        showError('エラー', 'リンクの読み込みに失敗しました');
       }
     } finally {
       setLoading(false);
@@ -94,14 +98,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         if (Platform.OS === 'web') {
           alert('エラー: このURLを開くことができません');
         } else {
-          Alert.alert('エラー', 'このURLを開くことができません');
+          showError('エラー', 'このURLを開くことができません');
         }
       }
     } catch (error) {
       if (Platform.OS === 'web') {
         alert('エラー: URLを開く際にエラーが発生しました');
       } else {
-        Alert.alert('エラー', 'URLを開く際にエラーが発生しました');
+        showError('エラー', 'URLを開く際にエラーが発生しました');
       }
     }
   };
@@ -114,20 +118,11 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     if (link.summary) {
-      if (Platform.OS === 'web') {
-        if (window.confirm('既に要約が生成されています。新しく生成しますか？')) {
-          proceed();
-        }
-      } else {
-        Alert.alert(
-          '確認',
-          '既に要約が生成されています。新しく生成しますか？',
-          [
-            { text: 'キャンセル', style: 'cancel' },
-            { text: '生成', onPress: proceed },
-          ]
-        );
-      }
+      showConfirm(
+        '確認',
+        '既に要約が生成されています。新しく生成しますか？',
+        proceed
+      );
     } else {
       await proceed();
     }
@@ -144,47 +139,37 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (!apiKey) {
         const navigateToSettings = () => navigation.navigate('LinksList' as any);
 
-        if (Platform.OS === 'web') {
-          if (window.confirm('APIキーが未設定です。設定画面に移動しますか？')) {
-            navigateToSettings();
-          }
-        } else {
-          Alert.alert(
-            'APIキー未設定',
-            '設定画面でGemini APIキーを設定してください。',
-            [
-              { text: 'キャンセル', style: 'cancel' },
-              { text: '設定画面へ', onPress: navigateToSettings },
-            ]
-          );
-        }
+        showConfirm(
+          'APIキー未設定',
+          '設定画面でGemini APIキーを設定してください。',
+          navigateToSettings
+        );
         setGeneratingSummary(false);
         return;
       }
 
       const summary = await summarizeURL(apiKey, link.url);
-      await updateLink(linkId, { summary });
-      setLink((prev) => (prev ? { ...prev, summary } : null));
 
-      if (Platform.OS === 'web') {
-        alert('要約を生成しました');
-      } else {
-        Alert.alert('成功', '要約を生成しました');
+      // Add summary to timeline
+      await addSummaryToTimeline(linkId, summary);
+
+      // Reload link to get updated timeline
+      const updatedLink = await getLink(linkId);
+      if (updatedLink) {
+        setLink(updatedLink);
       }
+
+      showSuccess('成功', '要約を生成しました');
     } catch (error: any) {
       console.error('Error generating summary:', error);
-      const errorMessage = error.message === 'INSUFFICIENT_CONTENT'
+      const errorMessage = error?.message === 'INSUFFICIENT_CONTENT'
         ? 'このリンクは要約できません。\n十分なテキストコンテンツが取得できませんでした。'
-        : error.message || '要約の生成に失敗しました';
+        : error?.message || '要約の生成に失敗しました';
 
-      if (Platform.OS === 'web') {
-        alert(`エラー: ${errorMessage}`);
-      } else {
-        Alert.alert(
-          error.message === 'INSUFFICIENT_CONTENT' ? '要約不可' : 'エラー',
-          errorMessage
-        );
-      }
+      showError(
+        error?.message === 'INSUFFICIENT_CONTENT' ? '要約不可' : 'エラー',
+        errorMessage
+      );
     } finally {
       setGeneratingSummary(false);
     }
@@ -200,13 +185,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert(message);
       } else {
-        Alert.alert('成功', message);
+        showSuccess('成功', message);
       }
     } catch (error) {
       if (Platform.OS === 'web') {
         alert('エラー: 更新に失敗しました');
       } else {
-        Alert.alert('エラー', '更新に失敗しました');
+        showError('エラー', '更新に失敗しました');
       }
     }
   };
@@ -222,7 +207,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('エラー: タグの読み込みに失敗しました');
       } else {
-        Alert.alert('エラー', 'タグの読み込みに失敗しました');
+        showError('エラー', 'タグの読み込みに失敗しました');
       }
     }
   };
@@ -248,7 +233,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert(`エラー: ${message}`);
       } else {
-        Alert.alert('エラー', message);
+        showError('エラー', message);
       }
     }
   };
@@ -279,7 +264,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('エラー: タグの作成に失敗しました');
       } else {
-        Alert.alert('エラー', 'タグの作成に失敗しました');
+        showError('エラー', 'タグの作成に失敗しました');
       }
     }
   };
@@ -300,7 +285,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert(`エラー: ${message}`);
       } else {
-        Alert.alert('エラー', message);
+        showError('エラー', message);
       }
       return;
     }
@@ -322,13 +307,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       if (Platform.OS === 'web') {
         alert('リンクを更新しました');
       } else {
-        Alert.alert('成功', 'リンクを更新しました');
+        showSuccess('成功', 'リンクを更新しました');
       }
     } catch (error) {
       if (Platform.OS === 'web') {
         alert('エラー: リンクの更新に失敗しました');
       } else {
-        Alert.alert('エラー', 'リンクの更新に失敗しました');
+        showError('エラー', 'リンクの更新に失敗しました');
       }
     }
   };
@@ -341,7 +326,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           alert('リンクを削除しました');
           navigation.goBack();
         } else {
-          Alert.alert('成功', 'リンクを削除しました', [
+          showSuccess('成功', 'リンクを削除しました', [
             { text: 'OK', onPress: () => navigation.goBack() },
           ]);
         }
@@ -349,25 +334,80 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         if (Platform.OS === 'web') {
           alert('エラー: リンクの削除に失敗しました');
         } else {
-          Alert.alert('エラー', 'リンクの削除に失敗しました');
+          showError('エラー', 'リンクの削除に失敗しました');
         }
       }
     };
 
-    if (Platform.OS === 'web') {
-      if (window.confirm('このリンクを削除しますか？')) {
-        performDelete();
+    showConfirm('確認', 'このリンクを削除しますか？', performDelete);
+  };
+
+  const handleAddNote = async () => {
+    if (!noteText.trim()) {
+      if (Platform.OS === 'web') {
+        alert('エラー: メモを入力してください');
+      } else {
+        showError('エラー', 'メモを入力してください');
       }
-    } else {
-      Alert.alert(
-        '確認',
-        'このリンクを削除しますか？',
-        [
-          { text: 'キャンセル', style: 'cancel' },
-          { text: '削除', style: 'destructive', onPress: performDelete },
-        ]
-      );
+      return;
     }
+
+    setAddingNote(true);
+
+    try {
+      await addNoteToLink(linkId, noteText.trim());
+
+      // Reload link to get updated timeline
+      const updatedLink = await getLink(linkId);
+      if (updatedLink) {
+        setLink(updatedLink);
+      }
+
+      setNoteText('');
+      if (Platform.OS === 'web') {
+        alert('メモを追加しました');
+      } else {
+        showSuccess('成功', 'メモを追加しました');
+      }
+    } catch (error) {
+      console.error('Error adding note:', error);
+      if (Platform.OS === 'web') {
+        alert('エラー: メモの追加に失敗しました');
+      } else {
+        showError('エラー', 'メモの追加に失敗しました');
+      }
+    } finally {
+      setAddingNote(false);
+    }
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    const performDelete = async () => {
+      try {
+        await deleteNoteFromTimeline(linkId, noteId);
+
+        // Reload link to get updated timeline
+        const updatedLink = await getLink(linkId);
+        if (updatedLink) {
+          setLink(updatedLink);
+        }
+
+        if (Platform.OS === 'web') {
+          alert('メモを削除しました');
+        } else {
+          showSuccess('成功', 'メモを削除しました');
+        }
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        if (Platform.OS === 'web') {
+          alert('エラー: メモの削除に失敗しました');
+        } else {
+          showError('エラー', 'メモの削除に失敗しました');
+        }
+      }
+    };
+
+    showConfirm('確認', 'このメモを削除しますか？', performDelete);
   };
 
   if (loading) {
@@ -445,11 +485,32 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           </Text>
         )}
 
-        {link.summary && (
-          <View style={styles.summaryContainer}>
-            <Text style={styles.summaryLabel}>AI要約:</Text>
-            <Text style={styles.summaryText}>{link.summary}</Text>
+        <View style={styles.noteInputContainer}>
+          <Text style={styles.noteInputLabel}>メモを追加</Text>
+          <View style={styles.noteInputRow}>
+            <TextInput
+              style={styles.noteInput}
+              placeholder="メモを入力してください..."
+              value={noteText}
+              onChangeText={setNoteText}
+              multiline
+              maxLength={500}
+            />
           </View>
+          <TouchableOpacity
+            style={[styles.addNoteButton, addingNote && styles.disabledButton]}
+            onPress={handleAddNote}
+            disabled={addingNote}
+          >
+            <Ionicons name="add-circle" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.addNoteButtonText}>
+              {addingNote ? 'メモを追加中...' : 'メモを追加'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {link.timeline && link.timeline.length > 0 && (
+          <Timeline entries={link.timeline} onDeleteNote={handleDeleteNote} />
         )}
 
         <Text style={styles.date}>
@@ -801,24 +862,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.borderGray,
   },
-  summaryContainer: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
-  },
-  summaryLabel: {
-    fontSize: 16,
-    fontFamily: theme.typography.fontFamily.bold,
-    color: colors.text.primary,
-    marginBottom: 10,
-  },
-  summaryText: {
-    fontSize: 14,
-    fontFamily: theme.typography.fontFamily.regular,
-    color: colors.text.primary,
-    lineHeight: 20,
-  },
   date: {
     fontSize: 12,
     fontFamily: theme.typography.fontFamily.regular,
@@ -953,6 +996,44 @@ const styles = StyleSheet.create({
     color: 'colors.white',
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
+  },
+  noteInputContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    marginTop: 20,
+  },
+  noteInputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 10,
+  },
+  noteInputRow: {
+    marginBottom: 10,
+  },
+  noteInput: {
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 80,
+    maxHeight: 150,
+    textAlignVertical: 'top',
+  },
+  addNoteButton: {
+    backgroundColor: '#34C759',
+    borderRadius: 10,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addNoteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

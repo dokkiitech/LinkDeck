@@ -5,13 +5,14 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  
   ActivityIndicator,
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { getUserTags, createTag, deleteTag } from '../../services/firestore';
 import { Tag, TagsStackParamList } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, CONFIRMATION_MESSAGES } from '../../constants/messages';
@@ -23,6 +24,7 @@ interface Props {
 
 const TagsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,7 +45,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       if (__DEV__) {
         console.error('[Tags] Error loading tags:', error);
       }
-      Alert.alert('エラー', ERROR_MESSAGES.TAGS.LOAD_FAILED);
+      showError('エラー', ERROR_MESSAGES.TAGS.LOAD_FAILED);
     } finally{
       setLoading(false);
       setRefreshing(false);
@@ -57,13 +59,13 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleCreateTag = async () => {
     if (!user || !newTagName.trim()) {
-      Alert.alert('エラー', 'タグ名を入力してください');
+      showError('エラー', 'タグ名を入力してください');
       return;
     }
 
     // タグ名の重複チェック
     if (tags.some((tag) => tag.name === newTagName.trim())) {
-      Alert.alert('エラー', 'このタグは既に存在します');
+      showError('エラー', 'このタグは既に存在します');
       return;
     }
 
@@ -78,12 +80,12 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       };
       setTags([newTag, ...tags]);
       setNewTagName('');
-      Alert.alert('成功', SUCCESS_MESSAGES.TAGS.CREATED);
+      showSuccess('成功', SUCCESS_MESSAGES.TAGS.CREATED);
     } catch (error) {
       if (__DEV__) {
         console.error('[Tags] Error creating tag:', error);
       }
-      Alert.alert('エラー', ERROR_MESSAGES.TAGS.CREATE_FAILED);
+      showError('エラー', ERROR_MESSAGES.TAGS.CREATE_FAILED);
     } finally {
       setIsCreating(false);
     }
@@ -92,28 +94,21 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
   const handleDeleteTag = (tag: Tag) => {
     if (!user) return;
 
-    Alert.alert(
+    showConfirm(
       '確認',
       `「${tag.name}」を削除しますか？\nこのタグを使用している全てのリンクからも削除されます。`,
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteTag(user.uid, tag.id);
-              setTags(tags.filter((t) => t.id !== tag.id));
-              Alert.alert('成功', SUCCESS_MESSAGES.TAGS.DELETED);
-            } catch (error) {
-              if (__DEV__) {
-                console.error('[Tags] Error deleting tag:', error);
-              }
-              Alert.alert('エラー', ERROR_MESSAGES.TAGS.DELETE_FAILED);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await deleteTag(user.uid, tag.id);
+          setTags(tags.filter((t) => t.id !== tag.id));
+          showSuccess('成功', SUCCESS_MESSAGES.TAGS.DELETED);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('[Tags] Error deleting tag:', error);
+          }
+          showError('エラー', ERROR_MESSAGES.TAGS.DELETE_FAILED);
+        }
+      }
     );
   };
 
@@ -150,6 +145,9 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>タグ</Text>
+      </View>
       <View style={styles.createTagContainer}>
         <TextInput
           style={styles.input}
@@ -200,6 +198,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.lightGray,
+  },
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: 60,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    color: '#000000',
   },
   createTagContainer: {
     backgroundColor: colors.white,

@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
+  
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { TagsStackParamList, Link } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDialog } from '../../contexts/DialogContext';
 import { getLinksByTag } from '../../services/firestore';
 import { colors, theme } from '../../theme';
 
@@ -30,6 +31,7 @@ interface Props {
 const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
   const { tagName } = route.params;
   const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +47,7 @@ const TagLinksScreen: React.FC<Props> = ({ navigation, route }) => {
       setLinks(fetchedLinks);
     } catch (error) {
       console.error('Error loading links by tag:', error);
-      Alert.alert('エラー', 'リンクの読み込みに失敗しました');
+      showError('エラー', 'リンクの読み込みに失敗しました');
     } finally {
       setLoading(false);
     }

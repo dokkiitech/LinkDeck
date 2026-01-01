@@ -2,6 +2,54 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ERROR_MESSAGES } from '../constants/messages';
 
 /**
+ * Gemini APIのエラーを解析してユーザーフレンドリーなメッセージを返す
+ */
+const parseGeminiError = (error: any): string => {
+  // エラーオブジェクトが存在しない場合
+  if (!error) {
+    return ERROR_MESSAGES.GEMINI.GENERIC_ERROR;
+  }
+
+  // エラーメッセージを安全に取得
+  const errorMessage = error?.message || error?.toString() || '';
+  const errorString = errorMessage.toLowerCase();
+
+  // クォータ超過エラー
+  if (
+    errorString.includes('quota') ||
+    errorString.includes('resource_exhausted') ||
+    errorString.includes('429') ||
+    errorString.includes('rate limit')
+  ) {
+    return ERROR_MESSAGES.GEMINI.QUOTA_EXCEEDED;
+  }
+
+  // 無効なAPIキーエラー
+  if (
+    errorString.includes('api key') ||
+    errorString.includes('api_key') ||
+    errorString.includes('invalid_argument') ||
+    errorString.includes('401') ||
+    errorString.includes('403')
+  ) {
+    return ERROR_MESSAGES.GEMINI.INVALID_API_KEY;
+  }
+
+  // ネットワークエラー
+  if (
+    errorString.includes('network') ||
+    errorString.includes('fetch') ||
+    errorString.includes('connection') ||
+    errorString.includes('timeout')
+  ) {
+    return ERROR_MESSAGES.GEMINI.NETWORK_ERROR;
+  }
+
+  // デフォルトのエラーメッセージ
+  return ERROR_MESSAGES.GEMINI.GENERIC_ERROR;
+};
+
+/**
  * Gemini APIを使用してテキストを要約する
  * @param apiKey ユーザーのGemini APIキー
  * @param content 要約対象のテキストコンテンツ
@@ -43,7 +91,8 @@ ${content.slice(0, 10000)} // 最大10,000文字まで
     if (__DEV__) {
       console.error('[Gemini] Error generating summary:', error);
     }
-    throw new Error(error.message || ERROR_MESSAGES.GEMINI.SUMMARY_FAILED);
+    const userFriendlyMessage = parseGeminiError(error);
+    throw new Error(userFriendlyMessage);
   }
 };
 
@@ -79,22 +128,30 @@ export const summarizeURL = async (
     if (__DEV__) {
       console.error('[Gemini] Error summarizing URL:', error);
       console.error('[Gemini] Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
       });
     }
     // 十分なコンテンツがない場合は専用のエラーコードを返す
-    if (error.message === 'INSUFFICIENT_CONTENT') {
+    if (error?.message === 'INSUFFICIENT_CONTENT') {
       throw error;
     }
 
     // TLSエラーの詳細をユーザーに伝える
-    if (error.message?.includes('TLS') || error.message?.includes('SSL') || error.message?.includes('certificate')) {
+    const errorMessage = error?.message || '';
+    if (errorMessage.includes('TLS') || errorMessage.includes('SSL') || errorMessage.includes('certificate')) {
       throw new Error('ネットワーク接続エラー: セキュアな接続を確立できませんでした');
     }
 
-    throw new Error(error.message || 'URL要約中にエラーが発生しました');
+    // Gemini APIエラーの場合はパース済みのエラーメッセージをそのまま使う
+    if (errorMessage && Object.values(ERROR_MESSAGES.GEMINI).includes(errorMessage)) {
+      throw error;
+    }
+
+    // その他のエラーはパースして返す
+    const userFriendlyMessage = parseGeminiError(error);
+    throw new Error(userFriendlyMessage);
   }
 };
 
@@ -142,8 +199,10 @@ export const validateApiKey = async (apiKey: string): Promise<boolean> => {
     const response = await result.response;
 
     return !!response.text();
-  } catch (error) {
-    console.error('API key validation failed:', error);
+  } catch (error: any) {
+    if (__DEV__) {
+      console.error('[Gemini] API key validation failed:', error);
+    }
     return false;
   }
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator } from 'react-native';
 import { AuthProvider } from './src/contexts/AuthContext';
+import { DialogProvider } from './src/contexts/DialogContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import SharedURLHandler from './src/components/SharedURLHandler';
 import { useFonts, IBMPlexMono_400Regular, IBMPlexMono_700Bold } from './src/theme';
@@ -22,9 +23,11 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <SharedURLHandler />
-      <AppNavigator />
-      <StatusBar style="auto" />
+      <DialogProvider>
+        <SharedURLHandler />
+        <AppNavigator />
+        <StatusBar style="auto" />
+      </DialogProvider>
     </AuthProvider>
   );
 }

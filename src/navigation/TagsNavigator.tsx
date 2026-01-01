@@ -13,8 +13,7 @@ const TagsNavigator: React.FC = () => {
         name="TagsList"
         component={TagsScreen}
         options={{
-          title: 'タグ',
-          headerLargeTitle: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import { Alert } from 'react-native';
 import * as Linking from 'expo-linking';
 import { useAuth } from '../contexts/AuthContext';
+import { useDialog } from '../contexts/DialogContext';
 import { createLink } from '../services/firestore';
 import { fetchUrlTitle } from '../utils/urlMetadata';
 import { extractURLFromText } from '../utils/urlValidation';
@@ -13,6 +13,7 @@ import { colors } from '../theme';
  */
 const SharedURLHandler: React.FC = () => {
   const { user } = useAuth();
+  const { showError, showSuccess } = useDialog();
   const isProcessingRef = useRef(false);
   const processedURLsRef = useRef<Set<string>>(new Set());
   const hasHandledInitialURL = useRef(false);

@@ -5,9 +5,10 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  Alert,
+
   Dimensions,
 } from 'react-native';
+import { useDialog } from '../../contexts/DialogContext';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { isValidURL } from '../../utils/urlValidation';
 import { colors, theme } from '../../theme';
@@ -24,6 +25,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   onScan,
 }) => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const { showError, showSuccess, showConfirm } = useDialog();
   const [scanned, setScanned] = useState(false);
 
   useEffect(() => {

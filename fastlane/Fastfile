@@ -28,6 +28,9 @@ platform :ios do
       path: ENV["BUILD_PROVISION_PROFILE_PATH"]
     )
 
+    # 依存関係を再インストール（expo-updatesを確実に削除）
+    sh("cd .. && pnpm install --force")
+
     # Expo prebuildでネイティブプロジェクトを生成
     sh("cd .. && npx expo prebuild --platform ios --clean")
 
@@ -102,6 +105,9 @@ platform :ios do
     install_provisioning_profile(
       path: ENV["BUILD_PROVISION_PROFILE_PATH"]
     )
+
+    # 依存関係を再インストール（expo-updatesを確実に削除）
+    sh("cd .. && pnpm install --force")
 
     # Expo prebuildでネイティブプロジェクトを生成
     sh("cd .. && npx expo prebuild --platform ios --clean")
