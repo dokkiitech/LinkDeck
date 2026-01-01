@@ -174,15 +174,23 @@ jobs:
           - ブランチ: \`${{ github.head_ref }}\`
 
           **考えられる原因:**
-          - TestFlightの送信回数制限（1時間に複数回送信すると制限される場合があります）
-          - App Store Connect API の一時的なエラー
-          - ネットワークエラー
+          - **ビルド番号の重複**: 同じビルド番号が既にTestFlightにアップロード済み
+          - **TestFlightの送信回数制限**: 1時間に複数回送信すると制限される場合があります
+          - **App Store Connect API の一時的なエラー**
+          - **ネットワークエラー**
 
           **対処方法:**
-          1. **送信制限の場合**: 1-2時間待ってから、GitHub Actionsの画面で「Re-run failed jobs」をクリック
-             - ビルドは再実行されず、送信のみが再実行されます
-             - アーティファクトは3日間保持されます
-          2. **その他のエラー**: ワークフローログで詳細を確認してください
+
+          ### ビルド番号重複エラーの場合
+          エラーメッセージに「The bundle version must be higher than the previously uploaded version」と表示されている場合：
+          - **buildジョブから再実行が必要です**
+          - GitHub Actionsの画面で「Re-run all jobs」をクリックしてください
+          - deployジョブのみの再実行では解決できません
+
+          ### 送信制限・一時的なエラーの場合
+          - 1-2時間待ってから「Re-run failed jobs」をクリック
+          - ビルドは再実行されず、送信のみが再実行されます
+          - アーティファクトは3日間保持されます
 
           **詳細:**
           - [ワークフロー実行](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
