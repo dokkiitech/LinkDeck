@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
-import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag, addNoteToLink, addSummaryToTimeline } from '../../services/firestore';
+import { getLink, updateLink, addTagToLink, removeTagFromLink, getUserTags, deleteLink, createTag, addNoteToLink, addSummaryToTimeline, deleteNoteFromTimeline } from '../../services/firestore';
 import { getGeminiApiKey } from '../../utils/storage';
 import { summarizeURL } from '../../services/gemini';
 import { useAuth } from '../../contexts/AuthContext';
@@ -381,6 +381,35 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  const handleDeleteNote = (noteId: string) => {
+    const performDelete = async () => {
+      try {
+        await deleteNoteFromTimeline(linkId, noteId);
+
+        // Reload link to get updated timeline
+        const updatedLink = await getLink(linkId);
+        if (updatedLink) {
+          setLink(updatedLink);
+        }
+
+        if (Platform.OS === 'web') {
+          alert('メモを削除しました');
+        } else {
+          showSuccess('成功', 'メモを削除しました');
+        }
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        if (Platform.OS === 'web') {
+          alert('エラー: メモの削除に失敗しました');
+        } else {
+          showError('エラー', 'メモの削除に失敗しました');
+        }
+      }
+    };
+
+    showConfirm('確認', 'このメモを削除しますか？', performDelete);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -481,7 +510,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
 
         {link.timeline && link.timeline.length > 0 && (
-          <Timeline entries={link.timeline} />
+          <Timeline entries={link.timeline} onDeleteNote={handleDeleteNote} />
         )}
 
         <Text style={styles.date}>
