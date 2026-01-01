@@ -156,4 +156,188 @@ platform :ios do
     # ビルド情報をファイルに書き出し（GitHub Actionsで使用）
     File.write("../build_info.txt", "BUILD_NUMBER=#{latest_build + 1}\nVERSION=1.0.0")
   end
+
+  desc "Build Preview version (build only, no upload)"
+  lane :preview_build do
+    # CI環境のセットアップ（一時キーチェーンを作成）
+    setup_ci if ENV['CI']
+
+    # App Store Connect API Keyのセットアップ
+    if ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
+      api_key = app_store_connect_api_key(
+        key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+        issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+        key_content: ENV['APP_STORE_CONNECT_API_KEY_CONTENT'],
+        is_key_content_base64: false
+      )
+    end
+
+    # 証明書のインポート
+    import_certificate(
+      certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: "fastlane_tmp_keychain"
+    )
+
+    # プロビジョニングプロファイルのインストール
+    install_provisioning_profile(
+      path: ENV["BUILD_PROVISION_PROFILE_PATH"]
+    )
+
+    # 依存関係を再インストール（expo-updatesを確実に削除）
+    sh("cd .. && pnpm install --force")
+
+    # Expo prebuildでネイティブプロジェクトを生成
+    sh("cd .. && npx expo prebuild --platform ios --clean")
+
+    # コード署名設定を更新
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "ios/LinksDeck.xcodeproj",
+      team_id: ENV["APPLE_TEAM_ID"],
+      bundle_identifier: "com.linkdeck.app",
+      profile_name: ENV["PROVISIONING_PROFILE_SPECIFIER"]
+    )
+
+    # TestFlightから最新のビルド番号を取得
+    latest_build = latest_testflight_build_number(
+      app_identifier: "com.linkdeck.app",
+      api_key: api_key
+    )
+
+    # ビルド番号を最新+1に設定
+    increment_build_number(
+      xcodeproj: "ios/LinksDeck.xcodeproj",
+      build_number: latest_build + 1
+    )
+
+    # ビルドとアーカイブ
+    build_app(
+      scheme: "LinksDeck",
+      workspace: "ios/LinksDeck.xcworkspace",
+      configuration: "Release",
+      export_method: "app-store",
+      xcargs: "CODE_SIGN_IDENTITY='iPhone Distribution' CODE_SIGN_STYLE=Manual",
+      export_options: {
+        provisioningProfiles: {
+          "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+        }
+      }
+    )
+
+    # ビルド情報をファイルに書き出し（GitHub Actionsで使用）
+    File.write("../build_info.txt", "BUILD_NUMBER=#{latest_build + 1}\nVERSION=1.0.0")
+  end
+
+  desc "Upload Preview build to TestFlight (upload only)"
+  lane :preview_upload do
+    # App Store Connect API Keyのセットアップ
+    if ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
+      api_key = app_store_connect_api_key(
+        key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+        issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+        key_content: ENV['APP_STORE_CONNECT_API_KEY_CONTENT'],
+        is_key_content_base64: false
+      )
+    end
+
+    # TestFlightにアップロード
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      api_key: api_key,
+      ipa: ENV['IPA_PATH']
+    )
+  end
+
+  desc "Build Production version (build only, no upload)"
+  lane :production_build do
+    # CI環境のセットアップ（一時キーチェーンを作成）
+    setup_ci if ENV['CI']
+
+    # App Store Connect API Keyのセットアップ
+    if ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
+      api_key = app_store_connect_api_key(
+        key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+        issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+        key_content: ENV['APP_STORE_CONNECT_API_KEY_CONTENT'],
+        is_key_content_base64: false
+      )
+    end
+
+    # 証明書のインポート
+    import_certificate(
+      certificate_path: ENV["BUILD_CERTIFICATE_PATH"],
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: "fastlane_tmp_keychain"
+    )
+
+    # プロビジョニングプロファイルのインストール
+    install_provisioning_profile(
+      path: ENV["BUILD_PROVISION_PROFILE_PATH"]
+    )
+
+    # 依存関係を再インストール（expo-updatesを確実に削除）
+    sh("cd .. && pnpm install --force")
+
+    # Expo prebuildでネイティブプロジェクトを生成
+    sh("cd .. && npx expo prebuild --platform ios --clean")
+
+    # コード署名設定を更新
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "ios/LinksDeck.xcodeproj",
+      team_id: ENV["APPLE_TEAM_ID"],
+      bundle_identifier: "com.linkdeck.app",
+      profile_name: ENV["PROVISIONING_PROFILE_SPECIFIER"]
+    )
+
+    # TestFlightから最新のビルド番号を取得
+    latest_build = latest_testflight_build_number(
+      app_identifier: "com.linkdeck.app",
+      api_key: api_key
+    )
+
+    # ビルド番号を最新+1に設定
+    increment_build_number(
+      xcodeproj: "ios/LinksDeck.xcodeproj",
+      build_number: latest_build + 1
+    )
+
+    # ビルドとアーカイブ
+    build_app(
+      scheme: "LinksDeck",
+      workspace: "ios/LinksDeck.xcworkspace",
+      configuration: "Release",
+      export_method: "app-store",
+      xcargs: "CODE_SIGN_IDENTITY='iPhone Distribution' CODE_SIGN_STYLE=Manual",
+      export_options: {
+        provisioningProfiles: {
+          "com.linkdeck.app" => ENV["PROVISIONING_PROFILE_SPECIFIER"]
+        }
+      }
+    )
+
+    # ビルド情報をファイルに書き出し（GitHub Actionsで使用）
+    File.write("../build_info.txt", "BUILD_NUMBER=#{latest_build + 1}\nVERSION=1.0.0")
+  end
+
+  desc "Upload Production build to TestFlight (upload only)"
+  lane :production_upload do
+    # App Store Connect API Keyのセットアップ
+    if ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
+      api_key = app_store_connect_api_key(
+        key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+        issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+        key_content: ENV['APP_STORE_CONNECT_API_KEY_CONTENT'],
+        is_key_content_base64: false
+      )
+    end
+
+    # TestFlightにアップロード
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      api_key: api_key,
+      ipa: ENV['IPA_PATH']
+    )
+  end
 end
