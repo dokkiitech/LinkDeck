@@ -456,13 +456,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           </Text>
         )}
 
-        {link.summary && (
-          <View style={styles.summaryContainer}>
-            <Text style={styles.summaryLabel}>AI要約:</Text>
-            <Text style={styles.summaryText}>{link.summary}</Text>
-          </View>
-        )}
-
         <View style={styles.noteInputContainer}>
           <Text style={styles.noteInputLabel}>メモを追加</Text>
           <View style={styles.noteInputRow}>
@@ -832,23 +825,6 @@ const styles = StyleSheet.create({
   menuDivider: {
     height: 1,
     backgroundColor: '#E5E5EA',
-  },
-  summaryContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
-  },
-  summaryLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 10,
-  },
-  summaryText: {
-    fontSize: 14,
-    color: '#000000',
-    lineHeight: 20,
   },
   date: {
     fontSize: 12,
