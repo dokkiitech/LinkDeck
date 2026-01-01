@@ -150,6 +150,18 @@ jobs:
           # PRにコメント投稿
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
 
+      - name: Delete Build Artifacts After Successful Deploy
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # 現在のワークフロー実行のアーティファクトを削除
+          ARTIFACTS=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].id')
+          for artifact_id in $ARTIFACTS; do
+            echo "Deleting artifact ID: $artifact_id"
+            gh api -X DELETE "/repos/${{ github.repository }}/actions/artifacts/$artifact_id"
+          done
+
       - name: Cleanup
         if: always()
         run: |
