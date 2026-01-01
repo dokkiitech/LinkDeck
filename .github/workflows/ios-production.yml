@@ -53,7 +53,7 @@ jobs:
           echo "BUILD_CERTIFICATE_PATH=$PWD/certificate.p12" >> $GITHUB_ENV
           echo "BUILD_PROVISION_PROFILE_PATH=$PWD/profile.mobileprovision" >> $GITHUB_ENV
 
-      - name: Build and Upload to TestFlight
+      - name: Build iOS App
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -70,7 +70,54 @@ jobs:
           EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
         run: |
-          fastlane ios production
+          fastlane ios production_build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: |
+            LinksDeck.ipa
+            build_info.txt
+          retention-days: 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f certificate.p12 profile.mobileprovision
+
+  deploy:
+    needs: build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: |
+          gem install fastlane
+          fastlane --version
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          IPA_PATH: ${{ github.workspace }}/LinksDeck.ipa
+        run: |
+          fastlane ios production_upload
 
       - name: Post Build Success Summary
         if: success()
@@ -80,7 +127,7 @@ jobs:
 
           # GitHub Actions Summary に出力
           cat >> $GITHUB_STEP_SUMMARY << EOF
-          ## ✅ iOS Production Build 成功
+          ## ✅ iOS Production Build & Deploy 成功
 
           **ビルド情報:**
           - ビルド番号: \`${BUILD_NUMBER}\`
@@ -100,4 +147,4 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          rm -f certificate.p12 profile.mobileprovision build_info.txt
+          rm -f build_info.txt LinksDeck.ipa
