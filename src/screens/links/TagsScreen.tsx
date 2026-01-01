@@ -144,9 +144,6 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>タグ</Text>
-      </View>
       <View style={styles.createTagContainer}>
         <TextInput
           style={styles.input}
@@ -198,22 +195,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F2F2F7',
   },
-  headerContainer: {
+  createTagContainer: {
     backgroundColor: '#FFFFFF',
     paddingTop: 60,
     paddingBottom: 15,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  headerTitle: {
-    fontSize: 34,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  createTagContainer: {
-    backgroundColor: '#FFFFFF',
-    padding: 15,
+    paddingHorizontal: 15,
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
