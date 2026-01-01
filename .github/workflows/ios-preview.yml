@@ -150,6 +150,48 @@ jobs:
           # PRにコメント投稿
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
 
+      - name: Post Deploy Failure Comment
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # ビルド情報を読み込み（存在する場合）
+          if [ -f build_info.txt ]; then
+            source build_info.txt
+          else
+            BUILD_NUMBER="不明"
+            VERSION="不明"
+          fi
+
+          # 失敗コメント内容を作成
+          cat << EOF > failure_comment.md
+          ## ❌ iOS Preview Deploy 失敗
+
+          **ビルド情報:**
+          - ビルド番号: \`${BUILD_NUMBER}\`
+          - バージョン: \`${VERSION}\`
+          - コミット: \`${{ github.sha }}\`
+          - ブランチ: \`${{ github.head_ref }}\`
+
+          **考えられる原因:**
+          - TestFlightの送信回数制限（1時間に複数回送信すると制限される場合があります）
+          - App Store Connect API の一時的なエラー
+          - ネットワークエラー
+
+          **対処方法:**
+          1. **送信制限の場合**: 1-2時間待ってから、GitHub Actionsの画面で「Re-run failed jobs」をクリック
+             - ビルドは再実行されず、送信のみが再実行されます
+             - アーティファクトは3日間保持されます
+          2. **その他のエラー**: ワークフローログで詳細を確認してください
+
+          **詳細:**
+          - [ワークフロー実行](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [ログを確認](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }})
+          EOF
+
+          # PRにコメント投稿
+          gh pr comment ${{ github.event.pull_request.number }} --body-file failure_comment.md
+
       - name: Delete Build Artifacts After Successful Deploy
         if: success()
         env:
@@ -165,4 +207,4 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          rm -f build_info.txt comment.md LinksDeck.ipa
+          rm -f build_info.txt comment.md failure_comment.md LinksDeck.ipa
