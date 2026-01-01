@@ -79,7 +79,7 @@ jobs:
           path: |
             LinksDeck.ipa
             build_info.txt
-          retention-days: 1
+          retention-days: 3
 
       - name: Cleanup
         if: always()
