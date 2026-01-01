@@ -13,7 +13,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Link, LinkDocument, Tag, TagDocument } from '../types';
+import { Link, LinkDocument, Tag, TagDocument, TimelineEntry, TimelineEntryDocument } from '../types';
 import { isValidURL } from '../utils/urlValidation';
 
 /**
@@ -54,6 +54,22 @@ export const createLink = async (
 };
 
 /**
+ * タイムラインエントリを変換
+ */
+const convertTimelineEntries = (
+  timelineDoc?: TimelineEntryDocument[]
+): TimelineEntry[] | undefined => {
+  if (!timelineDoc || !Array.isArray(timelineDoc)) return undefined;
+
+  return timelineDoc.map((entry, index) => ({
+    id: `${index}`,
+    content: entry.content,
+    createdAt: entry.createdAt.toDate(),
+    type: entry.type,
+  }));
+};
+
+/**
  * リンクを取得
  */
 export const getLink = async (linkId: string): Promise<Link | null> => {
@@ -67,6 +83,7 @@ export const getLink = async (linkId: string): Promise<Link | null> => {
       ...data,
       isArchived: Boolean(data.isArchived), // Ensure boolean type
       createdAt: data.createdAt.toDate(),
+      timeline: convertTimelineEntries(data.timeline),
     };
   }
 
@@ -111,6 +128,7 @@ export const getUserLinks = async (
       ...data,
       isArchived: Boolean(data.isArchived), // Ensure boolean type
       createdAt: data.createdAt.toDate(),
+      timeline: convertTimelineEntries(data.timeline),
     };
   });
 };
@@ -137,6 +155,7 @@ export const getLinksByTag = async (
       ...data,
       isArchived: Boolean(data.isArchived), // Ensure boolean type
       createdAt: data.createdAt.toDate(),
+      timeline: convertTimelineEntries(data.timeline),
     };
   });
 };
@@ -263,4 +282,59 @@ export const checkLinkExists = async (
 
   const querySnapshot = await getDocs(q);
   return !querySnapshot.empty;
+};
+
+/**
+ * リンクにメモを追加
+ */
+export const addNoteToLink = async (
+  linkId: string,
+  content: string
+): Promise<void> => {
+  const link = await getLink(linkId);
+  if (!link) {
+    throw new Error('Link not found');
+  }
+
+  const existingTimeline = link.timeline || [];
+  const newEntry: TimelineEntryDocument = {
+    content,
+    createdAt: Timestamp.now(),
+    type: 'note',
+  };
+
+  const updatedTimeline = [...(link.timeline?.map((entry) => ({
+    content: entry.content,
+    createdAt: Timestamp.fromDate(entry.createdAt),
+    type: entry.type,
+  })) || []), newEntry];
+
+  await updateLink(linkId, { timeline: updatedTimeline });
+};
+
+/**
+ * リンクに要約をタイムラインに追加
+ */
+export const addSummaryToTimeline = async (
+  linkId: string,
+  summary: string
+): Promise<void> => {
+  const link = await getLink(linkId);
+  if (!link) {
+    throw new Error('Link not found');
+  }
+
+  const newEntry: TimelineEntryDocument = {
+    content: summary,
+    createdAt: Timestamp.now(),
+    type: 'summary',
+  };
+
+  const updatedTimeline = [...(link.timeline?.map((entry) => ({
+    content: entry.content,
+    createdAt: Timestamp.fromDate(entry.createdAt),
+    type: entry.type,
+  })) || []), newEntry];
+
+  await updateLink(linkId, { summary, timeline: updatedTimeline });
 };
