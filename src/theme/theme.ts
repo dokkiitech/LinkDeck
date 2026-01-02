@@ -11,8 +11,8 @@ export const theme = {
   // Typography
   typography: {
     fontFamily: {
-      regular: 'IBMPlexMono_400Regular',
-      bold: 'IBMPlexMono_700Bold',
+      regular: 'IBMPlexSans_400Regular',
+      bold: 'IBMPlexSans_700Bold',
     },
 
     // Font sizes

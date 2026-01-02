@@ -54,6 +54,7 @@ export const colors = {
 
   // Link/Navigation colors
   link: '#679EDE',
+  linkPressed: '#5181B8',
 
   // Overlay/Modal
   overlay: 'rgba(0, 0, 0, 0.5)',

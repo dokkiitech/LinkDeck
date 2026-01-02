@@ -1,7 +1,7 @@
 export { colors } from './colors';
 export type { Colors } from './colors';
 
-export { fonts, useFonts, IBMPlexMono_400Regular, IBMPlexMono_700Bold } from './fonts';
+export { fonts, useFonts, IBMPlexSans_400Regular, IBMPlexSans_700Bold } from './fonts';
 export type { Fonts } from './fonts';
 
 export { theme } from './theme';
