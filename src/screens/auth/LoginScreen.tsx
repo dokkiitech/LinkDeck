@@ -14,6 +14,7 @@ import { AuthStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors, theme } from '../../theme';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -94,7 +95,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.buttonText}>ログイン</Text>
           )}
@@ -125,7 +126,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -135,64 +136,68 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.primary,
     marginBottom: 10,
   },
   catchphrase: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     marginBottom: 30,
   },
   subtitle: {
     fontSize: 24,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 40,
   },
   input: {
     width: '100%',
     height: 50,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#F9F9F9',
+    fontFamily: theme.typography.fontFamily.regular,
+    backgroundColor: colors.white,
   },
   errorText: {
-    color: '#FF3B30',
+    color: colors.alert,
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
     marginBottom: 10,
     textAlign: 'center',
   },
   button: {
     width: '100%',
     height: 50,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
   },
   guestButton: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: colors.gray,
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.button.disabled,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   linkButton: {
     marginTop: 20,
   },
   linkText: {
-    color: '#007AFF',
+    color: colors.primary,
     fontSize: 14,
+    fontFamily: theme.typography.fontFamily.regular,
   },
 });
 
