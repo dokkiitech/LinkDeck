@@ -237,17 +237,6 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // テキストからURLを抽出
-  const extractURLsFromText = (text: string): string[] => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const matches = text.match(urlRegex);
-    if (!matches) return [];
-
-    // 末尾の句読点を削除して重複を排除
-    const cleanedUrls = matches.map((url) => url.replace(/[.,;:!?)]+$/, ''));
-    return Array.from(new Set(cleanedUrls));
-  };
-
   // テキスト内のURLをクリック可能なリンクとしてレンダリング
   const renderTextWithLinks = (text: string) => {
     // URLを検出する正規表現
@@ -393,10 +382,9 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       );
     } else {
-      // テキストから新しいURLを抽出（保存済みリンクのURLは除外）
-      const extractedUrls = extractURLsFromText(item.content);
+      // 保存済みリンクとWeb検索結果のURLリストを作成
       const savedLinkUrls = item.links?.map((link) => link.url) || [];
-      const newUrls = extractedUrls.filter((url) => !savedLinkUrls.includes(url));
+      const webResultUrls = item.webResults?.map((result) => result.url) || [];
 
       return (
         <View style={styles.assistantMessageContainer}>
@@ -494,38 +482,6 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                   );
                 })}
-              </View>
-            )}
-            {newUrls.length > 0 && (
-              <View style={styles.linksContainer}>
-                <Text style={styles.linksHeader}>
-                  {newUrls.length}件の見つかったリンク
-                </Text>
-                {newUrls.map((url, index) => (
-                  <View key={index} style={styles.newLinkCard}>
-                    <View style={styles.newLinkContent}>
-                      <Text style={styles.newLinkUrl} numberOfLines={2}>
-                        {url}
-                      </Text>
-                      <View style={styles.newLinkActions}>
-                        <TouchableOpacity
-                          style={styles.openLinkButton}
-                          onPress={() => handleOpenUrl(url)}
-                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                        >
-                          <Ionicons name="open-outline" size={18} color="#666" />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.saveLinkButton}
-                          onPress={() => handleSaveLink(url)}
-                        >
-                          <Ionicons name="bookmark-outline" size={16} color="#fff" />
-                          <Text style={styles.saveLinkButtonText}>保存</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                ))}
               </View>
             )}
           </View>
@@ -929,29 +885,6 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#666',
-  },
-  newLinkCard: {
-    backgroundColor: '#f0f8ff',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#b3d9ff',
-  },
-  newLinkContent: {
-    flexDirection: 'column',
-    gap: 10,
-  },
-  newLinkUrl: {
-    fontSize: 13,
-    color: '#007AFF',
-    lineHeight: 18,
-  },
-  newLinkActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: 8,
   },
   openLinkButton: {
     padding: 6,
