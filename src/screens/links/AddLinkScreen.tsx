@@ -120,12 +120,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
       setTitleText('');
       setSelectedTags([]);
 
-      showSuccess('成功', SUCCESS_MESSAGES.LINKS.SAVED, [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      showSuccess('成功', SUCCESS_MESSAGES.LINKS.SAVED, () => navigation.goBack());
     } catch (error: any) {
       if (__DEV__) {
         console.error('[AddLink] Error adding link:', error);
