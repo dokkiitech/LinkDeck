@@ -39,9 +39,15 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
   });
 
   const showDialog = useCallback((options: DialogOptions) => {
+    // Ensure button callbacks are properly formatted
+    const sanitizedButtons = (options.buttons || [{ text: 'OK', style: 'default' }]).map(btn => ({
+      ...btn,
+      onPress: typeof btn.onPress === 'function' ? btn.onPress : undefined,
+    }));
+
     setDialogOptions({
       ...options,
-      buttons: options.buttons || [{ text: 'OK', style: 'default' }],
+      buttons: sanitizedButtons,
     });
     setDialogVisible(true);
   }, []);
@@ -60,7 +66,7 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           {
             text: 'OK',
             style: 'default',
-            onPress: onClose,
+            ...(typeof onClose === 'function' && { onPress: onClose }),
           },
         ],
       });
@@ -78,7 +84,7 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           {
             text: 'OK',
             style: 'default',
-            onPress: onClose,
+            ...(typeof onClose === 'function' && { onPress: onClose }),
           },
         ],
       });
@@ -96,7 +102,7 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           {
             text: 'OK',
             style: 'default',
-            onPress: onClose,
+            ...(typeof onClose === 'function' && { onPress: onClose }),
           },
         ],
       });
@@ -114,7 +120,7 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           {
             text: 'OK',
             style: 'default',
-            onPress: onClose,
+            ...(typeof onClose === 'function' && { onPress: onClose }),
           },
         ],
       });
@@ -137,12 +143,12 @@ export const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           {
             text: 'キャンセル',
             style: 'cancel',
-            onPress: onCancel,
+            ...(typeof onCancel === 'function' && { onPress: onCancel }),
           },
           {
             text: 'OK',
             style: 'default',
-            onPress: onConfirm,
+            ...(typeof onConfirm === 'function' && { onPress: onConfirm }),
           },
         ],
       });

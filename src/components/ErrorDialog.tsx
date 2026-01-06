@@ -92,8 +92,8 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({
       // Close dialog first to prevent double-clicks
       onClose?.();
 
-      // Then execute button callback
-      if (button.onPress) {
+      // Then execute button callback if it's a function
+      if (button.onPress && typeof button.onPress === 'function') {
         await Promise.resolve(button.onPress());
       }
     } catch (error) {
