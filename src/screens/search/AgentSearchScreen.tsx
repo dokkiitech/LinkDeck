@@ -155,6 +155,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         role: 'assistant',
         content: result.explanation,
         links: result.links,
+        webResults: result.webResults,
         timestamp: Date.now(),
       };
 
@@ -446,6 +447,53 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
                   </TouchableOpacity>
                 ))}
+              </View>
+            )}
+            {item.webResults && item.webResults.length > 0 && (
+              <View style={styles.linksContainer}>
+                <Text style={styles.linksHeader}>
+                  {item.webResults.length}件のWeb検索結果
+                </Text>
+                {item.webResults.map((webResult, index) => {
+                  // 既に保存されているかチェック
+                  const isAlreadySaved = savedLinkUrls.includes(webResult.url);
+
+                  return (
+                    <View key={index} style={styles.webResultCard}>
+                      <View style={styles.webResultContent}>
+                        <Text style={styles.webResultTitle} numberOfLines={2}>
+                          {webResult.title}
+                        </Text>
+                        <Text style={styles.webResultUrl} numberOfLines={1}>
+                          {webResult.url}
+                        </Text>
+                        {webResult.snippet && (
+                          <Text style={styles.webResultSnippet} numberOfLines={3}>
+                            {webResult.snippet}
+                          </Text>
+                        )}
+                        <View style={styles.webResultActions}>
+                          <TouchableOpacity
+                            style={styles.openLinkButton}
+                            onPress={() => handleOpenUrl(webResult.url)}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                          >
+                            <Ionicons name="open-outline" size={18} color="#666" />
+                          </TouchableOpacity>
+                          {!isAlreadySaved && (
+                            <TouchableOpacity
+                              style={styles.saveLinkButton}
+                              onPress={() => handleSaveLink(webResult.url)}
+                            >
+                              <Ionicons name="bookmark-outline" size={16} color="#fff" />
+                              <Text style={styles.saveLinkButtonText}>保存</Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
               </View>
             )}
             {newUrls.length > 0 && (
@@ -921,6 +969,41 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
+  },
+  webResultCard: {
+    backgroundColor: '#fff8f0',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#ffd9a0',
+  },
+  webResultContent: {
+    flexDirection: 'column',
+    gap: 8,
+  },
+  webResultTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    lineHeight: 18,
+  },
+  webResultUrl: {
+    fontSize: 12,
+    color: '#007AFF',
+    lineHeight: 16,
+  },
+  webResultSnippet: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+  },
+  webResultActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
   },
 });
 
