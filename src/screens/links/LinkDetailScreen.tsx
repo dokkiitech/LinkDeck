@@ -326,9 +326,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           alert('リンクを削除しました');
           navigation.goBack();
         } else {
-          showSuccess('成功', 'リンクを削除しました', [
-            { text: 'OK', onPress: () => navigation.goBack() },
-          ]);
+          showSuccess('成功', 'リンクを削除しました', () => navigation.goBack());
         }
       } catch (error) {
         if (Platform.OS === 'web') {
