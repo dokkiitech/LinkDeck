@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Link } from '../types';
 import { getUserLinks } from './firestore';
 import { ERROR_MESSAGES } from '../constants/messages';
+import { searchWeb, WebSearchResult } from './webSearch';
 
 /**
  * Gemini APIのエラーを解析してユーザーフレンドリーなメッセージを返す
@@ -59,6 +60,7 @@ export interface ConversationMessage {
   role: 'user' | 'assistant';
   content: string;
   links?: Link[];
+  webResults?: WebSearchResult[]; // Web検索結果
   timestamp: number;
   isStreaming?: boolean; // ストリーミング中かどうか
 }
@@ -68,6 +70,7 @@ export interface ConversationMessage {
  */
 export interface AgentSearchResult {
   links: Link[];
+  webResults?: WebSearchResult[]; // Web検索結果
   explanation: string;
 }
 
@@ -352,6 +355,30 @@ export const searchWithAgentStream = async (
       })),
     }));
 
+    // Web検索を実行（オンライン検索有効時）
+    let webSearchResults: WebSearchResult[] = [];
+    if (onlineSearchEnabled) {
+      try {
+        webSearchResults = await searchWeb(query, 10);
+        if (__DEV__) {
+          console.log(`[AgentSearch] Web search found ${webSearchResults.length} results`);
+        }
+      } catch (error) {
+        if (__DEV__) {
+          console.warn('[AgentSearch] Web search failed:', error);
+        }
+        // Web検索失敗時も続行
+      }
+    }
+
+    // Web検索結果をJSON形式で整形
+    const webSearchData = webSearchResults.map((result, index) => ({
+      index,
+      title: result.title,
+      url: result.url,
+      snippet: result.snippet,
+    }));
+
     // 会話履歴の整形
     let conversationContext = '';
     if (conversationHistory.length > 0) {
@@ -372,9 +399,12 @@ export const searchWithAgentStream = async (
     let prompt: string;
 
     if (onlineSearchEnabled) {
-      // オンライン検索有効時: 保存リンクと一般知識の両方を使う
-      if (allLinks.length === 0) {
-        // リンクがない場合は一般的な質問として回答
+      // オンライン検索有効時: Web検索結果と保存リンクを組み合わせる
+      const hasWebResults = webSearchResults.length > 0;
+      const hasLinks = allLinks.length > 0;
+
+      if (!hasLinks && !hasWebResults) {
+        // リンクもWeb検索結果もない場合
         prompt = `あなたは親切なAIアシスタントです。ユーザーの質問に対して、適切に回答してください。${conversationContext}
 
 ユーザーの質問:
@@ -390,12 +420,36 @@ ${query}
 回答は必ず以下のJSON形式で返してください:
 {
   "matchedIndexes": [],
+  "matchedWebIndexes": [],
   "explanation": "ユーザーの質問に対する回答をここに記載"
 }`;
+      } else if (!hasLinks && hasWebResults) {
+        // Web検索結果のみの場合
+        prompt = `あなたは、Web検索結果から関連する情報を見つけて回答するAIアシスタントです。${conversationContext}
+
+ユーザーの質問:
+${query}
+
+Web検索結果（JSON形式）:
+${JSON.stringify(webSearchData, null, 2)}
+
+指示:
+1. ユーザーの質問を分析し、Web検索結果から関連する情報を見つけてください
+2. 関連するWeb検索結果があれば、そのindex番号を matchedWebIndexes 配列に含めてください
+3. Web検索結果のタイトル、URL、スニペットを参考にしてください
+4. 検索結果を基に、簡潔で分かりやすい回答を作成してください
+5. 参考にしたURLがあれば、回答文に含めてください（例: https://example.com を参考にすると...）
+6. マークダウン形式を使わず、プレーンテキストのみで回答してください
+
+回答は必ず以下のJSON形式で返してください:
+{
+  "matchedIndexes": [],
+  "matchedWebIndexes": [0, 2, 5],
+  "explanation": "Web検索結果を基にした回答。参考URL: https://example.com"
+}`;
       } else {
-        // リンクがある場合は、リンクと一般知識を組み合わせる
-        prompt = `あなたは、ユーザーが保存したリンク集から関連する情報を検索し、必要に応じて一般的な知識も提供するAIアシスタントです。
-会話の文脈を理解して、適切に応答してください。${conversationContext}
+        // 保存リンクとWeb検索結果の両方がある場合
+        prompt = `あなたは、ユーザーが保存したリンクとWeb検索結果から関連する情報を見つけて回答するAIアシスタントです。${conversationContext}
 
 ユーザーの質問:
 ${query}
@@ -403,27 +457,23 @@ ${query}
 ユーザーが保存しているリンク一覧（JSON形式）:
 ${JSON.stringify(linksData, null, 2)}
 
+${hasWebResults ? `Web検索結果（JSON形式）:\n${JSON.stringify(webSearchData, null, 2)}` : ''}
+
 指示:
-1. まず、ユーザーの質問を分析してください
-2. 保存されているリンクの中に関連するものがあれば、そのindexを返してください
-3. タイトル、URL、タグだけでなく、AI要約（summary）やユーザーが追加したメモ（notes）の内容も検索対象に含めてください
-4. 保存されているリンクだけでは不十分な場合や、一般的な知識で補足できる場合は、説明に含めてください
-5. 会話の文脈を考慮してください（例: 「それ」「前回の」などの指示代名詞を理解）
-6. 日付の表現（"3月くらい"、"最近"、"去年"など）も考慮してください
-7. リンクが見つかった場合はindexを配列で返し、見つからなくても一般的な回答を提供してください
-8. マークダウン形式（**太字**、*斜体*、見出し記号など）を使わず、プレーンテキストのみで回答してください
-9. 説明文（explanation）にindex番号（例：「index 8」）を含めないでください
+1. ユーザーの質問を分析してください
+2. 保存されているリンクの中に関連するものがあれば、そのindex番号を matchedIndexes 配列に含めてください
+3. Web検索結果の中に関連するものがあれば、そのindex番号を matchedWebIndexes 配列に含めてください
+4. タイトル、URL、タグ、AI要約（summary）、メモ（notes）、スニペットなど、すべての情報を検索対象に含めてください
+5. 保存リンクとWeb検索結果の両方を活用して、最適な回答を作成してください
+6. 参考にしたWebのURLがあれば、回答文に含めてください（例: https://example.com によると...）
+7. 会話の文脈を考慮してください
+8. マークダウン形式を使わず、プレーンテキストのみで回答してください
 
 回答は必ず以下のJSON形式で返してください:
 {
-  "matchedIndexes": [0, 3, 5],
-  "explanation": "保存されたリンクと一般的な知識を組み合わせた回答"
-}
-
-リンクが見つからない場合でも、一般的な知識で回答してください:
-{
-  "matchedIndexes": [],
-  "explanation": "一般的な知識に基づいた回答"
+  "matchedIndexes": [0, 3],
+  "matchedWebIndexes": [1, 5],
+  "explanation": "保存リンクとWeb検索結果を組み合わせた回答"
 }`;
       }
     } else {
@@ -458,12 +508,14 @@ ${JSON.stringify(linksData, null, 2)}
 回答は必ず以下のJSON形式で返してください:
 {
   "matchedIndexes": [0, 3, 5],
+  "matchedWebIndexes": [],
   "explanation": "◯月に保存された◯◯に関するリンクを◯件見つけました。"
 }
 
 見つからない場合は:
 {
   "matchedIndexes": [],
+  "matchedWebIndexes": [],
   "explanation": "該当するリンクが見つかりませんでした。"
 }`;
     }
@@ -484,6 +536,7 @@ ${JSON.stringify(linksData, null, 2)}
 
     const parsedResponse = JSON.parse(jsonMatch[0]) as {
       matchedIndexes: number[];
+      matchedWebIndexes?: number[];
       explanation: string;
     };
 
@@ -492,8 +545,14 @@ ${JSON.stringify(linksData, null, 2)}
       .filter((index) => index >= 0 && index < allLinks.length)
       .map((index) => allLinks[index]);
 
+    // マッチしたWeb検索結果を取得
+    const matchedWebResults = (parsedResponse.matchedWebIndexes || [])
+      .filter((index) => index >= 0 && index < webSearchResults.length)
+      .map((index) => webSearchResults[index]);
+
     return {
       links: matchedLinks,
+      webResults: matchedWebResults.length > 0 ? matchedWebResults : undefined,
       explanation: parsedResponse.explanation || '検索が完了しました。',
     };
   } catch (error: any) {
