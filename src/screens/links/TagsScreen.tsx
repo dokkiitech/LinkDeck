@@ -16,6 +16,7 @@ import { useDialog } from '../../contexts/DialogContext';
 import { getUserTags, createTag, deleteTag } from '../../services/firestore';
 import { Tag, TagsStackParamList } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, CONFIRMATION_MESSAGES } from '../../constants/messages';
+import { colors, theme } from '../../theme';
 
 interface Props {
   navigation: NativeStackNavigationProp<TagsStackParamList, 'TagsList'>;
@@ -129,7 +130,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.deleteButton}
         onPress={() => handleDeleteTag(item)}
       >
-        <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+        <Ionicons name="trash-outline" size={20} color={colors.alert} />
       </TouchableOpacity>
     </View>
   );
@@ -137,7 +138,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -190,13 +191,13 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   headerContainer: {
     backgroundColor: '#FFFFFF',
@@ -210,36 +211,36 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   createTagContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     padding: 15,
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.borderGray,
   },
   input: {
     flex: 1,
     height: 40,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginRight: 10,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: colors.white,
   },
   createButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   createButtonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.button.disabled,
   },
   createButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   emptyContainer: {
     flex: 1,
@@ -249,13 +250,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.tertiary,
     marginBottom: 10,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     textAlign: 'center',
   },
   listContent: {
@@ -265,7 +267,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 12,
     elevation: 2,
     shadowColor: '#000',
@@ -283,7 +285,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tagBadge: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -291,17 +293,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   tagName: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   tagDate: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
   },
   tapHint: {
     fontSize: 11,
-    color: '#007AFF',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.primary,
     marginTop: 5,
     fontStyle: 'italic',
   },

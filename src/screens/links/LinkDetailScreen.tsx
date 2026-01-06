@@ -411,7 +411,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -437,7 +437,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           <View style={styles.tagsHeader}>
             <Text style={styles.tagsLabel}>タグ:</Text>
             <TouchableOpacity onPress={handleOpenTagModal} style={styles.editTagButton}>
-              <Ionicons name="add-circle" size={24} color="#007AFF" />
+              <Ionicons name="add-circle" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
           {link.tags.length > 0 ? (
@@ -457,7 +457,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.openLinkButton}
           onPress={handleOpenLink}
         >
-          <Ionicons name="open-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Ionicons name="open-outline" size={20} color={colors.white} style={{ marginRight: 8 }} />
           <Text style={styles.openLinkButtonText}>リンクを開く</Text>
         </TouchableOpacity>
 
@@ -686,7 +686,7 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                       {tag.name}
                     </Text>
                     {isSelected && (
-                      <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
+                      <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
                     )}
                   </TouchableOpacity>
                 );
@@ -702,31 +702,32 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   errorText: {
     fontSize: 16,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
   },
   content: {
     padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 10,
   },
   urlContainer: {
@@ -734,7 +735,8 @@ const styles = StyleSheet.create({
   },
   url: {
     fontSize: 14,
-    color: '#007AFF',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.primary,
     textDecorationLine: 'underline',
   },
   tagsContainer: {
@@ -748,23 +750,23 @@ const styles = StyleSheet.create({
   },
   tagsLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
   },
   editTagButton: {
     padding: 4,
   },
   editTagButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   tags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   tag: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -772,16 +774,18 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tagText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   noTagsText: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     fontStyle: 'italic',
   },
   openLinkButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: colors.success,
     borderRadius: 10,
     padding: 15,
     alignItems: 'center',
@@ -790,31 +794,32 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   openLinkButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   generateSummaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     padding: 15,
     alignItems: 'center',
     marginBottom: 20,
   },
   generateSummaryButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   disabledButton: {
-    backgroundColor: '#C7C7CC',
+    backgroundColor: colors.borderGray,
   },
   disabledButtonText: {
-    color: '#8E8E93',
+    color: colors.text.tertiary,
   },
   webNotice: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     textAlign: 'center',
     marginTop: -15,
     marginBottom: 20,
@@ -828,7 +833,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   menuContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 12,
     minWidth: 200,
     shadowColor: '#000',
@@ -843,19 +848,22 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.primary,
   },
   menuItemDangerText: {
     fontSize: 16,
-    color: '#FF3B30',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.error,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.borderGray,
   },
   date: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     textAlign: 'center',
   },
   modalOverlay: {
@@ -864,7 +872,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -878,12 +886,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
   },
   modalCloseButton: {
     fontSize: 32,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     fontWeight: '300',
   },
   newTagContainer: {
@@ -892,27 +901,28 @@ const styles = StyleSheet.create({
   },
   newTagInput: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     marginRight: 10,
   },
   addNewTagButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     paddingHorizontal: 20,
     justifyContent: 'center',
   },
   addNewTagButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   existingTagsLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 10,
   },
   tagsList: {
@@ -922,64 +932,68 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
   },
   tagItemSelected: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   tagItemText: {
     fontSize: 16,
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.primary,
   },
   tagItemTextSelected: {
-    color: '#007AFF',
-    fontWeight: '600',
+    color: colors.primary,
+    fontFamily: theme.typography.fontFamily.bold,
   },
   checkmark: {
     fontSize: 18,
-    color: '#007AFF',
-    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.primary,
+    fontFamily: theme.typography.fontFamily.bold,
   },
   editFormContainer: {
     marginBottom: 20,
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 8,
     marginTop: 10,
   },
   editInput: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     minHeight: 44,
     maxHeight: 120,
   },
   inputHint: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     marginTop: 5,
     marginBottom: 10,
   },
   saveButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: colors.success,
     borderRadius: 10,
     padding: 15,
     alignItems: 'center',
     marginTop: 20,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   noteInputContainer: {
     backgroundColor: '#FFFFFF',

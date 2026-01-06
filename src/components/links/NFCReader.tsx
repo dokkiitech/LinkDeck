@@ -11,6 +11,7 @@ import {
 import { useDialog } from '../../contexts/DialogContext';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { isValidURL } from '../../utils/urlValidation';
+import { colors, theme } from '../../theme';
 
 interface NFCReaderProps {
   visible: boolean;
@@ -281,18 +282,18 @@ const NFCReader: React.FC<NFCReaderProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     padding: 20,
   },
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   header: {
     flexDirection: 'row',
@@ -301,13 +302,13 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.borderGray,
   },
   headerText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#000',
   },
   closeIconButton: {
@@ -318,6 +319,7 @@ const styles = StyleSheet.create({
   },
   closeIconText: {
     fontSize: 28,
+    fontFamily: theme.typography.fontFamily.regular,
     fontWeight: '300',
     color: '#000',
   },
@@ -332,10 +334,11 @@ const styles = StyleSheet.create({
   },
   nfcIconText: {
     fontSize: 80,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   instructionText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     color: '#000',
     textAlign: 'center',
     marginBottom: 40,
@@ -353,34 +356,36 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: '#C7C7CC',
+    borderColor: colors.borderGray,
   },
   nfcIndicatorRingActive: {
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   nfcIndicatorDot: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#C7C7CC',
+    backgroundColor: colors.borderGray,
   },
   nfcIndicatorDotActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
   },
   hintText: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     textAlign: 'center',
     marginBottom: 30,
   },
   messageText: {
     fontSize: 16,
+    fontFamily: theme.typography.fontFamily.regular,
     textAlign: 'center',
     marginBottom: 20,
     color: '#000',
   },
   closeButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,
@@ -388,10 +393,10 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,
@@ -399,7 +404,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
 });
 

@@ -16,6 +16,7 @@ import { SettingsStackParamList } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { ERROR_MESSAGES } from '../../constants/messages';
+import { colors, theme } from '../../theme';
 
 type UpgradeAccountScreenNavigationProp = NativeStackNavigationProp<SettingsStackParamList, 'UpgradeAccount'>;
 
@@ -132,7 +133,7 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.white} />
             ) : (
               <Text style={styles.buttonText}>アカウントを作成</Text>
             )}
@@ -157,7 +158,7 @@ const UpgradeAccountScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   scrollContent: {
     flexGrow: 1,
@@ -168,14 +169,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 10,
     marginTop: 20,
   },
   description: {
     fontSize: 16,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     marginBottom: 30,
     lineHeight: 22,
   },
@@ -183,51 +185,54 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#FFFFFF',
+    fontFamily: theme.typography.fontFamily.regular,
+    backgroundColor: colors.white,
   },
   button: {
     width: '100%',
     height: 50,
-    backgroundColor: '#34C759',
+    backgroundColor: colors.success,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
   },
   buttonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.button.disabled,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
   loadingText: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     textAlign: 'center',
     marginTop: 10,
   },
   infoBox: {
     marginTop: 30,
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 10,
   },
   infoTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 15,
   },
   infoText: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     marginBottom: 10,
     lineHeight: 20,
   },

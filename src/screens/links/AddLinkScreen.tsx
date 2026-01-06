@@ -26,6 +26,7 @@ import { TagSelector } from '../../components/links/TagSelector';
 import { useTags } from '../../hooks/useTags';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
 import NFCReader from '../../components/links/NFCReader';
+import { colors, theme } from '../../theme';
 
 type AddLinkScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -218,7 +219,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
               onPress={() => setShowNFCReader(true)}
               disabled={loading}
             >
-              <Ionicons name="radio-outline" size={24} color="#007AFF" />
+              <Ionicons name="radio-outline" size={24} color={colors.primary} />
               <Text style={styles.scanButtonText}>NFC</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -226,7 +227,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
               onPress={() => setShowQRScanner(true)}
               disabled={loading}
             >
-              <Ionicons name="qr-code" size={24} color="#007AFF" />
+              <Ionicons name="qr-code" size={24} color={colors.primary} />
               <Text style={styles.scanButtonText}>QR</Text>
             </TouchableOpacity>
           </View>
@@ -256,7 +257,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.saveButtonText}>保存</Text>
           )}
@@ -281,7 +282,7 @@ const AddLinkScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   scrollView: {
     flex: 1,
@@ -294,8 +295,8 @@ const styles = StyleSheet.create({
   },
   scanButtonsLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 10,
   },
   buttonGroup: {
@@ -304,10 +305,10 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: colors.borderGray,
     paddingVertical: 15,
     paddingHorizontal: 10,
     flexDirection: 'row',
@@ -317,23 +318,23 @@ const styles = StyleSheet.create({
   },
   scanButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#007AFF',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.primary,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 10,
     padding: 18,
     alignItems: 'center',
     marginTop: 10,
   },
   saveButtonDisabled: {
-    backgroundColor: '#B0B0B0',
+    backgroundColor: colors.button.disabled,
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
   },
 });
 

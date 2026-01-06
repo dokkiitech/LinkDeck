@@ -21,6 +21,7 @@ import { Link } from '../../types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 import QRCodeScanner from '../../components/links/QRCodeScanner';
 import NFCReader from '../../components/links/NFCReader';
+import { colors, theme } from '../../theme';
 
 type LinksListScreenNavigationProp = NativeStackNavigationProp<
   LinksStackParamList,
@@ -217,7 +218,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -228,17 +229,17 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       {/* 検索バー */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color={colors.text.tertiary} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="タイトル、URL、タグで検索..."
+          placeholder="タイトル、URL、タグで検索"
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-            <Ionicons name="close-circle" size={20} color="#8E8E93" />
+            <Ionicons name="close-circle" size={20} color={colors.text.tertiary} />
           </TouchableOpacity>
         )}
       </View>
@@ -312,7 +313,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.fabMenuButton}
             onPress={handleNFCScan}
           >
-            <Ionicons name="radio-outline" size={24} color="#FFFFFF" />
+            <Ionicons name="radio-outline" size={24} color={colors.white} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -346,7 +347,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.fabMenuButton}
             onPress={handleManualAdd}
           >
-            <Ionicons name="create-outline" size={24} color="#FFFFFF" />
+            <Ionicons name="create-outline" size={24} color={colors.white} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -380,7 +381,7 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.fabMenuButton}
             onPress={handleQRScan}
           >
-            <Ionicons name="qr-code" size={24} color="#FFFFFF" />
+            <Ionicons name="qr-code" size={24} color={colors.white} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -429,12 +430,12 @@ const LinksListScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     margin: 10,
     marginBottom: 5,
     borderRadius: 10,
@@ -452,7 +453,8 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.primary,
     padding: 0,
   },
   clearButton: {
@@ -462,7 +464,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
   },
   emptyContainer: {
     flex: 1,
@@ -472,31 +474,32 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.tertiary,
     marginBottom: 10,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     textAlign: 'center',
   },
   listContent: {
     padding: 10,
   },
   sectionHeader: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.lightGray,
     paddingHorizontal: 15,
     paddingVertical: 8,
     marginTop: 10,
   },
   sectionHeaderText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
   },
   linkItem: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 12,
     marginBottom: 10,
     overflow: 'hidden',
@@ -511,13 +514,14 @@ const styles = StyleSheet.create({
   },
   linkTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+    fontFamily: theme.typography.fontFamily.bold,
+    color: colors.text.primary,
     marginBottom: 5,
   },
   linkUrl: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
     marginBottom: 10,
   },
   tagsContainer: {
@@ -526,7 +530,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   tag: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -534,12 +538,14 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tagText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 12,
+    fontFamily: theme.typography.fontFamily.regular,
   },
   linkDate: {
     fontSize: 12,
-    color: '#8E8E93',
+    fontFamily: theme.typography.fontFamily.regular,
+    color: colors.text.tertiary,
   },
   fab: {
     position: 'absolute',
@@ -548,7 +554,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
@@ -559,11 +565,12 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   fabRotated: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: colors.error,
   },
   fabText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 32,
+    fontFamily: theme.typography.fontFamily.regular,
     fontWeight: '300',
     marginTop: -2,
   },
@@ -588,7 +595,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -598,9 +605,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   fabMenuLabel: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: theme.typography.fontFamily.bold,
     marginRight: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
