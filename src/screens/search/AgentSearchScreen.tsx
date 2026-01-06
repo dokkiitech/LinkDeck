@@ -383,7 +383,11 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
       );
     } else {
       // 保存済みリンクとWeb検索結果のURLリストを作成
-      const savedLinkUrls = item.links?.map((link) => link.url) || [];
+      // userLinksも参照して、リアルタイムで保存済みかチェック
+      const savedLinkUrls = Array.from(new Set([
+        ...(item.links?.map((link) => link.url) || []),
+        ...userLinks.map((link) => link.url),
+      ]));
       const webResultUrls = item.webResults?.map((result) => result.url) || [];
 
       return (
