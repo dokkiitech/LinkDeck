@@ -1,6 +1,11 @@
 import { Timestamp } from 'firebase/firestore';
 
 /**
+ * ユーザーロールの型定義
+ */
+export type UserRole = 'admin' | 'user';
+
+/**
  * ユーザー情報の型定義
  */
 export interface User {
@@ -8,6 +13,7 @@ export interface User {
   email: string | null;
   displayName: string | null;
   createdAt: Date;
+  role?: UserRole; // ユーザーロール (デフォルト: 'user')
   geminiApiKey?: string; // 暗号化されたAPIキー
 }
 
@@ -18,6 +24,7 @@ export interface UserDocument {
   email: string | null;
   displayName: string | null;
   createdAt: Timestamp;
+  role?: UserRole;
   geminiApiKey?: string;
 }
 
@@ -128,3 +135,56 @@ export type SettingsStackParamList = {
   SettingsMain: undefined;
   UpgradeAccount: undefined;
 };
+
+/**
+ * サービスモード設定の型定義
+ */
+export interface ServiceModeConfig {
+  enabled: boolean;
+  message: string;
+  disabledFeatures: string[];
+  updatedAt: Date;
+  updatedBy: string; // ユーザーUID
+  updatedByEmail: string; // 設定した人のメールアドレス
+  reason: string; // 設定理由
+}
+
+/**
+ * Firestoreに保存されるサービスモード設定の型
+ */
+export interface ServiceModeConfigDocument {
+  enabled: boolean;
+  message: string;
+  disabledFeatures: string[];
+  updatedAt: Timestamp;
+  updatedBy: string;
+  updatedByEmail: string;
+  reason: string;
+}
+
+/**
+ * サービスモード変更履歴の型定義
+ */
+export interface ServiceModeHistory {
+  id: string;
+  enabled: boolean;
+  message: string;
+  disabledFeatures: string[];
+  changedAt: Date;
+  changedBy: string; // ユーザーUID
+  changedByEmail: string; // 変更した人のメールアドレス
+  reason: string; // 変更理由
+}
+
+/**
+ * Firestoreに保存されるサービスモード変更履歴の型
+ */
+export interface ServiceModeHistoryDocument {
+  enabled: boolean;
+  message: string;
+  disabledFeatures: string[];
+  changedAt: Timestamp;
+  changedBy: string;
+  changedByEmail: string;
+  reason: string;
+}

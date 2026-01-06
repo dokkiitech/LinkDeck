@@ -26,6 +26,12 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == request.resource.data.userId;
     }
 
+    // 管理者権限をチェック
+    function isAdmin() {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     // ========================================
     // ユーザーコレクション
     // ========================================
@@ -119,6 +125,28 @@ service cloud.firestore {
 
       // 削除: 自分のタグのみ
       allow delete: if isResourceOwner();
+    }
+
+    // ========================================
+    // サービスモード設定（config/serviceMode）
+    // ========================================
+
+    match /config/serviceMode {
+      // 読み取り: 認証済みユーザーなら誰でも読める
+      allow read: if isAuthenticated();
+
+      // 書き込み: 管理者のみ
+      allow write: if isAdmin();
+
+      // 変更履歴サブコレクション
+      match /history/{historyId} {
+        // 読み取り: 管理者のみ
+        allow read: if isAdmin();
+
+        // 作成: 管理者のみ（更新・削除は不可）
+        allow create: if isAdmin();
+        allow update, delete: if false;
+      }
     }
   }
 }
