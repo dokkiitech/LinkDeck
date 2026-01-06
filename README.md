@@ -27,7 +27,7 @@
 
 ```
 LinksDeck/
-├── src/
+├── src/                 # モバイルアプリ（React Native）
 │   ├── config/          # Firebase設定
 │   ├── contexts/        # React Context (認証など)
 │   ├── navigation/      # ナビゲーション構造
@@ -38,8 +38,16 @@ LinksDeck/
 │   ├── services/        # Firestoreサービス層
 │   ├── types/           # TypeScript型定義
 │   └── utils/           # ユーティリティ関数
+├── admin-dashboard/     # Web管理画面（Next.js）
+│   ├── app/             # Next.js App Router
+│   │   ├── service-mode/  # サービスモード管理画面
+│   │   └── api/         # API Routes
+│   ├── lib/             # Firebase設定・ユーティリティ
+│   └── components/      # UIコンポーネント
+├── functions/           # Firebase Cloud Functions
 ├── assets/              # 画像・アイコンなどのアセット
 ├── App.tsx              # アプリケーションエントリーポイント
+├── .env                 # 環境変数（モバイルアプリと管理画面で共有）
 └── package.json
 ```
 
@@ -158,8 +166,50 @@ npm run android
 3. APIキーを設定画面に入力して保存
 4. リンク詳細画面で「AI要約を生成」ボタンをタップ
 
+## 管理画面（サービスモード管理）
+
+LinksDeckには、サービスモードを管理するためのWeb管理画面が用意されています。
+
+### 管理画面のセットアップ
+
+```bash
+# 管理画面のディレクトリに移動
+cd admin-dashboard
+
+# 依存関係をインストール
+pnpm install
+
+# 環境変数の設定（ルートの.envがシンボリックリンクで共有されています）
+# ルートディレクトリで.envを作成し、EXPO_PUBLIC_*とNEXT_PUBLIC_*の両方を設定
+
+# 開発サーバーを起動
+pnpm dev
+```
+
+### 管理者ユーザーの設定
+
+Firebase Consoleで管理者権限を付与：
+
+1. Firebase Console → Firestore Database
+2. `users/{あなたのUID}` を開く
+3. フィールドを追加:
+   - フィールド名: `role`
+   - 型: `string`
+   - 値: `admin`
+
+### サービスモード管理機能
+
+- **サービスモードON/OFF**: トグルスイッチで切り替え
+- **メッセージ設定**: ユーザーに表示するカスタムメッセージ
+- **機能の無効化**: 個別機能の制御（リンク追加、AI検索、リンク閲覧）
+- **変更理由の記録**: すべての変更に理由を必須入力
+- **変更履歴の表示**: 誰がいつ何を変更したかを時系列で確認
+
+詳細: [admin-dashboard/README.md](admin-dashboard/README.md)
+
 ## 今後の実装予定
 
+- [x] **サービスモード管理機能** - Web管理画面で設定可能
 - [ ] iOS共有拡張機能（Share Extension）
 - [ ] URLメタデータの自動取得機能
 - [ ] Gemini API統合による要約生成
@@ -167,6 +217,7 @@ npm run android
 - [ ] リンクの検索機能
 - [ ] ダークモード対応
 - [ ] アーカイブ機能の拡張
+- [ ] モバイルアプリへのサービスモード表示機能
 
 ## トラブルシューティング
 

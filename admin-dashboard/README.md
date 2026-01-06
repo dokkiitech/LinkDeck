@@ -12,13 +12,32 @@ pnpm install
 
 ### 2. 環境変数の設定
 
-`.env.example`をコピーして`.env`を作成し、Firebase設定を入力してください。
+管理画面は**ルートディレクトリの`.env`ファイルをシンボリックリンクで共有**しています。
+モバイルアプリと管理画面で同じFirebase設定を使用します。
+
+ルートディレクトリで`.env`ファイルを作成してください：
 
 ```bash
+# プロジェクトルートに戻る
+cd ..
+
+# .env.exampleをコピーして.envを作成
 cp .env.example .env
+
+# .envファイルを編集してFirebase設定を入力
+# 注意: EXPO_PUBLIC_* と NEXT_PUBLIC_* の両方に同じ値を設定してください
 ```
 
-モバイルアプリのルートディレクトリにある`.env`ファイルと同じ設定を使用できます。
+シンボリックリンクは自動的に作成されています：
+```bash
+admin-dashboard/.env -> /home/user/LinksDeck/.env
+```
+
+もし削除してしまった場合は、以下のコマンドで再作成できます：
+```bash
+cd admin-dashboard
+ln -sf /home/user/LinksDeck/.env .env
+```
 
 ### 3. 開発サーバーの起動
 
