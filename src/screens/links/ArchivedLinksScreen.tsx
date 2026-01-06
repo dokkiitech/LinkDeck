@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tagText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 12,
     fontFamily: theme.typography.fontFamily.regular,
   },

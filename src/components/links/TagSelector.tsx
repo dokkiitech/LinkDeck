@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   existingTagTextSelected: {
-    color: 'colors.white',
+    color: colors.white,
     fontFamily: theme.typography.fontFamily.bold,
   },
   tagInputContainer: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   addTagButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -194,12 +194,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tagText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 14,
     fontFamily: theme.typography.fontFamily.regular,
   },
   tagRemove: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
     marginLeft: 5,

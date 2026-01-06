@@ -5,12 +5,12 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import { DialogProvider } from './src/contexts/DialogContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import SharedURLHandler from './src/components/SharedURLHandler';
-import { useFonts, IBMPlexMono_400Regular, IBMPlexMono_700Bold } from './src/theme';
+import { useFonts, IBMPlexSans_400Regular, IBMPlexSans_700Bold } from './src/theme';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    IBMPlexMono_400Regular,
-    IBMPlexMono_700Bold,
+    IBMPlexSans_400Regular,
+    IBMPlexSans_700Bold,
   });
 
   if (!fontsLoaded) {

@@ -229,7 +229,7 @@ const SettingsScreen: React.FC = () => {
             <Ionicons name="archive-outline" size={24} color={colors.primary} style={styles.menuIcon} />
             <Text style={styles.menuItemText}>アーカイブしたリンク</Text>
           </View>
-          <Ionicons name="chevron-forward" size={24} color="colors.borderGray" />
+          <Ionicons name="chevron-forward" size={24} color={colors.borderGray} />
         </TouchableOpacity>
       </View>
 
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.error,
   },
   buttonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   shortcutButton: {
-    backgroundColor: 'colors.accent2',
+    backgroundColor: colors.accent2,
     flexDirection: 'row',
     marginBottom: 5,
   },

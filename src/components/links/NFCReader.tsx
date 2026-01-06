@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: 'colors.borderGray',
+    borderColor: colors.borderGray,
   },
   nfcIndicatorRingActive: {
     borderColor: colors.primary,

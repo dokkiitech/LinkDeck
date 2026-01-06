@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tagText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 18,
     fontFamily: theme.typography.fontFamily.bold,
   },

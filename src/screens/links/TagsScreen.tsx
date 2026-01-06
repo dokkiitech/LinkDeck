@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.button.disabled,
   },
   createButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 14,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   tagName: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },

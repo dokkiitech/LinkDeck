@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.button.disabled,
   },
   saveButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 18,
     fontFamily: theme.typography.fontFamily.bold,
   },

@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tagText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 12,
     fontFamily: theme.typography.fontFamily.regular,
   },
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.error,
   },
   fabText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 32,
     fontFamily: theme.typography.fontFamily.regular,
     fontWeight: '300',
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   fabMenuLabel: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 12,
     fontFamily: theme.typography.fontFamily.bold,
     marginRight: 8,

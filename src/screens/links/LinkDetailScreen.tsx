@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   editTagButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 12,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tagText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 12,
     fontFamily: theme.typography.fontFamily.regular,
   },
@@ -796,7 +796,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   openLinkButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   generateSummaryButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addNewTagButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   saveButtonText: {
-    color: 'colors.white',
+    color: colors.white,
     fontSize: 16,
     fontFamily: theme.typography.fontFamily.bold,
   },
