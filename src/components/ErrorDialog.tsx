@@ -3,11 +3,11 @@ import {
   View,
   Text,
   Modal,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Animated,
   Dimensions,
-  TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -87,9 +87,19 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({
 
   const iconConfig = getIconConfig();
 
-  const handleButtonPress = (button: DialogButton) => {
-    button.onPress?.();
-    onClose?.();
+  const handleButtonPress = async (button: DialogButton) => {
+    try {
+      // Close dialog first to prevent double-clicks
+      onClose?.();
+
+      // Then execute button callback
+      if (button.onPress) {
+        await Promise.resolve(button.onPress());
+      }
+    } catch (error) {
+      console.error('Error in dialog button handler:', error);
+      // Dialog is already closed, so we just log the error
+    }
   };
 
   const handleBackdropPress = () => {
@@ -107,71 +117,69 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({
       animationType="none"
       onRequestClose={handleBackdropPress}
     >
-      <TouchableWithoutFeedback onPress={handleBackdropPress}>
-        <View style={styles.overlay}>
-          <TouchableWithoutFeedback>
-            <Animated.View
+      <Pressable style={styles.overlay} onPress={handleBackdropPress}>
+        <Pressable>
+          <Animated.View
+            style={[
+              styles.dialogContainer,
+              {
+                opacity: opacityAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            {/* アイコン */}
+            <View style={styles.iconContainer}>
+              <Ionicons name={iconConfig.name} size={64} color={iconConfig.color} />
+            </View>
+
+            {/* タイトル */}
+            <Text style={styles.title}>{title}</Text>
+
+            {/* メッセージ */}
+            <Text style={styles.message}>{message}</Text>
+
+            {/* ボタン */}
+            <View
               style={[
-                styles.dialogContainer,
-                {
-                  opacity: opacityAnim,
-                  transform: [{ scale: scaleAnim }],
-                },
+                styles.buttonContainer,
+                buttons.length > 2 && styles.buttonContainerVertical,
               ]}
             >
-              {/* アイコン */}
-              <View style={styles.iconContainer}>
-                <Ionicons name={iconConfig.name} size={64} color={iconConfig.color} />
-              </View>
+              {buttons.map((button, index) => {
+                const isCancel = button.style === 'cancel';
+                const isDestructive = button.style === 'destructive';
 
-              {/* タイトル */}
-              <Text style={styles.title}>{title}</Text>
-
-              {/* メッセージ */}
-              <Text style={styles.message}>{message}</Text>
-
-              {/* ボタン */}
-              <View
-                style={[
-                  styles.buttonContainer,
-                  buttons.length > 2 && styles.buttonContainerVertical,
-                ]}
-              >
-                {buttons.map((button, index) => {
-                  const isCancel = button.style === 'cancel';
-                  const isDestructive = button.style === 'destructive';
-
-                  return (
-                    <TouchableOpacity
-                      key={index}
+                return (
+                  <Pressable
+                    key={index}
+                    style={({ pressed }) => [
+                      styles.button,
+                      buttons.length === 1 && styles.buttonSingle,
+                      buttons.length === 2 && styles.buttonDouble,
+                      buttons.length > 2 && styles.buttonMultiple,
+                      isCancel && styles.buttonCancel,
+                      isDestructive && styles.buttonDestructive,
+                      pressed && styles.buttonPressed,
+                    ]}
+                    onPress={() => handleButtonPress(button)}
+                  >
+                    <Text
                       style={[
-                        styles.button,
-                        buttons.length === 1 && styles.buttonSingle,
-                        buttons.length === 2 && styles.buttonDouble,
-                        buttons.length > 2 && styles.buttonMultiple,
-                        isCancel && styles.buttonCancel,
-                        isDestructive && styles.buttonDestructive,
+                        styles.buttonText,
+                        isCancel && styles.buttonTextCancel,
+                        isDestructive && styles.buttonTextDestructive,
                       ]}
-                      onPress={() => handleButtonPress(button)}
-                      activeOpacity={0.7}
                     >
-                      <Text
-                        style={[
-                          styles.buttonText,
-                          isCancel && styles.buttonTextCancel,
-                          isDestructive && styles.buttonTextDestructive,
-                        ]}
-                      >
-                        {button.text}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </Animated.View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+                      {button.text}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Animated.View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 };
@@ -229,6 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    ...(Platform.OS === 'web' && { cursor: 'pointer' } as any),
   },
   buttonSingle: {
     flex: 1,
@@ -244,6 +253,9 @@ const styles = StyleSheet.create({
   },
   buttonDestructive: {
     backgroundColor: '#FF3B30',
+  },
+  buttonPressed: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
