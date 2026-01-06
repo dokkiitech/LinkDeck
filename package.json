@@ -7,7 +7,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build": "npx expo export --platform web"
+    "build": "npx expo export --platform web",
+    "agent:example": "ts-node agent-sdk/examples/lead-handling.ts",
+    "agent:build": "tsc -p agent-sdk/tsconfig.json"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -38,8 +40,12 @@
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@types/node": "^22.10.2",
     "@types/react": "~19.1.0",
-    "typescript": "~5.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.2",
+    "zod": "^3.24.1"
   },
   "private": true,
   "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
