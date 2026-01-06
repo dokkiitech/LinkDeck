@@ -24,7 +24,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useDialog } from '../../contexts/DialogContext';
 import { getGeminiApiKey } from '../../utils/storage';
 import { searchWithAgentStream, getSearchQuerySuggestions, ConversationMessage } from '../../services/agentSearch';
-import { getUserLinks } from '../../services/firestore';
+import { getUserLinks, createLink, checkLinkExists } from '../../services/firestore';
+import { fetchUrlTitle } from '../../utils/urlMetadata';
 import { ERROR_MESSAGES } from '../../constants/messages';
 
 type AgentSearchScreenNavigationProp = CompositeNavigationProp<
@@ -38,7 +39,7 @@ interface Props {
 
 const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
-  const { showError, showConfirm } = useDialog();
+  const { showError, showConfirm, showSuccess } = useDialog();
   const [hasApiKey, setHasApiKey] = useState(false);
   const [checkingApiKey, setCheckingApiKey] = useState(true);
   const [inputText, setInputText] = useState('');
@@ -201,6 +202,51 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // リンクを保存
+  const handleSaveLink = async (url: string) => {
+    if (!user) {
+      showError('エラー', 'ログインが必要です');
+      return;
+    }
+
+    try {
+      // 既に保存されているかチェック
+      const exists = await checkLinkExists(user.uid, url);
+      if (exists) {
+        showError('リンク保存', 'このリンクは既に保存されています');
+        return;
+      }
+
+      // タイトルを自動取得
+      const title = await fetchUrlTitle(url);
+      const linkTitle = title || new URL(url).hostname;
+
+      // リンクを保存
+      await createLink(user.uid, url, linkTitle, []);
+
+      showSuccess('リンク保存完了', `「${linkTitle}」を保存しました`);
+
+      // リンクリストを再読み込み（検索結果に反映されるように）
+      loadUserLinks();
+    } catch (error: any) {
+      if (__DEV__) {
+        console.error('[AgentSearch] Error saving link:', error);
+      }
+      showError('保存エラー', error?.message || 'リンクの保存に失敗しました');
+    }
+  };
+
+  // テキストからURLを抽出
+  const extractURLsFromText = (text: string): string[] => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = text.match(urlRegex);
+    if (!matches) return [];
+
+    // 末尾の句読点を削除して重複を排除
+    const cleanedUrls = matches.map((url) => url.replace(/[.,;:!?)]+$/, ''));
+    return Array.from(new Set(cleanedUrls));
+  };
+
   // テキスト内のURLをクリック可能なリンクとしてレンダリング
   const renderTextWithLinks = (text: string) => {
     // URLを検出する正規表現
@@ -346,6 +392,11 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       );
     } else {
+      // テキストから新しいURLを抽出（保存済みリンクのURLは除外）
+      const extractedUrls = extractURLsFromText(item.content);
+      const savedLinkUrls = item.links?.map((link) => link.url) || [];
+      const newUrls = extractedUrls.filter((url) => !savedLinkUrls.includes(url));
+
       return (
         <View style={styles.assistantMessageContainer}>
           <View style={styles.assistantMessageBubble}>
@@ -353,7 +404,7 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
             {item.links && item.links.length > 0 && (
               <View style={styles.linksContainer}>
                 <Text style={styles.linksHeader}>
-                  {item.links.length}件のリンク
+                  {item.links.length}件の保存済みリンク
                 </Text>
                 {item.links.map((link) => (
                   <TouchableOpacity
@@ -394,6 +445,38 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
                       )}
                     </View>
                   </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            {newUrls.length > 0 && (
+              <View style={styles.linksContainer}>
+                <Text style={styles.linksHeader}>
+                  {newUrls.length}件の見つかったリンク
+                </Text>
+                {newUrls.map((url, index) => (
+                  <View key={index} style={styles.newLinkCard}>
+                    <View style={styles.newLinkContent}>
+                      <Text style={styles.newLinkUrl} numberOfLines={2}>
+                        {url}
+                      </Text>
+                      <View style={styles.newLinkActions}>
+                        <TouchableOpacity
+                          style={styles.openLinkButton}
+                          onPress={() => handleOpenUrl(url)}
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                          <Ionicons name="open-outline" size={18} color="#666" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.saveLinkButton}
+                          onPress={() => handleSaveLink(url)}
+                        >
+                          <Ionicons name="bookmark-outline" size={16} color="#fff" />
+                          <Text style={styles.saveLinkButtonText}>保存</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
                 ))}
               </View>
             )}
@@ -798,6 +881,46 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#666',
+  },
+  newLinkCard: {
+    backgroundColor: '#f0f8ff',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#b3d9ff',
+  },
+  newLinkContent: {
+    flexDirection: 'column',
+    gap: 10,
+  },
+  newLinkUrl: {
+    fontSize: 13,
+    color: '#007AFF',
+    lineHeight: 18,
+  },
+  newLinkActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+  },
+  openLinkButton: {
+    padding: 6,
+  },
+  saveLinkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    gap: 4,
+  },
+  saveLinkButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
   },
 });
 
