@@ -10,6 +10,7 @@ import {
   addDeveloper,
   removeDeveloper,
   Developer,
+  isDeveloper,
 } from './services/maintenance';
 import './App.css';
 
@@ -29,10 +30,28 @@ function App() {
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [newDevEmail, setNewDevEmail] = useState('');
   const [newDevUid, setNewDevUid] = useState('');
+  const [checkingDeveloper, setCheckingDeveloper] = useState(false);
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // ユーザーがログインした場合、開発者かどうかをチェック
+        setCheckingDeveloper(true);
+        const isDev = await isDeveloper(user.uid);
+        setCheckingDeveloper(false);
+
+        if (!isDev) {
+          // 開発者でない場合はログアウトしてエラーを表示
+          setError('アクセス権限がありません。開発者のみがこの管理画面にアクセスできます。');
+          await signOut(auth);
+          setUser(null);
+        } else {
+          setUser(user);
+          setError('');
+        }
+      } else {
+        setUser(null);
+      }
     });
 
     return () => unsubscribeAuth();
@@ -70,7 +89,16 @@ function App() {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // ログイン成功後、開発者かどうかをチェック
+      const isDev = await isDeveloper(userCredential.user.uid);
+
+      if (!isDev) {
+        // 開発者でない場合はログアウトしてエラーを表示
+        await signOut(auth);
+        setError('アクセス権限がありません。開発者のみがこの管理画面にアクセスできます。');
+      }
     } catch (err: any) {
       setError(err.message || 'ログインに失敗しました');
     } finally {
@@ -146,12 +174,26 @@ function App() {
     }
   };
 
+  if (checkingDeveloper) {
+    return (
+      <div className="container">
+        <div className="card">
+          <h1>LinksDeck 管理画面</h1>
+          <p style={{ textAlign: 'center', color: '#718096' }}>認証情報を確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="container">
         <div className="card">
           <h1>LinksDeck 管理画面</h1>
           <h2>ログイン</h2>
+          <p className="info-text" style={{ marginBottom: '24px' }}>
+            この管理画面は開発者のみアクセス可能です。
+          </p>
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <label htmlFor="email">メールアドレス</label>
