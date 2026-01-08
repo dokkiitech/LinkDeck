@@ -120,5 +120,18 @@ service cloud.firestore {
       // 削除: 自分のタグのみ
       allow delete: if isResourceOwner();
     }
+
+    // ========================================
+    // メンテナンスモードコレクション
+    // ========================================
+
+    match /maintenance/{docId} {
+      // 読み取り: すべてのユーザー（認証前でもメンテナンス状態を確認できる必要があるため）
+      allow read: if true;
+
+      // 書き込み: 認証済みユーザーのみ
+      // 注意: 本番環境では特定の管理者のみに制限することを推奨
+      allow write: if isAuthenticated();
+    }
   }
 }
