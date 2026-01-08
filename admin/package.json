@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"
+    "start": "npx serve dist -l ${PORT:-3001} -s"
   },
   "dependencies": {
     "firebase": "^12.4.0",

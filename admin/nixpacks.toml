@@ -8,22 +8,7 @@ cmds = ["npm ci"]
 cmds = ["npm run build"]
 
 [start]
-cmd = "caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"
-
-[staticAssets]
-"/etc/caddy/Caddyfile" = """
-{
-  admin off
-  auto_https off
-}
-
-:{$PORT:3001} {
-  root * /app/dist
-  encode gzip
-  file_server
-  try_files {path} /index.html
-}
-"""
+cmd = "npx serve dist -l ${PORT:-3001} -s"
 
 [variables]
 NODE_ENV = "production"
