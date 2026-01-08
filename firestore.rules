@@ -146,5 +146,17 @@ service cloud.firestore {
       // 注意: 本番環境では特定の管理者のみに制限することを推奨
       allow write: if isAuthenticated();
     }
+
+    // ========================================
+    // メンテナンスログコレクション
+    // ========================================
+
+    match /maintenanceLogs/{logId} {
+      // 読み取り: 認証済みユーザーのみ
+      allow read: if isAuthenticated();
+
+      // 書き込み: 認証済みユーザーのみ（ログの作成のみ）
+      allow create: if isAuthenticated();
+    }
   }
 }

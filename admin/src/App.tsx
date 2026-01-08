@@ -11,10 +11,12 @@ import {
   removeDeveloper,
   Developer,
   isDeveloper,
+  getMaintenanceLogs,
+  MaintenanceLog,
 } from './services/maintenance';
 import './App.css';
 
-type Tab = 'maintenance' | 'developers';
+type Tab = 'maintenance' | 'developers' | 'logs';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -31,6 +33,7 @@ function App() {
   const [newDevEmail, setNewDevEmail] = useState('');
   const [newDevUid, setNewDevUid] = useState('');
   const [checkingDeveloper, setCheckingDeveloper] = useState(false);
+  const [logs, setLogs] = useState<MaintenanceLog[]>([]);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -76,11 +79,19 @@ function App() {
     if (user && activeTab === 'developers') {
       loadDevelopers();
     }
+    if (user && activeTab === 'logs') {
+      loadLogs();
+    }
   }, [user, activeTab]);
 
   const loadDevelopers = async () => {
     const devs = await getDevelopers();
     setDevelopers(devs);
+  };
+
+  const loadLogs = async () => {
+    const maintenanceLogs = await getMaintenanceLogs();
+    setLogs(maintenanceLogs);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -126,7 +137,12 @@ function App() {
     setError('');
 
     try {
-      await setMaintenanceMode(newMode, newMode ? reason : undefined, user?.email || undefined);
+      await setMaintenanceMode(
+        newMode,
+        newMode ? reason : undefined,
+        user?.email || undefined,
+        user?.uid || undefined
+      );
       setReason('');
     } catch (err: any) {
       setError(err.message || 'メンテナンスモードの切り替えに失敗しました');
@@ -252,6 +268,12 @@ function App() {
             onClick={() => setActiveTab('developers')}
           >
             開発者管理
+          </button>
+          <button
+            className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('logs')}
+          >
+            操作ログ
           </button>
         </div>
 
@@ -385,6 +407,49 @@ function App() {
                 </table>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'logs' && (
+          <div className="logs-section">
+            <h2>メンテナンスモード操作ログ</h2>
+            <p className="info-text">
+              メンテナンスモードの切り替え履歴を表示します。
+            </p>
+
+            {logs.length === 0 ? (
+              <p className="empty-message">操作ログはまだありません</p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>日時</th>
+                    <th>操作</th>
+                    <th>理由</th>
+                    <th>実行者</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log.id}>
+                      <td>{new Date(log.timestamp).toLocaleString('ja-JP')}</td>
+                      <td>
+                        <span className={`log-action ${log.action}`}>
+                          {log.action === 'enabled' ? '🔧 有効化' : '✅ 無効化'}
+                        </span>
+                      </td>
+                      <td>{log.reason || '—'}</td>
+                      <td>
+                        <div>
+                          <div>{log.performedBy}</div>
+                          <div className="uid-cell">{log.performedByUid}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
       </div>

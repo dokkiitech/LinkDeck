@@ -20,9 +20,23 @@ export interface Developer {
   addedAt: string;
 }
 
+/**
+ * メンテナンスログ
+ */
+export interface MaintenanceLog {
+  id: string;
+  action: 'enabled' | 'disabled';
+  reason?: string;
+  performedBy: string;
+  performedByUid: string;
+  timestamp: string;
+  previousStatus: boolean;
+}
+
 const MAINTENANCE_DOC_ID = 'current';
 const MAINTENANCE_COLLECTION = 'maintenance';
 const DEVELOPERS_COLLECTION = 'developers';
+const MAINTENANCE_LOGS_COLLECTION = 'maintenanceLogs';
 
 /**
  * メンテナンスモードの状態を取得
@@ -54,10 +68,14 @@ export const getMaintenanceStatus = async (): Promise<MaintenanceStatus> => {
 export const setMaintenanceMode = async (
   isMaintenanceMode: boolean,
   reason?: string,
-  userEmail?: string
+  userEmail?: string,
+  userUid?: string
 ): Promise<void> => {
   try {
     const docRef = doc(db, MAINTENANCE_COLLECTION, MAINTENANCE_DOC_ID);
+
+    // 現在の状態を取得
+    const currentStatus = await getMaintenanceStatus();
 
     // メンテナンスモードONの場合
     if (isMaintenanceMode) {
@@ -74,6 +92,17 @@ export const setMaintenanceMode = async (
         isMaintenanceMode: false,
       };
       await setDoc(docRef, status);
+    }
+
+    // ログを記録
+    if (userEmail && userUid) {
+      await addMaintenanceLog({
+        action: isMaintenanceMode ? 'enabled' : 'disabled',
+        reason,
+        performedBy: userEmail,
+        performedByUid: userUid,
+        previousStatus: currentStatus.isMaintenanceMode,
+      });
     }
   } catch (error) {
     console.error('Error setting maintenance mode:', error);
@@ -170,6 +199,51 @@ export const getDevelopers = async (): Promise<Developer[]> => {
     return developers;
   } catch (error) {
     console.error('Error fetching developers:', error);
+    return [];
+  }
+};
+
+/**
+ * メンテナンスログを追加
+ */
+const addMaintenanceLog = async (log: Omit<MaintenanceLog, 'id' | 'timestamp'>): Promise<void> => {
+  try {
+    const timestamp = new Date().toISOString();
+    const logId = `${Date.now()}_${log.performedByUid}`;
+    const logRef = doc(db, MAINTENANCE_LOGS_COLLECTION, logId);
+
+    const logData: MaintenanceLog = {
+      id: logId,
+      timestamp,
+      ...log,
+    };
+
+    await setDoc(logRef, logData);
+  } catch (error) {
+    console.error('Error adding maintenance log:', error);
+    // ログ追加の失敗はメンテナンスモード切り替えを失敗させない
+  }
+};
+
+/**
+ * メンテナンスログを取得（最新順）
+ */
+export const getMaintenanceLogs = async (limit: number = 50): Promise<MaintenanceLog[]> => {
+  try {
+    const logsCollection = collection(db, MAINTENANCE_LOGS_COLLECTION);
+    const querySnapshot = await getDocs(logsCollection);
+
+    const logs: MaintenanceLog[] = [];
+    querySnapshot.forEach((doc) => {
+      logs.push(doc.data() as MaintenanceLog);
+    });
+
+    // タイムスタンプで降順ソート
+    logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    return logs.slice(0, limit);
+  } catch (error) {
+    console.error('Error fetching maintenance logs:', error);
     return [];
   }
 };

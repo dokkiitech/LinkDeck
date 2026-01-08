@@ -342,3 +342,25 @@ td {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
 }
+
+.logs-section {
+  margin-top: 24px;
+}
+
+.log-action {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.log-action.enabled {
+  background: #fffaf0;
+  color: #dd6b20;
+}
+
+.log-action.disabled {
+  background: #f0fff4;
+  color: #38a169;
+}
