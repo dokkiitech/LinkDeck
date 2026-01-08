@@ -9,7 +9,10 @@
     "web": "expo start --web",
     "build": "npx expo export --platform web",
     "agent:example": "ts-node agent-sdk/examples/lead-handling.ts",
-    "agent:build": "tsc -p agent-sdk/tsconfig.json"
+    "agent:build": "tsc -p agent-sdk/tsconfig.json",
+    "admin:dev": "cd admin && npm run dev",
+    "admin:build": "cd admin && npm run build",
+    "admin:install": "cd admin && npm install"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
