@@ -38,14 +38,23 @@ export const setMaintenanceMode = async (
 ): Promise<void> => {
   try {
     const docRef = doc(db, MAINTENANCE_COLLECTION, MAINTENANCE_DOC_ID);
-    const status: MaintenanceStatus = {
-      isMaintenanceMode,
-      reason: isMaintenanceMode ? reason : undefined,
-      startedAt: isMaintenanceMode ? new Date().toISOString() : undefined,
-      startedBy: isMaintenanceMode ? userEmail : undefined,
-    };
 
-    await setDoc(docRef, status);
+    // メンテナンスモードONの場合
+    if (isMaintenanceMode) {
+      const status: MaintenanceStatus = {
+        isMaintenanceMode: true,
+        reason,
+        startedAt: new Date().toISOString(),
+        startedBy: userEmail,
+      };
+      await setDoc(docRef, status);
+    } else {
+      // メンテナンスモードOFFの場合はisMaintenanceModeのみ
+      const status: MaintenanceStatus = {
+        isMaintenanceMode: false,
+      };
+      await setDoc(docRef, status);
+    }
   } catch (error) {
     console.error('Error setting maintenance mode:', error);
     throw error;
