@@ -364,3 +364,245 @@ td {
   background: #f0fff4;
   color: #38a169;
 }
+
+/* レスポンシブデザイン対応 */
+
+/* タブレット (768px以下) */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    padding: 12px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .tabs {
+    gap: 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .status-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+  }
+
+  .status {
+    padding: 16px;
+  }
+
+  .status-indicator {
+    font-size: 18px;
+  }
+
+  /* テーブルをカード形式に変換 */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody {
+    display: block;
+  }
+
+  tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f7fafc;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  td:last-child {
+    border-bottom: none;
+    padding-top: 12px;
+    justify-content: center;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #4a5568;
+    margin-right: 12px;
+  }
+
+  td:last-child::before {
+    content: none;
+  }
+
+  .uid-cell {
+    max-width: 150px;
+  }
+
+  .btn-delete {
+    width: 100%;
+  }
+}
+
+/* スマートフォン (480px以下) */
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+
+  .user-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-info span {
+    font-size: 13px;
+    word-break: break-all;
+  }
+
+  .tab {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  input,
+  textarea {
+    font-size: 16px; /* iOS のズーム防止のため16px以上 */
+    padding: 10px;
+  }
+
+  button {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .status {
+    padding: 12px;
+  }
+
+  .status-indicator {
+    font-size: 16px;
+  }
+
+  .status-details p {
+    font-size: 13px;
+  }
+
+  .add-developer-section {
+    padding: 16px;
+  }
+
+  .add-developer-section h3,
+  .developers-list h3 {
+    font-size: 16px;
+  }
+
+  .info-text {
+    font-size: 13px;
+  }
+
+  .uid-cell {
+    max-width: 100px;
+    font-size: 11px;
+  }
+
+  .log-action {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  td::before {
+    font-size: 13px;
+  }
+}
+
+/* 極小画面 (360px以下) */
+@media (max-width: 360px) {
+  .card {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+  }
+
+  h2 {
+    font-size: 15px;
+  }
+
+  .tab {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .status-indicator {
+    font-size: 15px;
+  }
+
+  .user-info span {
+    font-size: 12px;
+  }
+
+  .btn-secondary {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}

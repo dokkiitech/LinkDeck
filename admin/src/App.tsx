@@ -389,9 +389,9 @@ function App() {
                   <tbody>
                     {developers.map((dev) => (
                       <tr key={dev.uid}>
-                        <td>{dev.email}</td>
-                        <td className="uid-cell">{dev.uid}</td>
-                        <td>{new Date(dev.addedAt).toLocaleString('ja-JP')}</td>
+                        <td data-label="メールアドレス">{dev.email}</td>
+                        <td data-label="UID" className="uid-cell">{dev.uid}</td>
+                        <td data-label="追加日時">{new Date(dev.addedAt).toLocaleString('ja-JP')}</td>
                         <td>
                           <button
                             onClick={() => handleRemoveDeveloper(dev.uid)}
@@ -432,14 +432,14 @@ function App() {
                 <tbody>
                   {logs.map((log) => (
                     <tr key={log.id}>
-                      <td>{new Date(log.timestamp).toLocaleString('ja-JP')}</td>
-                      <td>
+                      <td data-label="日時">{new Date(log.timestamp).toLocaleString('ja-JP')}</td>
+                      <td data-label="操作">
                         <span className={`log-action ${log.action}`}>
                           {log.action === 'enabled' ? '🔧 有効化' : '✅ 無効化'}
                         </span>
                       </td>
-                      <td>{log.reason || '—'}</td>
-                      <td>
+                      <td data-label="理由">{log.reason || '—'}</td>
+                      <td data-label="実行者">
                         <div>
                           <div>{log.performedBy}</div>
                           <div className="uid-cell">{log.performedByUid}</div>
