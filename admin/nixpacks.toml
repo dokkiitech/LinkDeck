@@ -1,0 +1,24 @@
+[phases.setup]
+nixPkgs = ["nodejs_22", "npm-9_x"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "caddy run --config /assets/Caddyfile --adapter caddyfile"
+
+[staticAssets]
+"/assets/Caddyfile" = """
+:{$PORT:3001} {
+  root * /app/dist
+  encode gzip
+  file_server
+  try_files {path} /index.html
+}
+"""
+
+[variables]
+NODE_ENV = "production"
