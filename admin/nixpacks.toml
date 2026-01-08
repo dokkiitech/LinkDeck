@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "npm-9_x"]
+nixPkgs = ["nodejs_22", "npm-9_x", "caddy"]
 
 [phases.install]
 cmds = ["npm ci"]
@@ -12,6 +12,11 @@ cmd = "caddy run --config /assets/Caddyfile --adapter caddyfile"
 
 [staticAssets]
 "/assets/Caddyfile" = """
+{
+  admin off
+  auto_https off
+}
+
 :{$PORT:3001} {
   root * /app/dist
   encode gzip
