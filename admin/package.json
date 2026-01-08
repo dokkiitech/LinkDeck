@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "caddy run --config /assets/Caddyfile --adapter caddyfile"
+    "start": "caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"
   },
   "dependencies": {
     "firebase": "^12.4.0",
