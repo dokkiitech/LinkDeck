@@ -133,5 +133,18 @@ service cloud.firestore {
       // 注意: 本番環境では特定の管理者のみに制限することを推奨
       allow write: if isAuthenticated();
     }
+
+    // ========================================
+    // 開発者コレクション
+    // ========================================
+
+    match /developers/{uid} {
+      // 読み取り: 認証済みユーザーのみ（自分が開発者かどうかを確認するため）
+      allow read: if isAuthenticated();
+
+      // 書き込み: 認証済みユーザーのみ
+      // 注意: 本番環境では特定の管理者のみに制限することを推奨
+      allow write: if isAuthenticated();
+    }
   }
 }

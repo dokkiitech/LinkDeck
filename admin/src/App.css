@@ -221,3 +221,124 @@ button[type='submit']:hover:not(:disabled),
 form {
   margin-top: 16px;
 }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tab {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #718096;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  width: auto;
+}
+
+.tab:hover {
+  color: #2d3748;
+  background: #f7fafc;
+}
+
+.tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.developers-section {
+  margin-top: 24px;
+}
+
+.info-text {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.add-developer-section {
+  background: #f7fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 32px;
+}
+
+.add-developer-section h3 {
+  font-size: 18px;
+  color: #2d3748;
+  margin-bottom: 16px;
+}
+
+.developers-list {
+  margin-top: 32px;
+}
+
+.developers-list h3 {
+  font-size: 18px;
+  color: #2d3748;
+  margin-bottom: 16px;
+}
+
+.empty-message {
+  text-align: center;
+  color: #a0aec0;
+  font-size: 14px;
+  padding: 32px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+thead {
+  background: #f7fafc;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #4a5568;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+  color: #2d3748;
+}
+
+.uid-cell {
+  font-family: monospace;
+  font-size: 12px;
+  color: #718096;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-delete {
+  background: #fc8181;
+  color: white;
+  padding: 6px 12px;
+  font-size: 13px;
+  width: auto;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #f56565;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+}

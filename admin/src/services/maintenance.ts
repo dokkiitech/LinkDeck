@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, collection, query, getDocs } from 'firebase/firestore';
 
 export interface MaintenanceStatus {
   isMaintenanceMode: boolean;
@@ -8,8 +8,15 @@ export interface MaintenanceStatus {
   startedBy?: string;
 }
 
+export interface Developer {
+  uid: string;
+  email: string;
+  addedAt: string;
+}
+
 const MAINTENANCE_DOC_ID = 'current';
 const MAINTENANCE_COLLECTION = 'maintenance';
+const DEVELOPERS_COLLECTION = 'developers';
 
 export const getMaintenanceStatus = async (): Promise<MaintenanceStatus> => {
   try {
@@ -80,4 +87,60 @@ export const subscribeToMaintenanceStatus = (
       callback({ isMaintenanceMode: false });
     }
   );
+};
+
+export const isDeveloper = async (uid: string): Promise<boolean> => {
+  try {
+    const docRef = doc(db, DEVELOPERS_COLLECTION, uid);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists();
+  } catch (error) {
+    console.error('Error checking developer status:', error);
+    return false;
+  }
+};
+
+export const addDeveloper = async (uid: string, email: string): Promise<void> => {
+  try {
+    const docRef = doc(db, DEVELOPERS_COLLECTION, uid);
+    const developer: Developer = {
+      uid,
+      email,
+      addedAt: new Date().toISOString(),
+    };
+    await setDoc(docRef, developer);
+  } catch (error) {
+    console.error('Error adding developer:', error);
+    throw error;
+  }
+};
+
+export const removeDeveloper = async (uid: string): Promise<void> => {
+  try {
+    const docRef = doc(db, DEVELOPERS_COLLECTION, uid);
+    await setDoc(docRef, { deleted: true, deletedAt: new Date().toISOString() });
+  } catch (error) {
+    console.error('Error removing developer:', error);
+    throw error;
+  }
+};
+
+export const getDevelopers = async (): Promise<Developer[]> => {
+  try {
+    const q = query(collection(db, DEVELOPERS_COLLECTION));
+    const querySnapshot = await getDocs(q);
+    const developers: Developer[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (!data.deleted) {
+        developers.push(data as Developer);
+      }
+    });
+
+    return developers;
+  } catch (error) {
+    console.error('Error fetching developers:', error);
+    return [];
+  }
 };
