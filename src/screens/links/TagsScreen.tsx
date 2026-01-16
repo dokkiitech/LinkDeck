@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  
+
   ActivityIndicator,
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDialog } from '../../contexts/DialogContext';
-import { getUserTags, createTag, deleteTag } from '../../services/firestore';
+import { useTags } from '../../hooks/useTags';
 import { Tag, TagsStackParamList } from '../../types';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, CONFIRMATION_MESSAGES } from '../../constants/messages';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants/messages';
 
 interface Props {
   navigation: NativeStackNavigationProp<TagsStackParamList, 'TagsList'>;
@@ -24,37 +25,26 @@ interface Props {
 const TagsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const { showError, showSuccess, showConfirm } = useDialog();
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    loadTags();
-  }, [user]);
+  // useTagsフックを使用してタグ管理
+  const {
+    tags,
+    loading,
+    refreshing,
+    createTag: createNewTag,
+    deleteTag: deleteTagById,
+    refresh,
+    refetch,
+  } = useTags({ userId: user?.uid });
 
-  const loadTags = async () => {
-    if (!user) return;
-
-    try {
-      const fetchedTags = await getUserTags(user.uid);
-      setTags(fetchedTags);
-    } catch (error) {
-      if (__DEV__) {
-        console.error('[Tags] Error loading tags:', error);
-      }
-      showError('エラー', ERROR_MESSAGES.TAGS.LOAD_FAILED);
-    } finally{
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    loadTags();
-  };
+  // 画面がフォーカスされた時にタグを再取得
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const handleCreateTag = async () => {
     if (!user || !newTagName.trim()) {
@@ -70,14 +60,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
 
     setIsCreating(true);
     try {
-      const tagId = await createTag(user.uid, newTagName.trim());
-      const newTag: Tag = {
-        id: tagId,
-        userId: user.uid,
-        name: newTagName.trim(),
-        createdAt: new Date(),
-      };
-      setTags([newTag, ...tags]);
+      await createNewTag(newTagName.trim());
       setNewTagName('');
       showSuccess('成功', SUCCESS_MESSAGES.TAGS.CREATED);
     } catch (error) {
@@ -98,8 +81,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
       `「${tag.name}」を削除しますか？\nこのタグを使用している全てのリンクからも削除されます。`,
       async () => {
         try {
-          await deleteTag(user.uid, tag.id);
-          setTags(tags.filter((t) => t.id !== tag.id));
+          await deleteTagById(tag.id);
           showSuccess('成功', SUCCESS_MESSAGES.TAGS.DELETED);
         } catch (error) {
           if (__DEV__) {
@@ -180,7 +162,7 @@ const TagsScreen: React.FC<Props> = ({ navigation }) => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           refreshing={refreshing}
-          onRefresh={handleRefresh}
+          onRefresh={refresh}
         />
       )}
     </View>
