@@ -443,9 +443,18 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           {link.tags.length > 0 ? (
             <View style={styles.tags}>
               {link.tags.map((tag, index) => (
-                <View key={index} style={styles.tag}>
+                <TouchableOpacity
+                  key={index}
+                  style={styles.tag}
+                  onPress={() => {
+                    (navigation as any).navigate('Tags', {
+                      screen: 'TagLinks',
+                      params: { tagName: tag },
+                    });
+                  }}
+                >
                   <Text style={styles.tagText}>{tag}</Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           ) : (
