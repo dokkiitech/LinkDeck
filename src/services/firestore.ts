@@ -1,163 +1,133 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { Link, LinkDocument, Tag, TagDocument, TimelineEntry, TimelineEntryDocument } from '../types';
+import { Link, LinkDocument, Tag, TimelineEntry, TimelineEntryDocument } from '../types';
 import { isValidURL } from '../utils/urlValidation';
+import { apiRequest } from './apiClient';
 
-/**
- * リンクコレクションの参照
- */
-const linksCollection = collection(db, 'links');
+interface ApiTimelineEntry {
+  id: string;
+  content: string;
+  createdAt: string;
+  type: 'note' | 'summary';
+}
 
-/**
- * タグコレクションの参照
- */
-const tagsCollection = collection(db, 'tags');
+interface ApiLink {
+  id: string;
+  userId: string;
+  url: string;
+  title: string;
+  tags: string[];
+  isArchived: boolean;
+  createdAt: string;
+  summary?: string | null;
+  timeline?: ApiTimelineEntry[];
+}
+
+interface ApiTag {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+}
+
+const mapTimeline = (timeline?: ApiTimelineEntry[]): TimelineEntry[] | undefined => {
+  if (!timeline || timeline.length === 0) {
+    return undefined;
+  }
+
+  return timeline.map((entry) => ({
+    id: entry.id,
+    content: entry.content,
+    createdAt: new Date(entry.createdAt),
+    type: entry.type,
+  }));
+};
+
+const mapLink = (link: ApiLink): Link => ({
+  id: link.id,
+  userId: link.userId,
+  url: link.url,
+  title: link.title,
+  tags: link.tags || [],
+  isArchived: Boolean(link.isArchived),
+  createdAt: new Date(link.createdAt),
+  summary: link.summary || undefined,
+  timeline: mapTimeline(link.timeline),
+});
+
+const mapTag = (tag: ApiTag): Tag => ({
+  id: tag.id,
+  userId: tag.userId,
+  name: tag.name,
+  createdAt: new Date(tag.createdAt),
+});
 
 /**
  * リンクを作成
  */
 export const createLink = async (
-  userId: string,
+  _userId: string,
   url: string,
   title: string,
   tags: string[] = []
 ): Promise<string> => {
-  // URLの厳格なバリデーション
   if (!isValidURL(url)) {
     throw new Error('Invalid URL: 有効なURLを入力してください');
   }
 
-  const linkData = {
-    userId,
-    url,
-    title,
-    tags,
-    isArchived: false,
-    createdAt: Timestamp.now(),
-  };
+  const response = await apiRequest<{ id: string }>('/v1/links', {
+    method: 'POST',
+    body: {
+      url,
+      title,
+      tags,
+    },
+  });
 
-  const docRef = await addDoc(linksCollection, linkData);
-  return docRef.id;
-};
-
-/**
- * タイムラインエントリを変換
- */
-const convertTimelineEntries = (
-  timelineDoc?: TimelineEntryDocument[]
-): TimelineEntry[] | undefined => {
-  if (!timelineDoc || !Array.isArray(timelineDoc)) return undefined;
-
-  return timelineDoc.map((entry, index) => ({
-    id: `${index}`,
-    content: entry.content,
-    createdAt: entry.createdAt.toDate(),
-    type: entry.type,
-  }));
+  return response.id;
 };
 
 /**
  * リンクを取得
  */
 export const getLink = async (linkId: string): Promise<Link | null> => {
-  const docRef = doc(db, 'links', linkId);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    const data = docSnap.data() as LinkDocument;
-    return {
-      id: docSnap.id,
-      ...data,
-      isArchived: Boolean(data.isArchived), // Ensure boolean type
-      createdAt: data.createdAt.toDate(),
-      timeline: convertTimelineEntries(data.timeline),
-    };
+  try {
+    const response = await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}`);
+    return mapLink(response);
+  } catch (error: any) {
+    if (error?.message?.includes('not found')) {
+      return null;
+    }
+    throw error;
   }
-
-  return null;
 };
 
 /**
  * ユーザーのリンク一覧を取得
- *
- * インデックスが必要:
- * - userId (ASC), isArchived (ASC), createdAt (DESC)
- * - userId (ASC), createdAt (DESC)
  */
 export const getUserLinks = async (
-  userId: string,
+  _userId: string,
   includeArchived: boolean = false
 ): Promise<Link[]> => {
-  let q;
-
-  if (!includeArchived) {
-    // アーカイブ済みを除外する場合: 複合インデックスが必要
-    q = query(
-      linksCollection,
-      where('userId', '==', userId),
-      where('isArchived', '==', false),
-      orderBy('createdAt', 'desc')
-    );
-  } else {
-    // 全てのリンクを取得する場合
-    q = query(
-      linksCollection,
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
+  const query = new URLSearchParams();
+  if (includeArchived) {
+    query.set('includeArchived', 'true');
   }
 
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data() as LinkDocument;
-    return {
-      id: doc.id,
-      ...data,
-      isArchived: Boolean(data.isArchived), // Ensure boolean type
-      createdAt: data.createdAt.toDate(),
-      timeline: convertTimelineEntries(data.timeline),
-    };
-  });
+  const response = await apiRequest<{ links: ApiLink[] }>(`/v1/links?${query.toString()}`);
+  return (response.links || []).map(mapLink);
 };
 
 /**
  * タグでリンクをフィルタリング
  */
 export const getLinksByTag = async (
-  userId: string,
+  _userId: string,
   tagName: string
 ): Promise<Link[]> => {
-  const q = query(
-    linksCollection,
-    where('userId', '==', userId),
-    where('tags', 'array-contains', tagName),
-    orderBy('createdAt', 'desc')
-  );
+  const query = new URLSearchParams();
+  query.set('tag', tagName);
 
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data() as LinkDocument;
-    return {
-      id: doc.id,
-      ...data,
-      isArchived: Boolean(data.isArchived), // Ensure boolean type
-      createdAt: data.createdAt.toDate(),
-      timeline: convertTimelineEntries(data.timeline),
-    };
-  });
+  const response = await apiRequest<{ links: ApiLink[] }>(`/v1/links?${query.toString()}`);
+  return (response.links || []).map(mapLink);
 };
 
 /**
@@ -167,121 +137,96 @@ export const updateLink = async (
   linkId: string,
   updates: Partial<Omit<LinkDocument, 'userId' | 'createdAt'>>
 ): Promise<void> => {
-  const docRef = doc(db, 'links', linkId);
+  const body: Record<string, unknown> = {};
 
-  // Ensure isArchived is always a boolean if it's being updated
-  const sanitizedUpdates = { ...updates };
-  if ('isArchived' in sanitizedUpdates && sanitizedUpdates.isArchived !== undefined) {
-    sanitizedUpdates.isArchived = Boolean(sanitizedUpdates.isArchived);
+  if (updates.url !== undefined) {
+    body.url = updates.url;
+  }
+  if (updates.title !== undefined) {
+    body.title = updates.title;
+  }
+  if (updates.isArchived !== undefined) {
+    body.isArchived = Boolean(updates.isArchived);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'summary')) {
+    body.summary = updates.summary ?? null;
   }
 
-  await updateDoc(docRef, sanitizedUpdates);
+  await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}`, {
+    method: 'PATCH',
+    body,
+  });
 };
 
 /**
  * リンクを削除
  */
 export const deleteLink = async (linkId: string): Promise<void> => {
-  const docRef = doc(db, 'links', linkId);
-  await deleteDoc(docRef);
+  await apiRequest<void>(`/v1/links/${encodeURIComponent(linkId)}`, {
+    method: 'DELETE',
+  });
 };
 
 /**
  * リンクにタグを追加
  */
 export const addTagToLink = async (linkId: string, tagName: string): Promise<void> => {
-  const link = await getLink(linkId);
-  if (link && !link.tags.includes(tagName)) {
-    const updatedTags = [...link.tags, tagName];
-    await updateLink(linkId, { tags: updatedTags });
-  }
+  await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}/tags`, {
+    method: 'POST',
+    body: { name: tagName },
+  });
 };
 
 /**
  * リンクからタグを削除
  */
 export const removeTagFromLink = async (linkId: string, tagName: string): Promise<void> => {
-  const link = await getLink(linkId);
-  if (link) {
-    const updatedTags = link.tags.filter((tag) => tag !== tagName);
-    await updateLink(linkId, { tags: updatedTags });
-  }
+  await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}/tags/${encodeURIComponent(tagName)}`, {
+    method: 'DELETE',
+  });
 };
 
 /**
  * タグを作成
  */
-export const createTag = async (userId: string, name: string): Promise<string> => {
-  const tagData: TagDocument = {
-    userId,
-    name,
-    createdAt: Timestamp.now(),
-  };
+export const createTag = async (_userId: string, name: string): Promise<string> => {
+  const response = await apiRequest<ApiTag>('/v1/tags', {
+    method: 'POST',
+    body: { name },
+  });
 
-  const docRef = await addDoc(tagsCollection, tagData);
-  return docRef.id;
+  return response.id;
 };
 
 /**
  * ユーザーのタグ一覧を取得
  */
-export const getUserTags = async (userId: string): Promise<Tag[]> => {
-  const q = query(
-    tagsCollection,
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc')
-  );
-
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data() as TagDocument;
-    return {
-      id: doc.id,
-      ...data,
-      createdAt: data.createdAt.toDate(),
-    };
-  });
+export const getUserTags = async (_userId: string): Promise<Tag[]> => {
+  const response = await apiRequest<{ tags: ApiTag[] }>('/v1/tags');
+  return (response.tags || []).map(mapTag);
 };
 
 /**
  * タグを削除
  */
-export const deleteTag = async (userId: string, tagId: string): Promise<void> => {
-  // タグを削除
-  const docRef = doc(db, 'tags', tagId);
-  const tagDoc = await getDoc(docRef);
-
-  if (tagDoc.exists()) {
-    const tagData = tagDoc.data() as TagDocument;
-    const tagName = tagData.name;
-
-    // このタグを使用している全てのリンクからタグを削除
-    const links = await getLinksByTag(userId, tagName);
-    await Promise.all(
-      links.map((link) => removeTagFromLink(link.id, tagName))
-    );
-
-    // タグを削除
-    await deleteDoc(docRef);
-  }
+export const deleteTag = async (_userId: string, tagId: string): Promise<void> => {
+  await apiRequest<void>(`/v1/tags/${encodeURIComponent(tagId)}`, {
+    method: 'DELETE',
+  });
 };
 
 /**
  * ユーザーが特定のURLを既に保存しているかチェック
  */
 export const checkLinkExists = async (
-  userId: string,
+  _userId: string,
   url: string
 ): Promise<boolean> => {
-  const q = query(
-    linksCollection,
-    where('userId', '==', userId),
-    where('url', '==', url),
-    limit(1)
-  );
+  const query = new URLSearchParams();
+  query.set('url', url);
 
-  const querySnapshot = await getDocs(q);
-  return !querySnapshot.empty;
+  const response = await apiRequest<{ exists: boolean }>(`/v1/links/exists?${query.toString()}`);
+  return Boolean(response.exists);
 };
 
 /**
@@ -291,25 +236,13 @@ export const addNoteToLink = async (
   linkId: string,
   content: string
 ): Promise<void> => {
-  const link = await getLink(linkId);
-  if (!link) {
-    throw new Error('Link not found');
-  }
-
-  const existingTimeline = link.timeline || [];
-  const newEntry: TimelineEntryDocument = {
-    content,
-    createdAt: Timestamp.now(),
-    type: 'note',
-  };
-
-  const updatedTimeline = [...(link.timeline?.map((entry) => ({
-    content: entry.content,
-    createdAt: Timestamp.fromDate(entry.createdAt),
-    type: entry.type,
-  })) || []), newEntry];
-
-  await updateLink(linkId, { timeline: updatedTimeline });
+  await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}/notes`, {
+    method: 'POST',
+    body: {
+      content,
+      type: 'note',
+    },
+  });
 };
 
 /**
@@ -319,24 +252,13 @@ export const addSummaryToTimeline = async (
   linkId: string,
   summary: string
 ): Promise<void> => {
-  const link = await getLink(linkId);
-  if (!link) {
-    throw new Error('Link not found');
-  }
-
-  const newEntry: TimelineEntryDocument = {
-    content: summary,
-    createdAt: Timestamp.now(),
-    type: 'summary',
-  };
-
-  const updatedTimeline = [...(link.timeline?.map((entry) => ({
-    content: entry.content,
-    createdAt: Timestamp.fromDate(entry.createdAt),
-    type: entry.type,
-  })) || []), newEntry];
-
-  await updateLink(linkId, { summary, timeline: updatedTimeline });
+  await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}/notes`, {
+    method: 'POST',
+    body: {
+      content: summary,
+      type: 'summary',
+    },
+  });
 };
 
 /**
@@ -346,19 +268,7 @@ export const deleteNoteFromTimeline = async (
   linkId: string,
   noteId: string
 ): Promise<void> => {
-  const link = await getLink(linkId);
-  if (!link) {
-    throw new Error('Link not found');
-  }
-
-  // Filter out the note with the specified ID
-  const updatedTimeline = link.timeline
-    ?.filter((entry) => entry.id !== noteId)
-    .map((entry) => ({
-      content: entry.content,
-      createdAt: Timestamp.fromDate(entry.createdAt),
-      type: entry.type,
-    })) || [];
-
-  await updateLink(linkId, { timeline: updatedTimeline });
+  await apiRequest<ApiLink>(`/v1/links/${encodeURIComponent(linkId)}/notes/${encodeURIComponent(noteId)}`, {
+    method: 'DELETE',
+  });
 };
