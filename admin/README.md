@@ -12,7 +12,7 @@ pnpm install
 ```
 
 2. 環境変数の設定:
-`.env.example`を`.env`にコピーして、Firebase設定を入力してください。
+`.env.example`を`.env`にコピーして、Firebase設定とAPI URLを入力してください。
 
 ```bash
 cp .env.example .env

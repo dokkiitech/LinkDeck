@@ -18,8 +18,10 @@
 
 - **フロントエンド**: React Native / Expo
 - **言語**: TypeScript
-- **バックエンド/DB**: Firebase
-  - Cloud Firestore（データベース）
+- **バックエンド/DB**:
+  - Go (`linksdeck-server`)
+  - PostgreSQL
+  - OpenAPI + Swagger UI
   - Firebase Authentication（認証）
 - **AI**: Google AI (Gemini API)
 - **ナビゲーション**: React Navigation
@@ -40,6 +42,7 @@ LinksDeck/
 │   ├── types/           # TypeScript型定義
 │   └── utils/           # ユーティリティ関数
 ├── admin/               # メンテナンスモード管理画面（Webアプリ）
+├── linksdeck-server/    # Go API + PostgreSQL + migration
 ├── assets/              # 画像・アイコンなどのアセット
 ├── App.tsx              # アプリケーションエントリーポイント
 └── package.json
@@ -87,7 +90,19 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
 EXPO_PUBLIC_FIREBASE_APP_ID=your-app-id
+EXPO_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
+
+### 4.1 linksdeck-server の起動
+
+```bash
+cd linksdeck-server
+cp .env.example .env
+make gen
+go run ./cmd/server
+```
+
+Swagger UI: `http://localhost:8080/swagger`
 
 ### 5. Firestore セキュリティルールの設定
 
