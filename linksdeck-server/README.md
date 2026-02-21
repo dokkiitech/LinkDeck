@@ -69,3 +69,8 @@ Health checks:
 
 - Liveness: `/v1/health/live`
 - Readiness: `/v1/health/ready`
+
+## Migration Runbook
+
+- Firestore -> PostgreSQL migration steps:
+  - `docs/migration-runbook.md`
