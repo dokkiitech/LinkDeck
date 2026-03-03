@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  
-  Linking,
   TextInput,
   Modal,
   Platform,
@@ -89,29 +87,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleOpenLink = async () => {
-    if (!link) return;
-
-    try {
-      const supported = await Linking.canOpenURL(link.url);
-      if (supported) {
-        await Linking.openURL(link.url);
-      } else {
-        if (Platform.OS === 'web') {
-          alert('エラー: このURLを開くことができません');
-        } else {
-          showError('エラー', 'このURLを開くことができません');
-        }
-      }
-    } catch (error) {
-      if (Platform.OS === 'web') {
-        alert('エラー: URLを開く際にエラーが発生しました');
-      } else {
-        showError('エラー', 'URLを開く際にエラーが発生しました');
-      }
-    }
-  };
-
-  const handleOpenInAppBrowser = async () => {
     if (!link) return;
 
     try {
@@ -484,14 +459,6 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         >
           <Ionicons name="open-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.openLinkButtonText}>リンクを開く</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.openLinkButton}
-          onPress={handleOpenInAppBrowser}
-        >
-          <Ionicons name="globe-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-          <Text style={styles.openLinkButtonText}>アプリ内ブラウザで開く</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
