@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
@@ -110,6 +111,20 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  const handleOpenInAppBrowser = async () => {
+    if (!link) return;
+
+    try {
+      await WebBrowser.openBrowserAsync(link.url);
+    } catch (error) {
+      console.error('Error opening in-app browser:', error);
+      if (Platform.OS === 'web') {
+        alert('エラー: アプリ内ブラウザで開けませんでした');
+      } else {
+        showError('エラー', 'アプリ内ブラウザで開けませんでした');
+      }
+    }
+  };
   const handleGenerateSummary = async () => {
     if (!link) return;
 
@@ -471,6 +486,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={styles.inAppBrowserButton}
+          onPress={handleOpenInAppBrowser}
+        >
+          <Ionicons name="globe-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Text style={styles.inAppBrowserButtonText}>アプリ内ブラウザで開く</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[
             styles.generateSummaryButton,
             Platform.OS === 'web' && styles.disabledButton
@@ -799,6 +822,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   openLinkButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  inAppBrowserButton: {
+    backgroundColor: '#0A84FF',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  inAppBrowserButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
