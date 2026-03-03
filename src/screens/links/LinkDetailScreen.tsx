@@ -6,14 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  
-  Linking,
   TextInput,
   Modal,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
@@ -91,21 +90,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     if (!link) return;
 
     try {
-      const supported = await Linking.canOpenURL(link.url);
-      if (supported) {
-        await Linking.openURL(link.url);
-      } else {
-        if (Platform.OS === 'web') {
-          alert('エラー: このURLを開くことができません');
-        } else {
-          showError('エラー', 'このURLを開くことができません');
-        }
-      }
+      await WebBrowser.openBrowserAsync(link.url);
     } catch (error) {
+      console.error('Error opening in-app browser:', error);
       if (Platform.OS === 'web') {
-        alert('エラー: URLを開く際にエラーが発生しました');
+        alert('エラー: アプリ内ブラウザで開けませんでした');
       } else {
-        showError('エラー', 'URLを開く際にエラーが発生しました');
+        showError('エラー', 'アプリ内ブラウザで開けませんでした');
       }
     }
   };
@@ -429,9 +420,9 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.content}>
         <Text style={styles.title}>{link.title}</Text>
 
-        <TouchableOpacity onPress={handleOpenLink} style={styles.urlContainer}>
+        <View style={styles.urlContainer}>
           <Text style={styles.url}>{link.url}</Text>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.tagsContainer}>
           <View style={styles.tagsHeader}>
@@ -743,8 +734,7 @@ const styles = StyleSheet.create({
   },
   url: {
     fontSize: 14,
-    color: '#007AFF',
-    textDecorationLine: 'underline',
+    color: '#3C3C43',
   },
   tagsContainer: {
     marginBottom: 20,
