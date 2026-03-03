@@ -12,6 +12,7 @@ import {
   Modal,
   Platform,
   KeyboardAvoidingView,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -106,6 +107,25 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         alert('エラー: URLを開く際にエラーが発生しました');
       } else {
         showError('エラー', 'URLを開く際にエラーが発生しました');
+      }
+    }
+  };
+
+  const handleShareLink = async () => {
+    if (!link) return;
+
+    try {
+      await Share.share({
+        message: `${link.title}\n${link.url}`,
+        url: link.url,
+        title: link.title,
+      });
+    } catch (error) {
+      console.error('Error sharing link:', error);
+      if (Platform.OS === 'web') {
+        alert('エラー: 共有に失敗しました');
+      } else {
+        showError('エラー', '共有に失敗しました');
       }
     }
   };
@@ -471,6 +491,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={styles.shareLinkButton}
+          onPress={handleShareLink}
+        >
+          <Ionicons name="share-social-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Text style={styles.shareLinkButtonText}>リンクを共有</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[
             styles.generateSummaryButton,
             Platform.OS === 'web' && styles.disabledButton
@@ -799,6 +827,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   openLinkButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  shareLinkButton: {
+    backgroundColor: '#5856D6',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  shareLinkButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
