@@ -420,9 +420,9 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.content}>
         <Text style={styles.title}>{link.title}</Text>
 
-        <TouchableOpacity onPress={handleOpenLink} style={styles.urlContainer}>
+        <View style={styles.urlContainer}>
           <Text style={styles.url}>{link.url}</Text>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.tagsContainer}>
           <View style={styles.tagsHeader}>
@@ -734,8 +734,7 @@ const styles = StyleSheet.create({
   },
   url: {
     fontSize: 14,
-    color: '#007AFF',
-    textDecorationLine: 'underline',
+    color: '#3C3C43',
   },
   tagsContainer: {
     marginBottom: 20,
