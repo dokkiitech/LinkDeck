@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
@@ -106,6 +107,21 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         alert('エラー: URLを開く際にエラーが発生しました');
       } else {
         showError('エラー', 'URLを開く際にエラーが発生しました');
+      }
+    }
+  };
+
+  const handleOpenInAppBrowser = async () => {
+    if (!link) return;
+
+    try {
+      await WebBrowser.openBrowserAsync(link.url);
+    } catch (error) {
+      console.error('Error opening in-app browser:', error);
+      if (Platform.OS === 'web') {
+        alert('エラー: アプリ内ブラウザで開けませんでした');
+      } else {
+        showError('エラー', 'アプリ内ブラウザで開けませんでした');
       }
     }
   };
@@ -468,6 +484,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         >
           <Ionicons name="open-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.openLinkButtonText}>リンクを開く</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.openLinkButton}
+          onPress={handleOpenInAppBrowser}
+        >
+          <Ionicons name="globe-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Text style={styles.openLinkButtonText}>アプリ内ブラウザで開く</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
