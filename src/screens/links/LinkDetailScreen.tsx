@@ -10,6 +10,7 @@ import {
   Modal,
   Platform,
   KeyboardAvoidingView,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
@@ -116,6 +117,24 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       );
     } else {
       await proceed();
+    }
+  };
+
+  const handleShareLink = async () => {
+    if (!link) return;
+
+    try {
+      await Share.share({
+        title: link.title,
+        message: link.url,
+        url: link.url,
+      });
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        alert('エラー: 共有に失敗しました');
+      } else {
+        showError('エラー', '共有に失敗しました');
+      }
     }
   };
 
@@ -462,6 +481,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={styles.shareLinkButton}
+          onPress={handleShareLink}
+        >
+          <Ionicons name="share-social-outline" size={20} color="#007AFF" style={{ marginRight: 8 }} />
+          <Text style={styles.shareLinkButtonText}>URLを共有</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[
             styles.generateSummaryButton,
             Platform.OS === 'web' && styles.disabledButton
@@ -790,6 +817,22 @@ const styles = StyleSheet.create({
   },
   openLinkButtonText: {
     color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  shareLinkButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    padding: 15,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  shareLinkButtonText: {
+    color: '#007AFF',
     fontSize: 16,
     fontWeight: '600',
   },
