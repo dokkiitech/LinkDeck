@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,9 +12,9 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  Animated,
   Switch,
 } from 'react-native';
+import spinners, { type BrailleSpinnerName } from 'unicode-animations';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -300,71 +300,33 @@ const AgentSearchScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
-  // 思考中インジケーター
+  // 思考中インジケーター（Unicodeアニメーション）
+  const THINKING_ANIMATIONS: BrailleSpinnerName[] = [
+    'braille', 'braillewave', 'dna', 'pulse', 'sparkle',
+    'helix', 'orbit', 'breathe', 'snake',
+  ];
+
   const ThinkingIndicator = () => {
-    const dot1Opacity = useRef(new Animated.Value(0.3)).current;
-    const dot2Opacity = useRef(new Animated.Value(0.3)).current;
-    const dot3Opacity = useRef(new Animated.Value(0.3)).current;
+    const spinnerName: BrailleSpinnerName = useMemo(
+      () => THINKING_ANIMATIONS[Math.floor(Math.random() * THINKING_ANIMATIONS.length)],
+      [],
+    );
+    const spinner = spinners[spinnerName];
+    const [frameIndex, setFrameIndex] = useState(0);
 
     useEffect(() => {
-      const animate = () => {
-        Animated.sequence([
-          Animated.timing(dot1Opacity, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dot1Opacity, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-        ]).start();
-
-        setTimeout(() => {
-          Animated.sequence([
-            Animated.timing(dot2Opacity, {
-              toValue: 1,
-              duration: 400,
-              useNativeDriver: true,
-            }),
-            Animated.timing(dot2Opacity, {
-              toValue: 0.3,
-              duration: 400,
-              useNativeDriver: true,
-            }),
-          ]).start();
-        }, 200);
-
-        setTimeout(() => {
-          Animated.sequence([
-            Animated.timing(dot3Opacity, {
-              toValue: 1,
-              duration: 400,
-              useNativeDriver: true,
-            }),
-            Animated.timing(dot3Opacity, {
-              toValue: 0.3,
-              duration: 400,
-              useNativeDriver: true,
-            }),
-          ]).start();
-        }, 400);
-      };
-
-      animate();
-      const interval = setInterval(animate, 1200);
-
+      const interval = setInterval(() => {
+        setFrameIndex((prev) => (prev + 1) % spinner.frames.length);
+      }, spinner.interval);
       return () => clearInterval(interval);
-    }, []);
+    }, [spinner]);
 
     return (
       <View style={styles.assistantMessageContainer}>
         <View style={styles.assistantMessageBubble}>
           <View style={styles.thinkingContainer}>
-            <Animated.View style={[styles.thinkingDot, { opacity: dot1Opacity }]} />
-            <Animated.View style={[styles.thinkingDot, { opacity: dot2Opacity }]} />
-            <Animated.View style={[styles.thinkingDot, { opacity: dot3Opacity }]} />
+            <Text style={styles.thinkingAnimation}>{spinner.frames[frameIndex]}</Text>
+            <Text style={styles.thinkingLabel}>考え中...</Text>
           </View>
         </View>
       </View>
@@ -882,13 +844,17 @@ const styles = StyleSheet.create({
   thinkingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
-  thinkingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#666',
+  thinkingAnimation: {
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 2,
+    color: '#555',
+  },
+  thinkingLabel: {
+    fontSize: 13,
+    color: '#999',
   },
   openLinkButton: {
     padding: 6,
