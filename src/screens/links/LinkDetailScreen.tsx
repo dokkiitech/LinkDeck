@@ -6,14 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  
-  Linking,
   TextInput,
   Modal,
   Platform,
   KeyboardAvoidingView,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { LinksStackParamList, Link, Tag } from '../../types';
@@ -91,21 +91,13 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     if (!link) return;
 
     try {
-      const supported = await Linking.canOpenURL(link.url);
-      if (supported) {
-        await Linking.openURL(link.url);
-      } else {
-        if (Platform.OS === 'web') {
-          alert('エラー: このURLを開くことができません');
-        } else {
-          showError('エラー', 'このURLを開くことができません');
-        }
-      }
+      await WebBrowser.openBrowserAsync(link.url);
     } catch (error) {
+      console.error('Error opening in-app browser:', error);
       if (Platform.OS === 'web') {
-        alert('エラー: URLを開く際にエラーが発生しました');
+        alert('エラー: アプリ内ブラウザで開けませんでした');
       } else {
-        showError('エラー', 'URLを開く際にエラーが発生しました');
+        showError('エラー', 'アプリ内ブラウザで開けませんでした');
       }
     }
   };
@@ -125,6 +117,24 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       );
     } else {
       await proceed();
+    }
+  };
+
+  const handleShareLink = async () => {
+    if (!link) return;
+
+    try {
+      await Share.share({
+        title: link.title,
+        message: link.url,
+        url: link.url,
+      });
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        alert('エラー: 共有に失敗しました');
+      } else {
+        showError('エラー', '共有に失敗しました');
+      }
     }
   };
 
@@ -429,9 +439,9 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.content}>
         <Text style={styles.title}>{link.title}</Text>
 
-        <TouchableOpacity onPress={handleOpenLink} style={styles.urlContainer}>
+        <View style={styles.urlContainer}>
           <Text style={styles.url}>{link.url}</Text>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.tagsContainer}>
           <View style={styles.tagsHeader}>
@@ -468,6 +478,14 @@ const LinkDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         >
           <Ionicons name="open-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.openLinkButtonText}>リンクを開く</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.shareLinkButton}
+          onPress={handleShareLink}
+        >
+          <Ionicons name="share-social-outline" size={20} color="#007AFF" style={{ marginRight: 8 }} />
+          <Text style={styles.shareLinkButtonText}>URLを共有</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -743,8 +761,7 @@ const styles = StyleSheet.create({
   },
   url: {
     fontSize: 14,
-    color: '#007AFF',
-    textDecorationLine: 'underline',
+    color: '#3C3C43',
   },
   tagsContainer: {
     marginBottom: 20,
@@ -800,6 +817,22 @@ const styles = StyleSheet.create({
   },
   openLinkButtonText: {
     color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  shareLinkButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    padding: 15,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  shareLinkButtonText: {
+    color: '#007AFF',
     fontSize: 16,
     fontWeight: '600',
   },
