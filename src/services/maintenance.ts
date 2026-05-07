@@ -1,5 +1,4 @@
-import { db } from '../config/firebase';
-import { doc, getDoc, setDoc, onSnapshot, collection, query, getDocs } from 'firebase/firestore';
+import { apiRequest } from './apiClient';
 
 /**
  * メンテナンスモードの状態
@@ -33,27 +32,15 @@ export interface MaintenanceLog {
   previousStatus: boolean;
 }
 
-const MAINTENANCE_DOC_ID = 'current';
-const MAINTENANCE_COLLECTION = 'maintenance';
-const DEVELOPERS_COLLECTION = 'developers';
-const MAINTENANCE_LOGS_COLLECTION = 'maintenanceLogs';
-
 /**
  * メンテナンスモードの状態を取得
  */
 export const getMaintenanceStatus = async (): Promise<MaintenanceStatus> => {
   try {
-    const docRef = doc(db, MAINTENANCE_COLLECTION, MAINTENANCE_DOC_ID);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      return docSnap.data() as MaintenanceStatus;
-    }
-
-    // デフォルトはメンテナンスモードOFF
-    return {
-      isMaintenanceMode: false,
-    };
+    const status = await apiRequest<MaintenanceStatus>('/v1/maintenance/status', {
+      authRequired: false,
+    });
+    return status;
   } catch (error) {
     console.error('Error fetching maintenance status:', error);
     return {
@@ -68,80 +55,57 @@ export const getMaintenanceStatus = async (): Promise<MaintenanceStatus> => {
 export const setMaintenanceMode = async (
   isMaintenanceMode: boolean,
   reason?: string,
-  userEmail?: string,
-  userUid?: string
+  _userEmail?: string,
+  _userUid?: string
 ): Promise<void> => {
-  try {
-    const docRef = doc(db, MAINTENANCE_COLLECTION, MAINTENANCE_DOC_ID);
-
-    // 現在の状態を取得
-    const currentStatus = await getMaintenanceStatus();
-
-    // メンテナンスモードONの場合
-    if (isMaintenanceMode) {
-      const status: MaintenanceStatus = {
-        isMaintenanceMode: true,
-        reason,
-        startedAt: new Date().toISOString(),
-        startedBy: userEmail,
-      };
-      await setDoc(docRef, status);
-    } else {
-      // メンテナンスモードOFFの場合はisMaintenanceModeのみ
-      const status: MaintenanceStatus = {
-        isMaintenanceMode: false,
-      };
-      await setDoc(docRef, status);
-    }
-
-    // ログを記録
-    if (userEmail && userUid) {
-      await addMaintenanceLog({
-        action: isMaintenanceMode ? 'enabled' : 'disabled',
-        reason,
-        performedBy: userEmail,
-        performedByUid: userUid,
-        previousStatus: currentStatus.isMaintenanceMode,
-      });
-    }
-  } catch (error) {
-    console.error('Error setting maintenance mode:', error);
-    throw error;
-  }
+  await apiRequest<MaintenanceStatus>('/v1/admin/maintenance', {
+    method: 'PUT',
+    body: {
+      isMaintenanceMode,
+      reason,
+    },
+  });
 };
 
 /**
- * メンテナンスモードの状態をリアルタイムで監視
+ * メンテナンスモードの状態を定期監視（15秒）
  */
 export const subscribeToMaintenanceStatus = (
   callback: (status: MaintenanceStatus) => void
 ): (() => void) => {
-  const docRef = doc(db, MAINTENANCE_COLLECTION, MAINTENANCE_DOC_ID);
+  let timer: ReturnType<typeof setInterval> | null = null;
+  let stopped = false;
 
-  return onSnapshot(
-    docRef,
-    (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data() as MaintenanceStatus);
-      } else {
-        callback({ isMaintenanceMode: false });
-      }
-    },
-    (error) => {
-      console.error('Error subscribing to maintenance status:', error);
+  const fetchStatus = async () => {
+    if (stopped) return;
+
+    try {
+      const status = await getMaintenanceStatus();
+      callback(status);
+    } catch (error) {
+      console.error('Error polling maintenance status:', error);
       callback({ isMaintenanceMode: false });
     }
-  );
+  };
+
+  void fetchStatus();
+  timer = setInterval(fetchStatus, 15000);
+
+  return () => {
+    stopped = true;
+    if (timer) {
+      clearInterval(timer);
+    }
+  };
 };
 
 /**
  * ユーザーが開発者かどうかをチェック
  */
-export const isDeveloper = async (uid: string): Promise<boolean> => {
+export const isDeveloper = async (_uid: string): Promise<boolean> => {
   try {
-    const docRef = doc(db, DEVELOPERS_COLLECTION, uid);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists();
+    const response = await apiRequest<{ isDeveloper: boolean }>('/v1/me/developer');
+    return Boolean(response.isDeveloper);
   } catch (error) {
     console.error('Error checking developer status:', error);
     return false;
@@ -152,31 +116,19 @@ export const isDeveloper = async (uid: string): Promise<boolean> => {
  * 開発者を追加
  */
 export const addDeveloper = async (uid: string, email: string): Promise<void> => {
-  try {
-    const docRef = doc(db, DEVELOPERS_COLLECTION, uid);
-    const developer: Developer = {
-      uid,
-      email,
-      addedAt: new Date().toISOString(),
-    };
-    await setDoc(docRef, developer);
-  } catch (error) {
-    console.error('Error adding developer:', error);
-    throw error;
-  }
+  await apiRequest<Developer>('/v1/admin/developers', {
+    method: 'POST',
+    body: { uid, email },
+  });
 };
 
 /**
  * 開発者を削除
  */
 export const removeDeveloper = async (uid: string): Promise<void> => {
-  try {
-    const docRef = doc(db, DEVELOPERS_COLLECTION, uid);
-    await setDoc(docRef, { deleted: true, deletedAt: new Date().toISOString() });
-  } catch (error) {
-    console.error('Error removing developer:', error);
-    throw error;
-  }
+  await apiRequest<void>(`/v1/admin/developers/${encodeURIComponent(uid)}`, {
+    method: 'DELETE',
+  });
 };
 
 /**
@@ -184,44 +136,11 @@ export const removeDeveloper = async (uid: string): Promise<void> => {
  */
 export const getDevelopers = async (): Promise<Developer[]> => {
   try {
-    const q = query(collection(db, DEVELOPERS_COLLECTION));
-    const querySnapshot = await getDocs(q);
-    const developers: Developer[] = [];
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      // deletedフラグがないものだけを返す
-      if (!data.deleted) {
-        developers.push(data as Developer);
-      }
-    });
-
-    return developers;
+    const response = await apiRequest<{ developers: Developer[] }>('/v1/admin/developers');
+    return response.developers || [];
   } catch (error) {
     console.error('Error fetching developers:', error);
     return [];
-  }
-};
-
-/**
- * メンテナンスログを追加
- */
-const addMaintenanceLog = async (log: Omit<MaintenanceLog, 'id' | 'timestamp'>): Promise<void> => {
-  try {
-    const timestamp = new Date().toISOString();
-    const logId = `${Date.now()}_${log.performedByUid}`;
-    const logRef = doc(db, MAINTENANCE_LOGS_COLLECTION, logId);
-
-    const logData: MaintenanceLog = {
-      id: logId,
-      timestamp,
-      ...log,
-    };
-
-    await setDoc(logRef, logData);
-  } catch (error) {
-    console.error('Error adding maintenance log:', error);
-    // ログ追加の失敗はメンテナンスモード切り替えを失敗させない
   }
 };
 
@@ -230,18 +149,11 @@ const addMaintenanceLog = async (log: Omit<MaintenanceLog, 'id' | 'timestamp'>):
  */
 export const getMaintenanceLogs = async (limit: number = 50): Promise<MaintenanceLog[]> => {
   try {
-    const logsCollection = collection(db, MAINTENANCE_LOGS_COLLECTION);
-    const querySnapshot = await getDocs(logsCollection);
+    const query = new URLSearchParams();
+    query.set('limit', String(limit));
 
-    const logs: MaintenanceLog[] = [];
-    querySnapshot.forEach((doc) => {
-      logs.push(doc.data() as MaintenanceLog);
-    });
-
-    // タイムスタンプで降順ソート
-    logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    return logs.slice(0, limit);
+    const response = await apiRequest<{ logs: MaintenanceLog[] }>(`/v1/admin/maintenance-logs?${query.toString()}`);
+    return response.logs || [];
   } catch (error) {
     console.error('Error fetching maintenance logs:', error);
     return [];

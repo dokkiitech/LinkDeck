@@ -1,0 +1,780 @@
+openapi: 3.0.3
+info:
+  title: LinksDeck Server API
+  version: 1.0.0
+  description: LinksDeck backend API for mobile app and admin console.
+servers:
+  - url: /
+paths:
+  /v1/health/live:
+    get:
+      operationId: getLiveHealth
+      summary: Liveness probe
+      tags: [health]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /v1/health/ready:
+    get:
+      operationId: getReadyHealth
+      summary: Readiness probe
+      tags: [health]
+      responses:
+        '200':
+          description: Ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/maintenance/status:
+    get:
+      operationId: getMaintenanceStatus
+      summary: Get maintenance status
+      tags: [maintenance]
+      responses:
+        '200':
+          description: Maintenance status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceStatus'
+
+  /v1/links:
+    get:
+      operationId: listLinks
+      summary: List current user links
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: includeArchived
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: tag
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of links
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [links]
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Link'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createLink
+      summary: Create link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLinkRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/links/exists:
+    get:
+      operationId: checkLinkExists
+      summary: Check if URL already exists for current user
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: url
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Exists result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkExistsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/links/{linkId}:
+    get:
+      operationId: getLink
+      summary: Get link detail
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+      responses:
+        '200':
+          description: Link detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateLink
+      summary: Update link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLinkRequest'
+      responses:
+        '200':
+          description: Updated link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteLink
+      summary: Delete link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/links/{linkId}/tags:
+    post:
+      operationId: addTagToLink
+      summary: Add tag to link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTagRequest'
+      responses:
+        '200':
+          description: Updated link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/links/{linkId}/tags/{tagName}:
+    delete:
+      operationId: removeTagFromLink
+      summary: Remove tag from link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+        - in: path
+          name: tagName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/links/{linkId}/notes:
+    post:
+      operationId: addNoteToLink
+      summary: Add note or summary timeline entry to link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddNoteRequest'
+      responses:
+        '200':
+          description: Updated link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/links/{linkId}/notes/{noteId}:
+    delete:
+      operationId: deleteNoteFromLink
+      summary: Delete timeline note/entry from link
+      tags: [links]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/tags:
+    get:
+      operationId: listTags
+      summary: List tags for current user
+      tags: [tags]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tag list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tags]
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tag'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createTag
+      summary: Create tag for current user
+      tags: [tags]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Created tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/tags/{tagId}:
+    delete:
+      operationId: deleteTag
+      summary: Delete tag
+      tags: [tags]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tagId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/me/developer:
+    get:
+      operationId: isDeveloper
+      summary: Check if current user is a developer/admin
+      tags: [me]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Developer check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsDeveloperResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/admin/maintenance:
+    put:
+      operationId: setMaintenanceMode
+      summary: Update maintenance mode
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetMaintenanceRequest'
+      responses:
+        '200':
+          description: Updated status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /v1/admin/developers:
+    get:
+      operationId: listDevelopers
+      summary: List developers
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Developers
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [developers]
+                properties:
+                  developers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Developer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      operationId: addDeveloper
+      summary: Add developer
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddDeveloperRequest'
+      responses:
+        '201':
+          description: Created developer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Developer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /v1/admin/developers/{uid}:
+    delete:
+      operationId: removeDeveloper
+      summary: Soft delete developer
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/admin/maintenance-logs:
+    get:
+      operationId: listMaintenanceLogs
+      summary: List maintenance logs
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: Maintenance logs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [logs]
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MaintenanceLog'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    LinkId:
+      in: path
+      name: linkId
+      required: true
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    HealthResponse:
+      type: object
+      required: [status, timestamp]
+      properties:
+        status:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    MaintenanceStatus:
+      type: object
+      required: [isMaintenanceMode]
+      properties:
+        isMaintenanceMode:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        startedBy:
+          type: string
+          nullable: true
+
+    TimelineEntry:
+      type: object
+      required: [id, type, content, createdAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [note, summary]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Link:
+      type: object
+      required: [id, userId, url, title, tags, isArchived, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        url:
+          type: string
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        isArchived:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        summary:
+          type: string
+          nullable: true
+        timeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineEntry'
+
+    Tag:
+      type: object
+      required: [id, userId, name, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Developer:
+      type: object
+      required: [uid, email, addedAt]
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+        addedAt:
+          type: string
+          format: date-time
+
+    MaintenanceLog:
+      type: object
+      required: [id, action, performedBy, performedByUid, timestamp, previousStatus]
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+          enum: [enabled, disabled]
+        reason:
+          type: string
+          nullable: true
+        performedBy:
+          type: string
+        performedByUid:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        previousStatus:
+          type: boolean
+
+    IsDeveloperResponse:
+      type: object
+      required: [isDeveloper]
+      properties:
+        isDeveloper:
+          type: boolean
+
+    LinkExistsResponse:
+      type: object
+      required: [exists]
+      properties:
+        exists:
+          type: boolean
+
+    CreateLinkRequest:
+      type: object
+      required: [url, title]
+      properties:
+        url:
+          type: string
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+
+    UpdateLinkRequest:
+      type: object
+      properties:
+        url:
+          type: string
+        title:
+          type: string
+        isArchived:
+          type: boolean
+        summary:
+          type: string
+          nullable: true
+
+    AddTagRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+
+    AddNoteRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        type:
+          type: string
+          enum: [note, summary]
+          default: note
+
+    CreateTagRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+
+    SetMaintenanceRequest:
+      type: object
+      required: [isMaintenanceMode]
+      properties:
+        isMaintenanceMode:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+
+    AddDeveloperRequest:
+      type: object
+      required: [uid, email]
+      properties:
+        uid:
+          type: string
+        email:
+          type: string

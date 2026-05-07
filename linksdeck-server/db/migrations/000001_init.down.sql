@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS maintenance_logs;
+DROP TABLE IF EXISTS developers;
+DROP TABLE IF EXISTS maintenance_status;
+DROP TABLE IF EXISTS timeline_entries;
+DROP TABLE IF EXISTS link_tags;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS links;
+DROP TABLE IF EXISTS users;
